@@ -18,8 +18,7 @@ public class BootSequence : MonoBehaviour
         "> PERSONALITY CORE: NOT FOUND",
         "> Y.O.U. MODULE: ACTIVE",
         "> ATTEMPTING RECOVERY...",
-        "> SYSTEM READY",
-        "> WAKE"
+        "> SYSTEM READY"
     };
 
     private void Start()
@@ -38,6 +37,10 @@ public class BootSequence : MonoBehaviour
         }
 
         yield return new WaitForSeconds(finalDelay);
+
+        terminalText.text += "\n> WAKE";
+
+        yield return new WaitForSeconds(0.8f);
 
         wakeUpSequence.Begin();
         gameObject.SetActive(false);
