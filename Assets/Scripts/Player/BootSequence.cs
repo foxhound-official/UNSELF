@@ -5,6 +5,7 @@ using UnityEngine;
 public class BootSequence : MonoBehaviour
 {
     [SerializeField] private TMP_Text terminalText;
+    [SerializeField] private WakeUpSequence wakeUpSequence;
     [SerializeField] private float lineDelay = 0.6f;
     [SerializeField] private float finalDelay = 1.5f;
 
@@ -38,6 +39,7 @@ public class BootSequence : MonoBehaviour
 
         yield return new WaitForSeconds(finalDelay);
 
+        wakeUpSequence.Begin();
         gameObject.SetActive(false);
     }
 }

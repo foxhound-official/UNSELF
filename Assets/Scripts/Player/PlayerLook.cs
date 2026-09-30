@@ -8,6 +8,11 @@ public class PlayerLook : MonoBehaviour
 
     private float verticalRotation;
 
+    public void ResetRotation()
+    {
+        verticalRotation = 0f;
+    }
+
     private void Update()
     {
         if (Mouse.current == null)

@@ -81,7 +81,7 @@ public class PlayerMovement : MonoBehaviour
 
         movement.y = verticalVelocity;
 
-        characterController.Move(movement * currentSpeed  * Time.deltaTime);
+        characterController.Move(movement * currentSpeed * Time.deltaTime);
 
         if (isCrouching)
         {
