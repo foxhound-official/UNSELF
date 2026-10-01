@@ -2191,6 +2191,7 @@ MonoBehaviour:
   memberLoadout: {fileID: 1806691667}
   memberHud: {fileID: 1572921781}
   targetRenderer: {fileID: 591258674}
+  logCooldown: 3
 --- !u!65 &591258673
 BoxCollider:
   m_ObjectHideFlags: 0

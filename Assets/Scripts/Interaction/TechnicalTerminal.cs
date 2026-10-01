@@ -2,10 +2,14 @@ using UnityEngine;
 
 public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerceptionTarget
 {
+    public string InteractionPrompt => "ACCESS TERMINAL";
+
     [SerializeField] private MemberLoadout memberLoadout;
     [SerializeField] private MemberHudMenuController memberHud;
     [SerializeField] private Renderer targetRenderer;
 
+    [SerializeField] private float logCooldown = 3f;
+    private float nextLogTime;
     private Color normalColor;
 
     private void Awake()
@@ -20,10 +24,14 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
         if (technicalMember == null)
             return;
 
-        memberHud.ShowMemberLog(technicalMember, "TECHNICAL ACCESS AVAILABLE");
-
         Color highlightColor = normalColor * 1.35f;
         targetRenderer.material.color = highlightColor;
+
+        if (Time.time < nextLogTime)
+            return;
+
+        memberHud.ShowMemberLog(technicalMember, "TECHNICAL ACCESS AVAILABLE");
+        nextLogTime = Time.time + logCooldown;
     }
 
     public void OnMemberFocusExit()
