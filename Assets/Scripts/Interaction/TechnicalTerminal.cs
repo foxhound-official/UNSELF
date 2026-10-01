@@ -7,6 +7,7 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
     [SerializeField] private MemberLoadout memberLoadout;
     [SerializeField] private MemberHudMenuController memberHud;
     [SerializeField] private Renderer targetRenderer;
+    [SerializeField] private SimpleDoor controlledDoor;
 
     [SerializeField] private float logCooldown = 3f;
     private float nextLogTime;
@@ -41,12 +42,25 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
 
     public void Interact()
     {
-        if (memberLoadout.HasMemberClass(MemberClass.Technical))
+        MemberDefinition technicalMember =
+            memberLoadout.GetFirstMemberByClass(MemberClass.Technical);
+
+        if (technicalMember == null)
         {
-            Debug.Log("TERMINAL: TECHNICAL ACCESS GRANTED");
+            Debug.Log("TERMINAL: ACCESS DENIED");
             return;
         }
 
-        Debug.Log("TERMINAL: ACCESS DENIED");
+        if (controlledDoor.IsOpen)
+        {
+            memberHud.ShowMemberLog(technicalMember, "ACCESS ALREADY OPEN");
+            return;
+        }
+
+        controlledDoor.Unlock();
+        controlledDoor.Open();
+
+        memberHud.ShowMemberLog(technicalMember, "ACCESS AUTHORIZED");
+        memberHud.ShowMemberLog(technicalMember, "DOOR CONTROL OVERRIDDEN");
     }
 }
