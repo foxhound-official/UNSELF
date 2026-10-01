@@ -2067,6 +2067,7 @@ GameObject:
   - component: {fileID: 1806691663}
   - component: {fileID: 1806691664}
   - component: {fileID: 1806691665}
+  - component: {fileID: 1806691666}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2167,6 +2168,20 @@ MonoBehaviour:
   duration: 2
   startHeightOffset: 0.35
   startLookDown: 55
+--- !u!114 &1806691666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1806691660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f76f78ab0f53de44822a0a25f89f65a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
+  playerCamera: {fileID: 330585545}
+  interactionDistance: 2.5
 --- !u!1 &1864492142
 GameObject:
   m_ObjectHideFlags: 0
@@ -2541,6 +2556,7 @@ GameObject:
   - component: {fileID: 2081491298}
   - component: {fileID: 2081491297}
   - component: {fileID: 2081491296}
+  - component: {fileID: 2081491299}
   m_Layer: 0
   m_Name: Debris_Left
   m_TagString: Untagged
@@ -2641,6 +2657,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2081491294}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2081491299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081491294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b2798f41c3c93545b5e7d9daac7406b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugInteractable
 --- !u!1 &2083720992
 GameObject:
   m_ObjectHideFlags: 0
