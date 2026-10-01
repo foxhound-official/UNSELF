@@ -33,11 +33,9 @@ public class MonitorBootTransition : MonoBehaviour
 
     private void Awake()
     {
-        scanLineStartPosition =
-            scanLine.rectTransform.anchoredPosition;
+        scanLineStartPosition = scanLine.rectTransform.anchoredPosition;
 
-        scanLineBaseColor =
-            scanLine.color;
+        scanLineBaseColor = scanLine.color;
 
         transitionRoot.SetActive(false);
     }
@@ -53,36 +51,31 @@ public class MonitorBootTransition : MonoBehaviour
         yield return OpenScreen();
     }
 
-    private IEnumerator FlickerBootScreen()
+private IEnumerator FlickerBootScreen()
+{
+    for (int i = 0; i < flickerCount; i++)
     {
-        for (int i = 0; i < flickerCount; i++)
-        {
-            bootLayout.SetActive(false);
+        AudioService.Play("screen_flicker");
 
-            yield return new WaitForSeconds(
-                flickerOffDuration
-            );
+        bootLayout.SetActive(false);
+        yield return new WaitForSeconds(flickerOffDuration);
 
-            bootLayout.SetActive(true);
-
-            yield return new WaitForSeconds(
-                flickerOnDuration
-            );
-        }
+        bootLayout.SetActive(true);
+        yield return new WaitForSeconds(flickerOnDuration);
     }
+}
 
     private void PrepareMonitorTransition()
     {
+        AudioService.Play("screen_open");
+
         transitionRoot.SetActive(true);
 
-        topShutter.localScale =
-            Vector3.one;
+        topShutter.localScale = Vector3.one;
 
-        bottomShutter.localScale =
-            Vector3.one;
+        bottomShutter.localScale = Vector3.one;
 
-        scanLine.rectTransform.anchoredPosition =
-            scanLineStartPosition;
+        scanLine.rectTransform.anchoredPosition = scanLineStartPosition;
 
         SetScanLineAlpha(1f);
 
@@ -98,29 +91,18 @@ public class MonitorBootTransition : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            float alpha =
-                Random.Range(
-                    minimumScanLineAlpha,
-                    1f
-                );
+            float alpha = Random.Range(minimumScanLineAlpha, 1f);
 
-            float verticalJitter =
-                Random.Range(
-                    -scanLineJitter,
-                    scanLineJitter
-                );
+            float verticalJitter = Random.Range(-scanLineJitter, scanLineJitter);
 
-            scanLine.rectTransform.anchoredPosition =
-                scanLineStartPosition +
-                Vector2.up * verticalJitter;
+            scanLine.rectTransform.anchoredPosition = scanLineStartPosition + Vector2.up * verticalJitter;
 
             SetScanLineAlpha(alpha);
 
             yield return null;
         }
 
-        scanLine.rectTransform.anchoredPosition =
-            scanLineStartPosition;
+        scanLine.rectTransform.anchoredPosition = scanLineStartPosition;
 
         SetScanLineAlpha(1f);
     }
@@ -133,90 +115,48 @@ public class MonitorBootTransition : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            float progress =
-                Mathf.Clamp01(
-                    elapsed / openDuration
-                );
+            float progress = Mathf.Clamp01(elapsed / openDuration);
 
-            float smoothProgress =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    progress
-                );
+            float smoothProgress = Mathf.SmoothStep(0f, 1f, progress);
 
-            float shutterScale =
-                Mathf.Lerp(
-                    1f,
-                    0f,
-                    smoothProgress
-                );
+            float shutterScale = Mathf.Lerp(1f, 0f, smoothProgress);
 
-            topShutter.localScale =
-                new Vector3(
-                    1f,
-                    shutterScale,
-                    1f
-                );
+            topShutter.localScale = new Vector3(1f, shutterScale, 1f);
 
-            bottomShutter.localScale =
-                new Vector3(
-                    1f,
-                    shutterScale,
-                    1f
-                );
+            bottomShutter.localScale = new Vector3(1f, shutterScale, 1f);
 
             UpdateScanLine(elapsed);
 
             yield return null;
         }
 
-        topShutter.localScale =
-            new Vector3(1f, 0f, 1f);
+        topShutter.localScale = new Vector3(1f, 0f, 1f);
 
-        bottomShutter.localScale =
-            new Vector3(1f, 0f, 1f);
+        bottomShutter.localScale = new Vector3(1f, 0f, 1f);
 
         SetScanLineAlpha(0f);
     }
 
     private void UpdateScanLine(float elapsed)
     {
-        float fadeProgress =
-            Mathf.Clamp01(
-                elapsed / scanLineFadeDuration
-            );
+        float fadeProgress = Mathf.Clamp01(elapsed / scanLineFadeDuration);
 
-        float interference =
-            Random.Range(
-                minimumScanLineAlpha,
-                1f
-            );
+        float interference = Random.Range(minimumScanLineAlpha, 1f);
 
-        float alpha =
-            (1f - fadeProgress) *
-            interference;
+        float alpha = (1f - fadeProgress) * interference;
 
         SetScanLineAlpha(alpha);
 
-        float verticalJitter =
-            Random.Range(
-                -scanLineJitter,
-                scanLineJitter
-            );
+        float verticalJitter = Random.Range(-scanLineJitter, scanLineJitter);
 
-        scanLine.rectTransform.anchoredPosition =
-            scanLineStartPosition +
-            Vector2.up * verticalJitter;
+        scanLine.rectTransform.anchoredPosition = scanLineStartPosition + Vector2.up * verticalJitter;
     }
 
     private void SetScanLineAlpha(float alpha)
     {
         Color color = scanLineBaseColor;
 
-        color.a =
-            scanLineBaseColor.a *
-            alpha;
+        color.a = scanLineBaseColor.a * alpha;
 
         scanLine.color = color;
     }
