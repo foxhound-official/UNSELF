@@ -24,4 +24,15 @@ public class MemberLoadout : MonoBehaviour
 
         return false;
     }
+
+    public MemberDefinition GetFirstMemberByClass(MemberClass memberClass)
+    {
+        foreach (MemberDefinition member in activeMembers)
+        {
+            if (member != null && member.Class == memberClass)
+                return member;
+        }
+
+        return null;
+    }
 }

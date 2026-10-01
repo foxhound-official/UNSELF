@@ -43,3 +43,7 @@ MonoBehaviour:
     clips:
     - {fileID: 8300000, guid: 322df168a9278ce4d896cd72df30b70d, type: 3}
     volume: 0.2
+  - id: member_log
+    clips:
+    - {fileID: 8300000, guid: 322df168a9278ce4d896cd72df30b70d, type: 3}
+    volume: 0.2

@@ -22,4 +22,16 @@ public class MemberHudMenuController : MonoBehaviour
                 slots[i].SetEmpty();
         }
     }
+
+    public void ShowMemberLog(MemberDefinition member, string message)
+    {
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (memberLoadout.GetMember(i) != member)
+                continue;
+
+            slots[i].ShowLog($"{member.Code} // {message}");
+            return;
+        }
+    }
 }
