@@ -231,6 +231,7 @@ MonoBehaviour:
   memberHud: {fileID: 1572921781}
   targetRenderer: {fileID: 6771401}
   controlledDoor: {fileID: 646057662}
+  statusText: {fileID: 602193863}
   logCooldown: 3
 --- !u!65 &6771400
 BoxCollider:
@@ -2434,7 +2435,6 @@ GameObject:
   - component: {fileID: 591258675}
   - component: {fileID: 591258674}
   - component: {fileID: 591258673}
-  - component: {fileID: 591258672}
   m_Layer: 0
   m_Name: TestTerminal
   m_TagString: Untagged
@@ -2451,7 +2451,7 @@ Transform:
   m_GameObject: {fileID: 591258670}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.18, y: 1.195, z: 4.902}
+  m_LocalPosition: {x: -3.18, y: 0.836, z: 4.902}
   m_LocalScale: {x: 0.5, y: 1, z: 0.05}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2459,23 +2459,6 @@ Transform:
   - {fileID: 1367730260}
   m_Father: {fileID: 2083720993}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &591258672
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 591258670}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d7669af2299b68408c96cac0626892e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TechnicalTerminal
-  memberLoadout: {fileID: 1806691667}
-  memberHud: {fileID: 1572921781}
-  targetRenderer: {fileID: 591258674}
-  controlledDoor: {fileID: 646057662}
-  logCooldown: 3
 --- !u!65 &591258673
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4138,7 +4121,7 @@ Transform:
   m_GameObject: {fileID: 1269020338}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.3, y: 1.3, z: 5.42}
+  m_LocalPosition: {x: -5.256, y: 1.3, z: 5.42}
   m_LocalScale: {x: 5, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
