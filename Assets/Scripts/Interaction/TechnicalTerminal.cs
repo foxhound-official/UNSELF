@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerceptionTarget
 {
@@ -8,6 +9,7 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
     [SerializeField] private MemberHudMenuController memberHud;
     [SerializeField] private Renderer targetRenderer;
     [SerializeField] private SimpleDoor controlledDoor;
+    [SerializeField] private TMP_Text statusText;
 
     [SerializeField] private float logCooldown = 3f;
     private float nextLogTime;
@@ -47,15 +49,18 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
 
         if (technicalMember == null)
         {
-            Debug.Log("TERMINAL: ACCESS DENIED");
+            statusText.text = "ACCESS DENIED";
             return;
         }
 
         if (controlledDoor.IsOpen)
         {
+            statusText.text = "ACCESS OPEN";
             memberHud.ShowMemberLog(technicalMember, "ACCESS ALREADY OPEN");
             return;
         }
+
+        statusText.text = "ACCESS GRANTED";
 
         controlledDoor.Unlock();
         controlledDoor.Open();
