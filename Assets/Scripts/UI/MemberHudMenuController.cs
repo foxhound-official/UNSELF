@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class MemberHudController : MonoBehaviour
+public class MemberHudMenuController : MonoBehaviour
 {
+    [SerializeField] private MemberLoadout memberLoadout;
     [SerializeField] private MemberHudSlot[] slots;
-    [SerializeField] private MemberDefinition[] activeMembers;
 
     private void Start()
     {
@@ -14,8 +14,10 @@ public class MemberHudController : MonoBehaviour
     {
         for (int i = 0; i < slots.Length; i++)
         {
-            if (i < activeMembers.Length && activeMembers[i] != null)
-                slots[i].SetMember(activeMembers[i]);
+            MemberDefinition member = memberLoadout.GetMember(i);
+
+            if (member != null)
+                slots[i].SetMember(member);
             else
                 slots[i].SetEmpty();
         }

@@ -2957,14 +2957,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f38f8e2be22842547a0299802ccff0ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MemberHudController
+  memberLoadout: {fileID: 1806691667}
   slots:
   - {fileID: 2076069290}
   - {fileID: 246398653}
   - {fileID: 1828162}
-  activeMembers:
-  - {fileID: 11400000, guid: 071f915e000867541a24cc2a2164213d, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!1 &1652549308
 GameObject:
   m_ObjectHideFlags: 0
@@ -3277,7 +3274,7 @@ MonoBehaviour:
   activeMembers:
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 071f915e000867541a24cc2a2164213d, type: 2}
 --- !u!1 &1858438639
 GameObject:
   m_ObjectHideFlags: 0

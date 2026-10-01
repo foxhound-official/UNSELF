@@ -4,6 +4,16 @@ public class MemberLoadout : MonoBehaviour
 {
     [SerializeField] private MemberDefinition[] activeMembers = new MemberDefinition[3];
 
+    public int SlotCount => activeMembers.Length;
+
+    public MemberDefinition GetMember(int index)
+    {
+        if (index < 0 || index >= activeMembers.Length)
+            return null;
+
+        return activeMembers[index];
+    }
+
     public bool HasMemberClass(MemberClass memberClass)
     {
         foreach (MemberDefinition member in activeMembers)
