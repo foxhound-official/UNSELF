@@ -35,4 +35,19 @@ public class MemberLoadout : MonoBehaviour
 
         return null;
     }
+
+    public bool TrySetMember(int index, MemberDefinition member)
+    {
+        if (index < 0 || index >= activeMembers.Length || member == null)
+            return false;
+
+        for (int i = 0; i < activeMembers.Length; i++)
+        {
+            if (activeMembers[i] == member)
+                activeMembers[i] = null;
+        }
+
+        activeMembers[index] = member;
+        return true;
+    }
 }
