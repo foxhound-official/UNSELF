@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Docs/Images/unself_banner.png" alt="UNSELF">
+  <img src="unself_banner.png" alt="UNSELF">
 </p>
 <p align="center">
   <strong>UNSELF</strong><br>
