@@ -25,6 +25,20 @@ public class MemberLoadout : MonoBehaviour
         return false;
     }
 
+    public bool HasMember(MemberDefinition member)
+    {
+        if (member == null)
+            return false;
+
+        foreach (MemberDefinition activeMember in activeMembers)
+        {
+            if (activeMember == member)
+                return true;
+        }
+
+        return false;
+    }
+
     public MemberDefinition GetFirstMemberByClass(MemberClass memberClass)
     {
         foreach (MemberDefinition member in activeMembers)

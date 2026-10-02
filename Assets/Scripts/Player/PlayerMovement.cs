@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
 
     private CharacterController characterController;
     private float verticalVelocity;
+    private bool isCrouching;
 
     private void Awake()
     {
@@ -44,24 +45,25 @@ public class PlayerMovement : MonoBehaviour
 
         float currentSpeed = moveSpeed;
 
-        bool isCrouching =
-            Keyboard.current != null &&
-            Keyboard.current.leftCtrlKey.isPressed;
+        bool wantsToCrouch = Keyboard.current != null && Keyboard.current.leftCtrlKey.isPressed;
 
-        bool isSprinting =
-            Keyboard.current != null &&
-            Keyboard.current.leftShiftKey.isPressed &&
-            input.y > 0f &&
-            !isCrouching;
+        if (wantsToCrouch)
+        {
+            isCrouching = true;
+        }
+        else if (isCrouching && CanStand())
+        {
+            isCrouching = false;
+        }
+
+        bool isSprinting = Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed && input.y > 0f && !isCrouching;
 
         if (isSprinting)
         {
             currentSpeed = sprintSpeed;
         }
 
-        Vector3 movement =
-            transform.forward * input.y +
-            transform.right * input.x;
+        Vector3 movement = transform.forward * input.y + transform.right * input.x;
 
         if (characterController.isGrounded)
         {
@@ -72,9 +74,7 @@ public class PlayerMovement : MonoBehaviour
             verticalVelocity += gravity * Time.deltaTime;
         }
 
-        if (characterController.isGrounded &&
-            Keyboard.current != null &&
-            Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (characterController.isGrounded && Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
@@ -88,26 +88,31 @@ public class PlayerMovement : MonoBehaviour
             characterController.height = crouchingHeight;
             characterController.center = new Vector3(0f, crouchingHeight / 2f, 0f);
 
-            cameraTransform.localPosition = new Vector3(
-                0f,
-                crouchingCameraHeight,
-                0f
-            );
+            cameraTransform.localPosition = new Vector3(0f, crouchingCameraHeight, 0f);
         }
         else
         {
             characterController.height = standingHeight;
-            characterController.center = new Vector3(
-                0f,
-                standingHeight / 2f,
-                0f
-            );
+            characterController.center = new Vector3(0f, standingHeight / 2f, 0f);
 
-            cameraTransform.localPosition = new Vector3(
-                0f,
-                0.65f,
-                0f
-            );
+            cameraTransform.localPosition = new Vector3(0f, 0.65f, 0f);
         }
+    }
+
+    private bool CanStand()
+    {
+        float checkDistance = standingHeight - crouchingHeight;
+
+        Vector3 origin =
+            transform.position +
+            Vector3.up * (crouchingHeight + 0.05f);
+
+        return !Physics.Raycast(
+            origin,
+            Vector3.up,
+            checkDistance,
+            Physics.DefaultRaycastLayers,
+            QueryTriggerInteraction.Ignore
+        );
     }
 }

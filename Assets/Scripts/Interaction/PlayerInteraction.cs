@@ -33,6 +33,12 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
+        if (interactable is IConditionalInteractable conditional && !conditional.CanInteract)
+        {
+            interactionPrompt.Hide();
+            return;
+        }
+
         interactionPrompt.Show($"[F] {interactable.InteractionPrompt}");
     }
 
@@ -46,6 +52,9 @@ public class PlayerInteraction : MonoBehaviour
         IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
 
         if (interactable == null)
+            return;
+
+        if (interactable is IConditionalInteractable conditional && !conditional.CanInteract)
             return;
 
         interactable.Interact();
