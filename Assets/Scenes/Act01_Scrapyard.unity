@@ -192,7 +192,6 @@ GameObject:
   - component: {fileID: 6771402}
   - component: {fileID: 6771401}
   - component: {fileID: 6771400}
-  - component: {fileID: 6771399}
   m_Layer: 0
   m_Name: TerminalScreen
   m_TagString: Untagged
@@ -209,30 +208,12 @@ Transform:
   m_GameObject: {fileID: 6771397}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.61}
-  m_LocalScale: {x: 0.9, y: 0.9, z: 0.02}
+  m_LocalPosition: {x: -3.18, y: 0.836, z: 4.8715}
+  m_LocalScale: {x: 0.45, y: 0.9, z: 0.001}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 591258671}
+  m_Father: {fileID: 268595201}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6771399
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6771397}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d7669af2299b68408c96cac0626892e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TechnicalTerminal
-  memberLoadout: {fileID: 1806691667}
-  memberHud: {fileID: 1572921781}
-  targetRenderer: {fileID: 6771401}
-  controlledDoor: {fileID: 646057662}
-  statusText: {fileID: 602193863}
-  logCooldown: 3
 --- !u!65 &6771400
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -644,6 +625,60 @@ MonoBehaviour:
   emptyColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
   logLifetime: 4
   logFadeDuration: 1
+--- !u!1 &268595200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 268595201}
+  - component: {fileID: 268595202}
+  m_Layer: 0
+  m_Name: TestTerminal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &268595201
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268595200}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 591258671}
+  - {fileID: 6771398}
+  - {fileID: 1367730260}
+  m_Father: {fileID: 2083720993}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &268595202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268595200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d7669af2299b68408c96cac0626892e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TechnicalTerminal
+  memberLoadout: {fileID: 1806691667}
+  memberHud: {fileID: 1572921781}
+  targetRenderers:
+  - {fileID: 591258674}
+  controlledDoor: {fileID: 646057662}
+  statusText: {fileID: 602193863}
+  logCooldown: 3
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -2436,7 +2471,7 @@ GameObject:
   - component: {fileID: 591258674}
   - component: {fileID: 591258673}
   m_Layer: 0
-  m_Name: TestTerminal
+  m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2450,14 +2485,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 591258670}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -3.18, y: 0.836, z: 4.902}
   m_LocalScale: {x: 0.5, y: 1, z: 0.05}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 6771398}
-  - {fileID: 1367730260}
-  m_Father: {fileID: 2083720993}
+  m_Children: []
+  m_Father: {fileID: 268595201}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &591258673
 BoxCollider:
@@ -2653,7 +2686,7 @@ GameObject:
   - component: {fileID: 602193864}
   - component: {fileID: 602193863}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: StatusText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4680,16 +4713,16 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1367730259}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.66}
-  m_LocalScale: {x: 0.002, y: 0.002, z: 0.002}
+  m_LocalPosition: {x: 0, y: 0, z: 4.869}
+  m_LocalScale: {x: 0.001, y: 0.002, z: 0.000100000005}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 602193862}
-  m_Father: {fileID: 591258671}
+  m_Father: {fileID: 268595201}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -3.18, y: 0.836}
   m_SizeDelta: {x: 400, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1367730261
@@ -6641,8 +6674,8 @@ Transform:
   - {fileID: 963407516}
   - {fileID: 2081491295}
   - {fileID: 1924324770}
-  - {fileID: 591258671}
   - {fileID: 646057658}
+  - {fileID: 268595201}
   m_Father: {fileID: 733251168}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2087172245

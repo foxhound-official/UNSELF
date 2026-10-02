@@ -7,17 +7,25 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
 
     [SerializeField] private MemberLoadout memberLoadout;
     [SerializeField] private MemberHudMenuController memberHud;
-    [SerializeField] private Renderer targetRenderer;
+    [SerializeField] private Renderer[] targetRenderers;
     [SerializeField] private SimpleDoor controlledDoor;
     [SerializeField] private TMP_Text statusText;
 
     [SerializeField] private float logCooldown = 3f;
     private float nextLogTime;
-    private Color normalColor;
+    private Color[] normalColors;
 
     private void Awake()
     {
-        normalColor = targetRenderer.material.color;
+        normalColors = new Color[targetRenderers.Length];
+
+        for (int i = 0; i < targetRenderers.Length; i++)
+        {
+            if (targetRenderers[i] == null)
+                continue;
+
+            normalColors[i] = targetRenderers[i].material.color;
+        }
     }
 
     public void OnMemberFocusEnter(MemberLoadout loadout)
@@ -27,8 +35,7 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
         if (technicalMember == null)
             return;
 
-        Color highlightColor = normalColor * 1.35f;
-        targetRenderer.material.color = highlightColor;
+        SetHighlighted(true);
 
         if (Time.time < nextLogTime)
             return;
@@ -39,7 +46,7 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
 
     public void OnMemberFocusExit()
     {
-        targetRenderer.material.color = normalColor;
+        SetHighlighted(false);
     }
 
     public void Interact()
@@ -67,5 +74,20 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
 
         memberHud.ShowMemberLog(technicalMember, "ACCESS AUTHORIZED");
         memberHud.ShowMemberLog(technicalMember, "DOOR CONTROL OVERRIDDEN");
+    }
+
+    private void SetHighlighted(bool highlighted)
+    {
+        for (int i = 0; i < targetRenderers.Length; i++)
+        {
+            Renderer targetRenderer = targetRenderers[i];
+
+            if (targetRenderer == null)
+                continue;
+
+            targetRenderer.material.color = highlighted
+                ? normalColors[i] * 1.35f
+                : normalColors[i];
+        }
     }
 }
