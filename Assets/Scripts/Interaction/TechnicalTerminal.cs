@@ -5,7 +5,7 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
 {
     public string InteractionPrompt => "ACCESS TERMINAL";
 
-    [SerializeField] private MemberLoadout memberLoadout;
+    [SerializeField] private MemberAssembly memberAssembly;
     [SerializeField] private MemberHudMenuController memberHud;
     [SerializeField] private Renderer[] targetRenderers;
     [SerializeField] private SimpleDoor controlledDoor;
@@ -28,9 +28,10 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
         }
     }
 
-    public void OnMemberFocusEnter(MemberLoadout loadout)
+    public void OnMemberFocusEnter(MemberAssembly assembly)
     {
-        MemberDefinition technicalMember = loadout.GetFirstMemberByClass(MemberClass.Technical);
+        MemberDefinition technicalMember =
+            assembly.GetFirstMemberByClass(MemberClass.Technical);
 
         if (technicalMember == null)
             return;
@@ -40,7 +41,11 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
         if (Time.time < nextLogTime)
             return;
 
-        memberHud.ShowMemberLog(technicalMember, "TECHNICAL ACCESS AVAILABLE");
+        memberHud.ShowMemberLog(
+            technicalMember,
+            "TECHNICAL ACCESS AVAILABLE"
+        );
+
         nextLogTime = Time.time + logCooldown;
     }
 
@@ -51,8 +56,7 @@ public class TechnicalTerminal : MonoBehaviour, IInteractable, IMemberPerception
 
     public void Interact()
     {
-        MemberDefinition technicalMember =
-            memberLoadout.GetFirstMemberByClass(MemberClass.Technical);
+        MemberDefinition technicalMember = memberAssembly.GetFirstMemberByClass(MemberClass.Technical);
 
         if (technicalMember == null)
         {

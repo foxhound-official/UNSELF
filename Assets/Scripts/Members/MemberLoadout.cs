@@ -1,67 +1,90 @@
+using System;
 using UnityEngine;
 
 public class MemberLoadout : MonoBehaviour
 {
-    [SerializeField] private MemberDefinition[] activeMembers = new MemberDefinition[3];
+    private const int HudSlotCount = 3;
 
-    public int SlotCount => activeMembers.Length;
+    [SerializeField] private MemberAssembly memberAssembly;
+    [SerializeField] private MemberDefinition[] hudMembers = new MemberDefinition[HudSlotCount];
+
+    public int SlotCount => HudSlotCount;
 
     public MemberDefinition GetMember(int index)
     {
-        if (index < 0 || index >= activeMembers.Length)
+        if (index < 0 || index >= hudMembers.Length)
             return null;
 
-        return activeMembers[index];
+        return hudMembers[index];
     }
 
-    public bool HasMemberClass(MemberClass memberClass)
-    {
-        foreach (MemberDefinition member in activeMembers)
-        {
-            if (member != null && member.Class == memberClass)
-                return true;
-        }
-
-        return false;
-    }
-
-    public bool HasMember(MemberDefinition member)
+    public bool IsMemberVisible(MemberDefinition member)
     {
         if (member == null)
             return false;
 
-        foreach (MemberDefinition activeMember in activeMembers)
+        foreach (MemberDefinition hudMember in hudMembers)
         {
-            if (activeMember == member)
+            if (hudMember == member)
                 return true;
         }
 
         return false;
     }
 
-    public MemberDefinition GetFirstMemberByClass(MemberClass memberClass)
+    public bool TryToggleMember(MemberDefinition member)
     {
-        foreach (MemberDefinition member in activeMembers)
-        {
-            if (member != null && member.Class == memberClass)
-                return member;
-        }
-
-        return null;
-    }
-
-    public bool TrySetMember(int index, MemberDefinition member)
-    {
-        if (index < 0 || index >= activeMembers.Length || member == null)
+        if (member == null || !memberAssembly.HasMember(member))
             return false;
 
-        for (int i = 0; i < activeMembers.Length; i++)
+        // Clicking an already visible Member removes it from the HUD.
+        for (int i = 0; i < hudMembers.Length; i++)
         {
-            if (activeMembers[i] == member)
-                activeMembers[i] = null;
+            if (hudMembers[i] != member)
+                continue;
+
+            hudMembers[i] = null;
+            return true;
         }
 
-        activeMembers[index] = member;
-        return true;
+        // New HUD Members occupy the first available display slot.
+        for (int i = 0; i < hudMembers.Length; i++)
+        {
+            if (hudMembers[i] != null)
+                continue;
+
+            hudMembers[i] = member;
+            return true;
+        }
+
+        return false;
+    }
+
+    public void RemoveMember(MemberDefinition member)
+    {
+        for (int i = 0; i < hudMembers.Length; i++)
+        {
+            if (hudMembers[i] == member)
+                hudMembers[i] = null;
+        }
+    }
+
+    private void OnValidate()
+    {
+        if (hudMembers != null && hudMembers.Length == HudSlotCount)
+            return;
+
+        MemberDefinition[] resizedMembers = new MemberDefinition[HudSlotCount];
+
+        if (hudMembers != null)
+        {
+            Array.Copy(
+                hudMembers,
+                resizedMembers,
+                Mathf.Min(hudMembers.Length, HudSlotCount)
+            );
+        }
+
+        hudMembers = resizedMembers;
     }
 }

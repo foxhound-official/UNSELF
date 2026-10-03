@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BreakableBarricade : MonoBehaviour, IInteractable, IConditionalInteractable, IMemberPerceptionTarget
 {
-    [SerializeField] private MemberLoadout memberLoadout;
+    [SerializeField] private MemberAssembly memberAssembly;
     [SerializeField] private MemberHudMenuController memberHud;
     [SerializeField] private MemberDefinition requiredMember;
     [SerializeField] private Renderer targetRenderer;
@@ -16,9 +16,7 @@ public class BreakableBarricade : MonoBehaviour, IInteractable, IConditionalInte
 
     public string InteractionPrompt => "BREAK BARRICADE";
 
-    public bool CanInteract =>
-        !isBroken &&
-        memberLoadout.HasMember(requiredMember);
+    public bool CanInteract => !isBroken && memberAssembly.HasMember(requiredMember);
 
     private void Awake()
     {
@@ -26,9 +24,9 @@ public class BreakableBarricade : MonoBehaviour, IInteractable, IConditionalInte
             normalColor = targetRenderer.material.color;
     }
 
-    public void OnMemberFocusEnter(MemberLoadout loadout)
+    public void OnMemberFocusEnter(MemberAssembly assembly)
     {
-        if (!loadout.HasMember(requiredMember) || isBroken)
+        if (!assembly.HasMember(requiredMember) || isBroken)
             return;
 
         SetHighlighted(true);
@@ -36,7 +34,11 @@ public class BreakableBarricade : MonoBehaviour, IInteractable, IConditionalInte
         if (Time.time < nextLogTime)
             return;
 
-        memberHud.ShowMemberLog(requiredMember, "BREACH POINT DETECTED");
+        memberHud.ShowMemberLog(
+            requiredMember,
+            "BREACH POINT DETECTED"
+        );
+
         nextLogTime = Time.time + logCooldown;
     }
 

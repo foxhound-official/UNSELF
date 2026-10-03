@@ -1,5 +1,5 @@
 public interface IMemberPerceptionTarget
 {
-    void OnMemberFocusEnter(MemberLoadout memberLoadout);
+    void OnMemberFocusEnter(MemberAssembly memberAssembly);
     void OnMemberFocusExit();
 }

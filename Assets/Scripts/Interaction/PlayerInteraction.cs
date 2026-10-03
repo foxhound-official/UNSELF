@@ -15,6 +15,12 @@ public class PlayerInteraction : MonoBehaviour
             TryInteract();
     }
 
+    private void OnDisable()
+    {
+        // Interaction prompts must not remain visible while interaction is suspended.
+        interactionPrompt.Hide();
+    }
+
     private void UpdateInteractionPrompt()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
