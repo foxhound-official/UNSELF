@@ -17,8 +17,9 @@ public class PlayerInteraction : MonoBehaviour
 
     private void OnDisable()
     {
-        // Interaction prompts must not remain visible while interaction is suspended.
-        interactionPrompt.Hide();
+        // The prompt may already be destroyed while the scene is shutting down.
+        if (interactionPrompt != null)
+            interactionPrompt.Hide();
     }
 
     private void UpdateInteractionPrompt()

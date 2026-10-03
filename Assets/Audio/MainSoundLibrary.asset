@@ -45,5 +45,9 @@ MonoBehaviour:
     volume: 0.2
   - id: member_log
     clips:
-    - {fileID: 8300000, guid: 322df168a9278ce4d896cd72df30b70d, type: 3}
+    - {fileID: 8300000, guid: ed8fa619f6428fd4193bfc775a37e283, type: 3}
     volume: 0.2
+  - id: ui_click
+    clips:
+    - {fileID: 8300000, guid: a0b6b5b8cc993ef46a115d516e38a188, type: 3}
+    volume: 0.3

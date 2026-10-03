@@ -8,6 +8,12 @@ public class PlayerLook : MonoBehaviour
 
     private float verticalRotation;
 
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
     public void ResetRotation()
     {
         verticalRotation = 0f;

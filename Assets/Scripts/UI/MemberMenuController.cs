@@ -215,6 +215,7 @@ public class MemberMenuController : MonoBehaviour
     {
         selectedMember = member;
 
+        Debug.Log($"MEMBER SELECTED: {member.Code}");
         // Rebuild only the archive so the selection marker updates immediately.
         RefreshMemberInventory();
     }
