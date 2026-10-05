@@ -33,7 +33,10 @@ public class AssemblySlotUI : MonoBehaviour
             menuController.ToggleHudMember(slotIndex));
     }
 
-    public void Refresh(MemberAssembly assembly, MemberLoadout loadout)
+    public void Refresh(
+        MemberAssembly assembly,
+        MemberLoadout loadout,
+        bool canEditAssembly)
     {
         slotNumberText.text = $"{slotIndex + 1:00}";
 
@@ -47,18 +50,19 @@ public class AssemblySlotUI : MonoBehaviour
             return;
         }
 
-        slotButton.interactable = true;
-
         MemberDefinition member = assembly.GetMember(slotIndex);
 
         if (member == null)
         {
             memberNameText.text = "[EMPTY]";
 
+            slotButton.interactable = canEditAssembly;
             removeButton.gameObject.SetActive(false);
             hudButton.gameObject.SetActive(false);
             return;
         }
+
+        slotButton.interactable = false;
 
         bool isStartSlot = assembly.IsMemberStartSlot(slotIndex);
 
@@ -74,7 +78,7 @@ public class AssemblySlotUI : MonoBehaviour
 
         memberNameText.text = $"{member.Code} // {member.MemberName}";
 
-        removeButton.gameObject.SetActive(true);
+        removeButton.gameObject.SetActive(canEditAssembly);
         hudButton.gameObject.SetActive(true);
 
         hudButtonText.text = loadout.IsMemberVisible(member)

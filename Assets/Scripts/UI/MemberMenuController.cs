@@ -6,6 +6,12 @@ using UnityEngine.UI;
 
 public class MemberMenuController : MonoBehaviour
 {
+    private enum MemberMenuMode
+    {
+        View,
+        EditAssembly
+    }
+
     [SerializeField] private GameObject menuRoot;
 
     [Header("Player Data")]
@@ -30,6 +36,8 @@ public class MemberMenuController : MonoBehaviour
     private readonly List<AssemblySlotUI> assemblySlotViews = new();
 
     private MemberDefinition selectedMember;
+    private MemberMenuMode currentMode = MemberMenuMode.View;
+
     private bool isOpen;
 
     private bool movementWasEnabled;
@@ -38,6 +46,9 @@ public class MemberMenuController : MonoBehaviour
 
     private CursorLockMode previousCursorLockMode;
     private bool previousCursorVisible;
+
+    private bool CanEditAssembly =>
+        currentMode == MemberMenuMode.EditAssembly;
 
     private void Start()
     {
@@ -65,14 +76,25 @@ public class MemberMenuController : MonoBehaviour
     public void ToggleMenu()
     {
         if (isOpen)
+        {
             CloseMenu();
-        else
-            OpenMenu();
+            return;
+        }
+
+        OpenMenu(MemberMenuMode.View);
+    }
+
+    public void OpenAssemblyEditor()
+    {
+        if (isOpen)
+            return;
+
+        OpenMenu(MemberMenuMode.EditAssembly);
     }
 
     public void InstallSelectedMember(int slotIndex)
     {
-        if (selectedMember == null)
+        if (!CanEditAssembly || selectedMember == null)
             return;
 
         if (!memberAssembly.TryInstallMember(slotIndex, selectedMember))
@@ -84,6 +106,9 @@ public class MemberMenuController : MonoBehaviour
 
     public void RemoveMember(int slotIndex)
     {
+        if (!CanEditAssembly)
+            return;
+
         MemberDefinition member = memberAssembly.GetMember(slotIndex);
 
         if (member == null)
@@ -113,9 +138,11 @@ public class MemberMenuController : MonoBehaviour
         Refresh();
     }
 
-    private void OpenMenu()
+    private void OpenMenu(MemberMenuMode mode)
     {
         isOpen = true;
+        currentMode = mode;
+        selectedMember = null;
 
         // Preserve the current gameplay state instead of assuming every
         // player system was enabled before the menu opened.
@@ -141,6 +168,9 @@ public class MemberMenuController : MonoBehaviour
     {
         isOpen = false;
         menuRoot.SetActive(false);
+
+        selectedMember = null;
+        currentMode = MemberMenuMode.View;
 
         // Restore exactly the gameplay state that existed before opening.
         playerMovement.enabled = movementWasEnabled;
@@ -172,7 +202,13 @@ public class MemberMenuController : MonoBehaviour
         RefreshMemberInventory();
 
         foreach (AssemblySlotUI slotView in assemblySlotViews)
-            slotView.Refresh(memberAssembly, memberLoadout);
+        {
+            slotView.Refresh(
+                memberAssembly,
+                memberLoadout,
+                CanEditAssembly
+            );
+        }
     }
 
     private void RefreshMemberInventory()
@@ -195,6 +231,7 @@ public class MemberMenuController : MonoBehaviour
                 Instantiate(memberEntryTemplate, memberListContent);
 
             entry.gameObject.SetActive(true);
+            entry.interactable = CanEditAssembly;
 
             TMP_Text text = entry.GetComponentInChildren<TMP_Text>();
 
@@ -213,9 +250,13 @@ public class MemberMenuController : MonoBehaviour
 
     private void SelectMember(MemberDefinition member)
     {
+        if (!CanEditAssembly)
+            return;
+
         selectedMember = member;
 
         Debug.Log($"MEMBER SELECTED: {member.Code}");
+
         // Rebuild only the archive so the selection marker updates immediately.
         RefreshMemberInventory();
     }
