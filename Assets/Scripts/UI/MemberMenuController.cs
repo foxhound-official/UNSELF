@@ -227,24 +227,20 @@ public class MemberMenuController : MonoBehaviour
 
         foreach (MemberDefinition member in memberInventory.Members)
         {
-            Button entry =
-                Instantiate(memberEntryTemplate, memberListContent);
+            Button entry = Instantiate(memberEntryTemplate, memberListContent);
 
             entry.gameObject.SetActive(true);
             entry.interactable = CanEditAssembly;
 
-            TMP_Text text = entry.GetComponentInChildren<TMP_Text>();
-
             bool isSelected = member == selectedMember;
 
-            text.text = isSelected
-                ? $"> {member.Code} // {member.MemberName}"
-                : $"  {member.Code} // {member.MemberName}";
+            MemberArchiveEntryUI entryView = entry.GetComponent<MemberArchiveEntryUI>();
+
+            entryView.Refresh(member, isSelected);
 
             MemberDefinition capturedMember = member;
 
-            entry.onClick.AddListener(() =>
-                SelectMember(capturedMember));
+            entry.onClick.AddListener(() => SelectMember(capturedMember));
         }
     }
 
