@@ -6,6 +6,7 @@ public class MemberArchiveEntryUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text codeText;
     [SerializeField] private TMP_Text memberNameText;
+    [SerializeField] private TMP_Text slotCostText;
 
     [SerializeField] private Image backgroundImage;
     [SerializeField] private Image accentImage;
@@ -19,6 +20,7 @@ public class MemberArchiveEntryUI : MonoBehaviour
 
         codeText.text = member.Code;
         memberNameText.text = member.MemberName;
+        slotCostText.text = member.SlotCost == 1 ? "1 SLOT" : $"{member.SlotCost} SLOTS";
 
         codeText.color = memberColor;
 

@@ -13,6 +13,7 @@ public class MemberMenuController : MonoBehaviour
     }
 
     [SerializeField] private GameObject menuRoot;
+    [SerializeField] private MemberMenuTransition menuTransition;
 
     [Header("Player Data")]
     [SerializeField] private MemberInventory memberInventory;
@@ -39,6 +40,7 @@ public class MemberMenuController : MonoBehaviour
     private MemberMenuMode currentMode = MemberMenuMode.View;
 
     private bool isOpen;
+    private bool isClosing;
 
     private bool movementWasEnabled;
     private bool lookWasEnabled;
@@ -75,6 +77,9 @@ public class MemberMenuController : MonoBehaviour
 
     public void ToggleMenu()
     {
+        if (isClosing)
+            return;
+
         if (isOpen)
         {
             CloseMenu();
@@ -86,7 +91,7 @@ public class MemberMenuController : MonoBehaviour
 
     public void OpenAssemblyEditor()
     {
-        if (isOpen)
+        if (isOpen || isClosing)
             return;
 
         OpenMenu(MemberMenuMode.EditAssembly);
@@ -162,11 +167,27 @@ public class MemberMenuController : MonoBehaviour
 
         menuRoot.SetActive(true);
         Refresh();
+
+        menuTransition.PlayOpen();
     }
 
-    private void CloseMenu()
+private void CloseMenu()
+{
+    if (isClosing)
+        return;
+
+    isClosing = true;
+
+    menuTransition.PlayClose(
+        CompleteClose
+    );
+}
+
+    private void CompleteClose()
     {
         isOpen = false;
+        isClosing = false;
+
         menuRoot.SetActive(false);
 
         selectedMember = null;
