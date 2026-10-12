@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b3c2e23bddb6a684c9d77176a11db769, type: 3}
-  m_Name: SOCIAL_TerminalSpecialist
+  m_Name: SOCIAL_CompanyLawyer
   m_EditorClassIdentifier: Assembly-CSharp::MemberDefinition
   code: S_1
   memberName: COMPANY_LAWYER
