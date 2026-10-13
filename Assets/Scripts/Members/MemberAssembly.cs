@@ -53,6 +53,20 @@ public class MemberAssembly : MonoBehaviour
         return false;
     }
 
+    public bool HasMember(string memberCode)
+    {
+        if (string.IsNullOrWhiteSpace(memberCode))
+            return false;
+
+        foreach (MemberDefinition installedMember in installedMembers)
+        {
+            if (installedMember != null && installedMember.Code == memberCode)
+                return true;
+        }
+
+        return false;
+    }
+
     public MemberDefinition GetFirstMemberByClass(MemberClass memberClass)
     {
         foreach (MemberDefinition member in installedMembers)

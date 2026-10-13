@@ -28,8 +28,10 @@ public class DialogueController : MonoBehaviour
         // Yarn owns dialogue flow, while UNSELF owns player and gameplay state.
         dialogueRunner.onDialogueComplete.AddListener(HandleDialogueCompleted);
 
-        // Temporary bridges until the universal capability and action systems are ready.
-        dialogueRunner.AddFunction("has_required_member", (Func<bool>)HasRequiredMember);
+        // Dialogue conditions read the current gameplay state through explicit parameters.
+        dialogueRunner.AddFunction<string, bool>("has_member", HasMember);
+
+        // Temporary command until dialogue results are migrated to WorldActions.
         dialogueRunner.AddCommandHandler("complete_member_dialogue", (Action)CompleteMemberDialogue);
     }
 
@@ -48,7 +50,7 @@ public class DialogueController : MonoBehaviour
             return;
 
         dialogueRunner.onDialogueComplete.RemoveListener(HandleDialogueCompleted);
-        dialogueRunner.RemoveFunction("has_required_member");
+        dialogueRunner.RemoveFunction("has_member");
         dialogueRunner.RemoveCommandHandler("complete_member_dialogue");
     }
 
@@ -106,11 +108,9 @@ public class DialogueController : MonoBehaviour
         playerLocked = false;
     }
 
-    private bool HasRequiredMember()
+    private bool HasMember(string memberCode)
     {
-        return currentNpc != null &&
-               currentNpc.RequiredMember != null &&
-               memberAssembly.HasMember(currentNpc.RequiredMember);
+        return memberAssembly.HasMember(memberCode);
     }
 
     private void CompleteMemberDialogue()
