@@ -1,0 +1,11 @@
+﻿title: TestWorker
+---
+WORKER: You're not authorized to be here.
+
+-> \[1\] I \/\/ I'll leave.
+    WORKER: Then leave.
+
+-> \[2\] S_1 \/\/ Section 7-B grants me access to this area. <<if has_required_member()>>
+    WORKER: ...Fine. Your authorization checks out.
+    <<complete_member_dialogue>>
+===

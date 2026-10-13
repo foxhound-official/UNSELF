@@ -1,11 +1,11 @@
-using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
+using Yarn.Unity;
 
 public class DialogueController : MonoBehaviour
 {
-    [SerializeField] private GameObject dialogueRoot;
+    [SerializeField] private DialogueRunner dialogueRunner;
 
     [Header("Player")]
     [SerializeField] private PlayerMovement playerMovement;
@@ -13,86 +13,60 @@ public class DialogueController : MonoBehaviour
     [SerializeField] private PlayerInteraction playerInteraction;
     [SerializeField] private MemberAssembly memberAssembly;
 
-    [Header("Dialogue")]
-    [SerializeField] private TMP_Text speakerNameText;
-    [SerializeField] private TMP_Text dialogueText;
-
-    [Header("I Choice")]
-    [SerializeField] private Button defaultChoiceButton;
-    [SerializeField] private TMP_Text defaultChoiceText;
-
-    [Header("Member Choice")]
-    [SerializeField] private Button memberChoiceButton;
-    [SerializeField] private TMP_Text memberChoiceText;
-
-    [Header("Continue")]
-    [SerializeField] private Button continueButton;
-
     private DialogueNPC currentNpc;
-    private bool isOpen;
-    private bool waitingForContinue;
 
     private bool movementWasEnabled;
     private bool lookWasEnabled;
     private bool interactionWasEnabled;
+    private bool playerLocked;
 
     private CursorLockMode previousCursorLockMode;
     private bool previousCursorVisible;
-    private bool memberChoiceSelected;
 
     private void Awake()
     {
-        defaultChoiceButton.onClick.AddListener(SelectDefaultChoice);
-        memberChoiceButton.onClick.AddListener(SelectMemberChoice);
-        continueButton.onClick.AddListener(CompleteDialogue);
+        // Yarn owns dialogue flow, while UNSELF owns player and gameplay state.
+        dialogueRunner.onDialogueComplete.AddListener(HandleDialogueCompleted);
 
-        dialogueRoot.SetActive(false);
+        // Temporary bridges until the universal capability and action systems are ready.
+        dialogueRunner.AddFunction("has_required_member", (Func<bool>)HasRequiredMember);
+        dialogueRunner.AddCommandHandler("complete_member_dialogue", (Action)CompleteMemberDialogue);
     }
 
     private void Update()
     {
-        if (!isOpen || Keyboard.current == null)
+        if (!dialogueRunner.IsDialogueRunning || Keyboard.current == null)
             return;
 
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            CloseDialogue();
+            _ = dialogueRunner.Stop();
+    }
+
+    private void OnDestroy()
+    {
+        if (dialogueRunner == null)
             return;
-        }
 
-        if (waitingForContinue)
-        {
-            if (Keyboard.current.enterKey.wasPressedThisFrame ||
-                Keyboard.current.spaceKey.wasPressedThisFrame)
-            {
-                CompleteDialogue();
-            }
-
-            return;
-        }
-
-        if (Keyboard.current.digit1Key.wasPressedThisFrame)
-        {
-            SelectDefaultChoice();
-            return;
-        }
-
-        if (Keyboard.current.digit2Key.wasPressedThisFrame &&
-            memberChoiceButton.gameObject.activeSelf)
-        {
-            SelectMemberChoice();
-        }
+        dialogueRunner.onDialogueComplete.RemoveListener(HandleDialogueCompleted);
+        dialogueRunner.RemoveFunction("has_required_member");
+        dialogueRunner.RemoveCommandHandler("complete_member_dialogue");
     }
 
     public void OpenDialogue(DialogueNPC npc)
     {
-        if (isOpen || npc == null)
+        if (npc == null || dialogueRunner.IsDialogueRunning)
             return;
 
         currentNpc = npc;
-        isOpen = true;
-        waitingForContinue = false;
-        memberChoiceSelected = false;
+
+        LockPlayer();
+        _ = dialogueRunner.StartDialogue(npc.StartNode);
+    }
+
+    private void LockPlayer()
+    {
+        if (playerLocked)
+            return;
 
         movementWasEnabled = playerMovement.enabled;
         lookWasEnabled = playerLook.enabled;
@@ -108,95 +82,19 @@ public class DialogueController : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        dialogueRoot.SetActive(true);
-
-        ShowOpeningState();
+        playerLocked = true;
     }
 
-    private void ShowOpeningState()
+    private void HandleDialogueCompleted()
     {
-        speakerNameText.text =
-            currentNpc.SpeakerName;
-
-        dialogueText.text =
-            currentNpc.OpeningLine;
-
-        defaultChoiceText.text =
-            $"[1] I // {currentNpc.DefaultChoice}";
-
-        bool hasRequiredMember =
-            memberAssembly.HasMember(
-                currentNpc.RequiredMember
-            );
-
-        memberChoiceButton.gameObject.SetActive(
-            hasRequiredMember
-        );
-
-        if (hasRequiredMember)
-        {
-            MemberDefinition member =
-                currentNpc.RequiredMember;
-
-            memberChoiceText.text =
-                $"[2] {member.Code} // {currentNpc.MemberChoice}";
-        }
-
-        defaultChoiceButton.gameObject.SetActive(true);
-        continueButton.gameObject.SetActive(false);
-    }
-
-    private void SelectDefaultChoice()
-    {
-        if (!isOpen || waitingForContinue)
-            return;
-
-        memberChoiceSelected = false;
-
-        ShowResponse(
-            currentNpc.DefaultResponse
-        );
-    }
-
-    private void SelectMemberChoice()
-    {
-        if (!isOpen || waitingForContinue)
-            return;
-
-        if (!memberAssembly.HasMember(
-                currentNpc.RequiredMember))
-        {
-            return;
-        }
-
-        memberChoiceSelected = true;
-
-        ShowResponse(
-            currentNpc.MemberResponse
-        );
-    }
-
-    private void ShowResponse(string response)
-    {
-        waitingForContinue = true;
-
-        dialogueText.text = response;
-
-        defaultChoiceButton.gameObject.SetActive(false);
-        memberChoiceButton.gameObject.SetActive(false);
-        continueButton.gameObject.SetActive(true);
-    }
-
-    private void CloseDialogue()
-    {
-        if (!isOpen)
-            return;
-
-        isOpen = false;
-        waitingForContinue = false;
+        UnlockPlayer();
         currentNpc = null;
+    }
 
-        dialogueRoot.SetActive(false);
+    private void UnlockPlayer()
+    {
+        if (!playerLocked)
+            return;
 
         playerMovement.enabled = movementWasEnabled;
         playerLook.enabled = lookWasEnabled;
@@ -204,16 +102,22 @@ public class DialogueController : MonoBehaviour
 
         Cursor.lockState = previousCursorLockMode;
         Cursor.visible = previousCursorVisible;
+
+        playerLocked = false;
     }
 
-    private void CompleteDialogue()
+    private bool HasRequiredMember()
     {
-        if (!isOpen || !waitingForContinue)
+        return currentNpc != null &&
+               currentNpc.RequiredMember != null &&
+               memberAssembly.HasMember(currentNpc.RequiredMember);
+    }
+
+    private void CompleteMemberDialogue()
+    {
+        if (currentNpc == null)
             return;
 
-        if (memberChoiceSelected)
-            currentNpc.CompleteMemberDialogue();
-
-        CloseDialogue();
+        currentNpc.CompleteMemberDialogue();
     }
 }
