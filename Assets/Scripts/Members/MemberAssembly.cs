@@ -67,6 +67,34 @@ public class MemberAssembly : MonoBehaviour
         return false;
     }
 
+    public bool HasCapability(MemberCapability capability)
+    {
+        if (capability == null)
+            return false;
+
+        foreach (MemberDefinition member in installedMembers)
+        {
+            if (member != null && member.HasCapability(capability))
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool HasCapability(string capabilityCode)
+    {
+        if (string.IsNullOrWhiteSpace(capabilityCode))
+            return false;
+
+        foreach (MemberDefinition member in installedMembers)
+        {
+            if (member != null && member.HasCapability(capabilityCode))
+                return true;
+        }
+
+        return false;
+    }
+
     public MemberDefinition GetFirstMemberByClass(MemberClass memberClass)
     {
         foreach (MemberDefinition member in installedMembers)

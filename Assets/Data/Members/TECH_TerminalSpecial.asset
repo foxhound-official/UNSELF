@@ -16,3 +16,5 @@ MonoBehaviour:
   memberName: TERMINAL SPECIALIST
   memberClass: 1
   slotCost: 1
+  capabilities:
+  - {fileID: 11400000, guid: 58464577663289846b3bf34ebe801db2, type: 2}

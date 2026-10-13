@@ -16,3 +16,5 @@ MonoBehaviour:
   memberName: SQUAD_BREACHER
   memberClass: 2
   slotCost: 1
+  capabilities:
+  - {fileID: 11400000, guid: 4805cb221677f2c40ae3d1025bf000e7, type: 2}

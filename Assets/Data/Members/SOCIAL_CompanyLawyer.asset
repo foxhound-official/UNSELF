@@ -16,3 +16,5 @@ MonoBehaviour:
   memberName: COMPANY_LAWYER
   memberClass: 0
   slotCost: 2
+  capabilities:
+  - {fileID: 11400000, guid: 0cbe8d8e7a6bb8d41a003dcf3e888f47, type: 2}
