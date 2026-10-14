@@ -32,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
 
     public event Action<float> Landed;
 
+    public Vector3 HorizontalVelocity => horizontalVelocity;
+    public float SprintRatio => sprintSpeed > moveSpeed ? Mathf.InverseLerp(moveSpeed, sprintSpeed, HorizontalSpeed) : 0f;
     public float HorizontalSpeed => horizontalVelocity.magnitude;
     public float SpeedRatio => sprintSpeed > 0f ? Mathf.Clamp01(HorizontalSpeed / sprintSpeed) : 0f;
     public bool IsGrounded => characterController != null && characterController.isGrounded;
