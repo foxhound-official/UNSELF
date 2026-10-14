@@ -79,7 +79,7 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private void UpdateBob()
     {
-        bool isMoving = playerMovement.IsGrounded && playerMovement.HorizontalSpeed > 0.1f;
+        bool isMoving = playerMovement.IsGrounded && playerMovement.HorizontalSpeed > 0.1f && !playerMovement.IsSliding;
         Vector3 targetOffset = Vector3.zero;
 
         if (isMoving)
