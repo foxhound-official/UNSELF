@@ -8,6 +8,7 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private LayerMask hitMask = ~0;
     [SerializeField] private PlayerLook playerLook;
     [SerializeField] private WeaponRecoil weaponRecoil;
+    [SerializeField] private MuzzleFlash muzzleFlash;
 
     private int currentAmmo;
     private int reserveAmmo;
@@ -48,11 +49,23 @@ public class PlayerWeapon : MonoBehaviour
 
     private void TryFire()
     {
-        if (Time.time < nextFireTime || currentAmmo <= 0)
+        if (Time.time < nextFireTime)
             return;
+
+        if (currentAmmo <= 0)
+        {
+            AudioService.Play("weapon_empty");
+            nextFireTime = Time.time + weapon.FireInterval;
+            return;
+        }
 
         currentAmmo--;
         nextFireTime = Time.time + weapon.FireInterval;
+
+        AudioService.Play("weapon_fire");
+
+        if (muzzleFlash != null)
+            muzzleFlash.Play();
 
         Ray ray = new Ray(
             playerCamera.transform.position,

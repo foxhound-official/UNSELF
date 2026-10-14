@@ -51,3 +51,12 @@ MonoBehaviour:
     clips:
     - {fileID: 8300000, guid: a0b6b5b8cc993ef46a115d516e38a188, type: 3}
     volume: 0.3
+  - id: weapon_fire
+    clips:
+    - {fileID: 8300000, guid: 9fef960307ba9444e97da3779f87812a, type: 3}
+    - {fileID: 8300000, guid: 8d6990f6a44ade840ba176914b71b04d, type: 3}
+    volume: 0.3
+  - id: weapon_empty
+    clips:
+    - {fileID: 8300000, guid: 477266c2a6618a649816f25180557258, type: 3}
+    volume: 0.3
