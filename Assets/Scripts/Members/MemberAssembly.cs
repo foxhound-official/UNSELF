@@ -179,4 +179,18 @@ public class MemberAssembly : MonoBehaviour
 
         installedMembers = resizedMembers;
     }
+
+    public MemberDefinition GetFirstMemberWithCapability(MemberCapability capability)
+    {
+        if (capability == null)
+            return null;
+
+        foreach (MemberDefinition member in installedMembers)
+        {
+            if (member != null && member.HasCapability(capability))
+                return member;
+        }
+
+        return null;
+    }
 }

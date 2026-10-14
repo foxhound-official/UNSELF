@@ -29,7 +29,7 @@ public class DialogueController : MonoBehaviour
         dialogueRunner.onDialogueComplete.AddListener(HandleDialogueCompleted);
 
         // Dialogue conditions read the current gameplay state through explicit parameters.
-        dialogueRunner.AddFunction<string, bool>("has_member", HasMember);
+        dialogueRunner.AddFunction<string, bool>("has_capability", HasCapability);
 
         // Temporary command until dialogue results are migrated to WorldActions.
         dialogueRunner.AddCommandHandler("complete_member_dialogue", (Action)CompleteMemberDialogue);
@@ -50,7 +50,7 @@ public class DialogueController : MonoBehaviour
             return;
 
         dialogueRunner.onDialogueComplete.RemoveListener(HandleDialogueCompleted);
-        dialogueRunner.RemoveFunction("has_member");
+        dialogueRunner.RemoveFunction("has_capability");
         dialogueRunner.RemoveCommandHandler("complete_member_dialogue");
     }
 
@@ -108,9 +108,9 @@ public class DialogueController : MonoBehaviour
         playerLocked = false;
     }
 
-    private bool HasMember(string memberCode)
+    private bool HasCapability(string capabilityCode)
     {
-        return memberAssembly.HasMember(memberCode);
+        return memberAssembly.HasCapability(capabilityCode);
     }
 
     private void CompleteMemberDialogue()

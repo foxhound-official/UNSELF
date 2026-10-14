@@ -2320,6 +2320,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 268595201}
+  - component: {fileID: 268595205}
+  - component: {fileID: 268595204}
+  - component: {fileID: 268595203}
   - component: {fileID: 268595202}
   m_Layer: 0
   m_Name: TestTerminal
@@ -2355,16 +2358,61 @@ MonoBehaviour:
   m_GameObject: {fileID: 268595200}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d7669af2299b68408c96cac0626892e, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e9b1b13c28d931479e390ffb2416cca, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TechnicalTerminal
-  memberAssembly: {fileID: 1806691670}
+  m_EditorClassIdentifier: Assembly-CSharp::CapabilityPerceptionFeedback
+  requiredCapability: {fileID: 11400000, guid: 58464577663289846b3bf34ebe801db2, type: 2}
   memberHud: {fileID: 1572921781}
   targetRenderers:
   - {fileID: 591258674}
-  controlledDoor: {fileID: 646057662}
-  statusText: {fileID: 602193863}
+  - {fileID: 6771401}
+  logMessage: TECHNICAL ACCESS AVAILABLE
+  highlightMultiplier: 1.35
   logCooldown: 3
+--- !u!114 &268595203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268595200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81e27597db04418458c062c3a21c55ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OpenDoorAction
+  door: {fileID: 646057662}
+--- !u!114 &268595204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268595200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b854d860f8c8662459367ddd331f1b3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MemberCapabilityRequirement
+  memberAssembly: {fileID: 1806691670}
+  requiredCapability: {fileID: 11400000, guid: 58464577663289846b3bf34ebe801db2, type: 2}
+--- !u!114 &268595205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268595200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 006aae68273bda745a60910c31760a59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractionController
+  interactionPrompt: ACCESS TERMINAL
+  requirements:
+  - {fileID: 268595204}
+  actions:
+  - {fileID: 268595203}
 --- !u!1 &278911283
 GameObject:
   m_ObjectHideFlags: 0
@@ -2570,11 +2618,170 @@ MonoBehaviour:
   dialogueController: {fileID: 2008638855}
   startNode: TestWorker
   requiredMember: {fileID: 11400000, guid: 071f915e000867541a24cc2a2164213d, type: 2}
-  controlledDoor: {fileID: 646057662}
+  controlledDoor: {fileID: 0}
   memberHud: {fileID: 1572921781}
   targetRenderers:
   - {fileID: 286656520}
   logCooldown: 3
+--- !u!1 &319368908
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 319368909}
+  - component: {fileID: 319368912}
+  - component: {fileID: 319368911}
+  - component: {fileID: 319368910}
+  - component: {fileID: 319368915}
+  - component: {fileID: 319368914}
+  - component: {fileID: 319368913}
+  m_Layer: 0
+  m_Name: TestBody
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &319368909
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319368908}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -5.21, y: 0.836, z: 4.902}
+  m_LocalScale: {x: 0.5, y: 1, z: 0.049999997}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2083720993}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &319368910
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319368908}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &319368911
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319368908}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: c2e40fa84d53ccd428f640eac126b1fb, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &319368912
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319368908}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &319368913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319368908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81e27597db04418458c062c3a21c55ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OpenDoorAction
+  door: {fileID: 646057662}
+--- !u!114 &319368914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319368908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b854d860f8c8662459367ddd331f1b3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MemberCapabilityRequirement
+  memberAssembly: {fileID: 1806691670}
+  requiredCapability: {fileID: 11400000, guid: 58464577663289846b3bf34ebe801db2, type: 2}
+--- !u!114 &319368915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319368908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 006aae68273bda745a60910c31760a59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractionController
+  interactionPrompt: OVERRIDE SECURITY
+  requirements:
+  - {fileID: 319368914}
+  actions:
+  - {fileID: 319368913}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -6301,7 +6508,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleDoor
   isLocked: 1
-  openOffset: {x: 2, y: 0, z: 0}
+  openOffset: {x: 2.5, y: 0, z: 0}
   openDuration: 1
 --- !u!1 &653374931
 GameObject:
@@ -13644,7 +13851,7 @@ GameObject:
   - component: {fileID: 1884469361}
   - component: {fileID: 1884469360}
   m_Layer: 0
-  m_Name: ScrapPile_07 (1)
+  m_Name: ScrapPile_08
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14781,18 +14988,19 @@ Transform:
   m_Children:
   - {fileID: 801133732}
   - {fileID: 653374932}
+  - {fileID: 1381899584}
+  - {fileID: 921010584}
+  - {fileID: 1269020339}
+  - {fileID: 1118534483}
   - {fileID: 339108642}
   - {fileID: 701718690}
   - {fileID: 1884469359}
   - {fileID: 2081653485}
-  - {fileID: 1118534483}
-  - {fileID: 1381899584}
-  - {fileID: 1269020339}
-  - {fileID: 921010584}
   - {fileID: 963407516}
   - {fileID: 1924324770}
   - {fileID: 2081491295}
   - {fileID: 646057658}
+  - {fileID: 319368909}
   - {fileID: 268595201}
   - {fileID: 165201156}
   - {fileID: 1321005990}
