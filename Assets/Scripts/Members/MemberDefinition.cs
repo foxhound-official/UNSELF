@@ -4,7 +4,8 @@ public enum MemberClass
 {
     Social,
     Technical,
-    Combat
+    Combat,
+    Agility
 }
 
 [CreateAssetMenu(fileName = "Member", menuName = "UNSELF/Members/Member")]

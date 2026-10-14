@@ -148,17 +148,11 @@ public class AssemblySlotUI : MonoBehaviour
     {
         return memberClass switch
         {
-            MemberClass.Social =>
-                new Color32(77, 179, 255, 255),
-
-            MemberClass.Technical =>
-                new Color32(255, 191, 51, 255),
-
-            MemberClass.Combat =>
-                new Color32(255, 77, 64, 255),
-
-            _ =>
-                new Color32(255, 255, 255, 255)
+            MemberClass.Social => new Color32(77, 179, 255, 255),
+            MemberClass.Technical => new Color32(255, 191, 51, 255),
+            MemberClass.Combat => new Color32(255, 77, 64, 255),
+            MemberClass.Agility => new Color(0.28f, 0.84f, 0.66f),
+            _ => new Color32(255, 255, 255, 255)
         };
     }
 

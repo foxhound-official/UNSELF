@@ -23,6 +23,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float crouchTransitionSpeed = 5f;
     [SerializeField] private Transform cameraPivot;
 
+    [Header("Enhanced Mobility")]
+    [SerializeField] private MemberAssembly memberAssembly;
+    [SerializeField] private MemberCapability enhancedMobilityCapability;
+    [SerializeField] private float enhancedSprintSpeed = 6f;
+    [SerializeField] private float enhancedSprintAcceleration = 18f;
+    [SerializeField] private float enhancedJumpHeight = 1.45f;
+
     private CharacterController characterController;
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
@@ -30,12 +37,16 @@ public class PlayerMovement : MonoBehaviour
     private float standingCameraHeight;
     private bool isCrouching;
 
+    private bool HasEnhancedMobility => memberAssembly != null && enhancedMobilityCapability != null && memberAssembly.HasCapability(enhancedMobilityCapability);
+    private float CurrentSprintSpeed => HasEnhancedMobility ? enhancedSprintSpeed : sprintSpeed;
+    private float CurrentJumpHeight => HasEnhancedMobility ? enhancedJumpHeight : jumpHeight;
+
     public event Action<float> Landed;
 
     public Vector3 HorizontalVelocity => horizontalVelocity;
-    public float SprintRatio => sprintSpeed > moveSpeed ? Mathf.InverseLerp(moveSpeed, sprintSpeed, HorizontalSpeed) : 0f;
+    public float SprintRatio => CurrentSprintSpeed > moveSpeed ? Mathf.InverseLerp(moveSpeed, CurrentSprintSpeed, HorizontalSpeed) : 0f;
     public float HorizontalSpeed => horizontalVelocity.magnitude;
-    public float SpeedRatio => sprintSpeed > 0f ? Mathf.Clamp01(HorizontalSpeed / sprintSpeed) : 0f;
+    public float SpeedRatio => CurrentSprintSpeed > 0f ? Mathf.Clamp01(HorizontalSpeed / CurrentSprintSpeed) : 0f;
     public bool IsGrounded => characterController != null && characterController.isGrounded;
     public bool IsSprinting { get; private set; }
     public bool IsCrouching => isCrouching;
@@ -105,7 +116,7 @@ public class PlayerMovement : MonoBehaviour
         float targetSpeed = isCrouching
             ? crouchSpeed
             : IsSprinting
-                ? sprintSpeed
+                ? CurrentSprintSpeed
                 : moveSpeed;
 
         Vector3 targetVelocity = direction * targetSpeed;
@@ -114,9 +125,18 @@ public class PlayerMovement : MonoBehaviour
 
         if (grounded)
         {
-            acceleration = input.sqrMagnitude > 0f
-                ? groundAcceleration
-                : groundDeceleration;
+            if (input.sqrMagnitude <= 0f)
+            {
+                acceleration = groundDeceleration;
+            }
+            else if (IsSprinting && HasEnhancedMobility)
+            {
+                acceleration = enhancedSprintAcceleration;
+            }
+            else
+            {
+                acceleration = groundAcceleration;
+            }
         }
         else
         {
@@ -141,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
             return;
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
-            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            verticalVelocity = Mathf.Sqrt(CurrentJumpHeight * -2f * gravity);
     }
 
     private void UpdateSprint(Vector2 input)
