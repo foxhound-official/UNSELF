@@ -1,51 +1,161 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private float sprintSpeed = 5f;
-    [SerializeField] private float gravity = -20f;
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 3.5f;
+    [SerializeField] private float sprintSpeed = 5.5f;
+    [SerializeField] private float crouchSpeed = 2f;
+    [SerializeField] private float groundAcceleration = 14f;
+    [SerializeField] private float groundDeceleration = 18f;
+    [SerializeField] private float airAcceleration = 4f;
+
+    [Header("Vertical Movement")]
+    [SerializeField] private float gravity = -22f;
     [SerializeField] private float jumpHeight = 1.2f;
-    [SerializeField] private float standingHeight = 1.8f;
-    [SerializeField] private float crouchingHeight = 1.0f;
+    [SerializeField] private float groundedVelocity = -2f;
+
+    [Header("Crouch")]
+    [SerializeField] private float crouchingHeight = 1f;
     [SerializeField] private float crouchingCameraHeight = 0.4f;
-    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private float crouchTransitionSpeed = 5f;
+    [SerializeField] private Transform cameraPivot;
 
     private CharacterController characterController;
+    private Vector3 horizontalVelocity;
     private float verticalVelocity;
+    private float standingHeight;
+    private float standingCameraHeight;
     private bool isCrouching;
+
+    public event Action<float> Landed;
+
+    public float HorizontalSpeed => horizontalVelocity.magnitude;
+    public float SpeedRatio => sprintSpeed > 0f ? Mathf.Clamp01(HorizontalSpeed / sprintSpeed) : 0f;
+    public bool IsGrounded => characterController != null && characterController.isGrounded;
+    public bool IsSprinting { get; private set; }
+    public bool IsCrouching => isCrouching;
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
+
         standingHeight = characterController.height;
+        standingCameraHeight = cameraPivot.localPosition.y;
     }
 
     private void Update()
     {
+        Vector2 input = ReadMovementInput();
+
+        UpdateCrouch();
+        UpdateSprint(input);
+
+        bool groundedBeforeMove = characterController.isGrounded;
+
+        UpdateHorizontalVelocity(input, groundedBeforeMove);
+        UpdateVerticalVelocity(groundedBeforeMove);
+
+        Vector3 velocity = horizontalVelocity;
+        velocity.y = verticalVelocity;
+
+        characterController.Move(velocity * Time.deltaTime);
+
+        bool groundedAfterMove = characterController.isGrounded;
+
+        if (!groundedBeforeMove && groundedAfterMove && verticalVelocity < 0f)
+            Landed?.Invoke(-verticalVelocity);
+
+        if (groundedAfterMove && verticalVelocity < 0f)
+            verticalVelocity = groundedVelocity;
+
+        UpdateCameraHeight();
+    }
+
+    private Vector2 ReadMovementInput()
+    {
         Vector2 input = Vector2.zero;
 
-        if (Keyboard.current != null)
+        if (Keyboard.current == null)
+            return input;
+
+        if (Keyboard.current.wKey.isPressed)
+            input.y += 1f;
+
+        if (Keyboard.current.sKey.isPressed)
+            input.y -= 1f;
+
+        if (Keyboard.current.dKey.isPressed)
+            input.x += 1f;
+
+        if (Keyboard.current.aKey.isPressed)
+            input.x -= 1f;
+
+        return Vector2.ClampMagnitude(input, 1f);
+    }
+
+    private void UpdateHorizontalVelocity(Vector2 input, bool grounded)
+    {
+        Vector3 direction = transform.forward * input.y + transform.right * input.x;
+
+        float targetSpeed = isCrouching
+            ? crouchSpeed
+            : IsSprinting
+                ? sprintSpeed
+                : moveSpeed;
+
+        Vector3 targetVelocity = direction * targetSpeed;
+
+        float acceleration;
+
+        if (grounded)
         {
-            if (Keyboard.current.wKey.isPressed)
-                input.y += 1;
-
-            if (Keyboard.current.sKey.isPressed)
-                input.y -= 1;
-
-            if (Keyboard.current.dKey.isPressed)
-                input.x += 1;
-
-            if (Keyboard.current.aKey.isPressed)
-                input.x -= 1;
+            acceleration = input.sqrMagnitude > 0f
+                ? groundAcceleration
+                : groundDeceleration;
+        }
+        else
+        {
+            acceleration = input.sqrMagnitude > 0f ? airAcceleration : 0f;
         }
 
-        input = Vector2.ClampMagnitude(input, 1f);
+        horizontalVelocity = Vector3.MoveTowards(
+            horizontalVelocity,
+            targetVelocity,
+            acceleration * Time.deltaTime
+        );
+    }
 
-        float currentSpeed = moveSpeed;
+    private void UpdateVerticalVelocity(bool grounded)
+    {
+        if (grounded && verticalVelocity < 0f)
+            verticalVelocity = groundedVelocity;
+        else
+            verticalVelocity += gravity * Time.deltaTime;
 
-        bool wantsToCrouch = Keyboard.current != null && Keyboard.current.leftCtrlKey.isPressed;
+        if (!grounded || isCrouching || Keyboard.current == null)
+            return;
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+    }
+
+    private void UpdateSprint(Vector2 input)
+    {
+        IsSprinting =
+            Keyboard.current != null &&
+            Keyboard.current.leftShiftKey.isPressed &&
+            input.y > 0f &&
+            !isCrouching;
+    }
+
+    private void UpdateCrouch()
+    {
+        bool wantsToCrouch =
+            Keyboard.current != null &&
+            Keyboard.current.leftCtrlKey.isPressed;
 
         if (wantsToCrouch)
         {
@@ -56,56 +166,42 @@ public class PlayerMovement : MonoBehaviour
             isCrouching = false;
         }
 
-        bool isSprinting = Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed && input.y > 0f && !isCrouching;
+        float targetHeight = isCrouching ? crouchingHeight : standingHeight;
 
-        if (isSprinting)
-        {
-            currentSpeed = sprintSpeed;
-        }
+        characterController.height = Mathf.MoveTowards(
+            characterController.height,
+            targetHeight,
+            crouchTransitionSpeed * Time.deltaTime
+        );
 
-        Vector3 movement = transform.forward * input.y + transform.right * input.x;
+        characterController.center = new Vector3(
+            0f,
+            characterController.height / 2f,
+            0f
+        );
+    }
 
-        if (characterController.isGrounded)
-        {
-            verticalVelocity = -2f;
-        }
-        else
-        {
-            verticalVelocity += gravity * Time.deltaTime;
-        }
+    private void UpdateCameraHeight()
+    {
+        float targetHeight = isCrouching
+            ? crouchingCameraHeight
+            : standingCameraHeight;
 
-        if (characterController.isGrounded && Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-        }
+        Vector3 position = cameraPivot.localPosition;
 
-        movement.y = verticalVelocity;
+        position.y = Mathf.MoveTowards(
+            position.y,
+            targetHeight,
+            crouchTransitionSpeed * Time.deltaTime
+        );
 
-        characterController.Move(movement * currentSpeed * Time.deltaTime);
-
-        if (isCrouching)
-        {
-            characterController.height = crouchingHeight;
-            characterController.center = new Vector3(0f, crouchingHeight / 2f, 0f);
-
-            cameraTransform.localPosition = new Vector3(0f, crouchingCameraHeight, 0f);
-        }
-        else
-        {
-            characterController.height = standingHeight;
-            characterController.center = new Vector3(0f, standingHeight / 2f, 0f);
-
-            cameraTransform.localPosition = new Vector3(0f, 0.65f, 0f);
-        }
+        cameraPivot.localPosition = position;
     }
 
     private bool CanStand()
     {
         float checkDistance = standingHeight - crouchingHeight;
-
-        Vector3 origin =
-            transform.position +
-            Vector3.up * (crouchingHeight + 0.05f);
+        Vector3 origin = transform.position + Vector3.up * (crouchingHeight + 0.05f);
 
         return !Physics.Raycast(
             origin,

@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerLook : MonoBehaviour
 {
     [SerializeField] private Transform cameraTransform;
-    [SerializeField] private float mouseSensitivity = 2f;
+    [SerializeField] private float mouseSensitivity = 0.08f;
 
     private float verticalRotation;
 
@@ -26,8 +26,8 @@ public class PlayerLook : MonoBehaviour
 
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
 
-        float mouseX = mouseDelta.x * mouseSensitivity * Time.deltaTime;
-        float mouseY = mouseDelta.y * mouseSensitivity * Time.deltaTime;
+        float mouseX = mouseDelta.x * mouseSensitivity;
+        float mouseY = mouseDelta.y * mouseSensitivity;
 
         transform.Rotate(Vector3.up * mouseX);
 
