@@ -2501,6 +2501,8 @@ GameObject:
   - component: {fileID: 286656520}
   - component: {fileID: 286656519}
   - component: {fileID: 286656522}
+  - component: {fileID: 286656523}
+  - component: {fileID: 286656524}
   m_Layer: 0
   m_Name: TestNPC
   m_TagString: Untagged
@@ -2617,12 +2619,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueNPC
   dialogueController: {fileID: 2008638855}
   startNode: TestWorker
-  requiredMember: {fileID: 11400000, guid: 071f915e000867541a24cc2a2164213d, type: 2}
-  controlledDoor: {fileID: 0}
+  dialogueActions:
+  - id: grant_access
+    actions:
+    - {fileID: 286656524}
+--- !u!114 &286656523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286656517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9b1b13c28d931479e390ffb2416cca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CapabilityPerceptionFeedback
+  requiredCapability: {fileID: 11400000, guid: 0cbe8d8e7a6bb8d41a003dcf3e888f47, type: 2}
   memberHud: {fileID: 1572921781}
   targetRenderers:
   - {fileID: 286656520}
+  logMessage: SOCIAL APPROACH AVAILABLE
+  highlightMultiplier: 1.35
   logCooldown: 3
+--- !u!114 &286656524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286656517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81e27597db04418458c062c3a21c55ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OpenDoorAction
+  door: {fileID: 646057662}
 --- !u!1 &319368908
 GameObject:
   m_ObjectHideFlags: 0

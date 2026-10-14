@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Yarn.Unity;
@@ -31,8 +30,7 @@ public class DialogueController : MonoBehaviour
         // Dialogue conditions read the current gameplay state through explicit parameters.
         dialogueRunner.AddFunction<string, bool>("has_capability", HasCapability);
 
-        // Temporary command until dialogue results are migrated to WorldActions.
-        dialogueRunner.AddCommandHandler("complete_member_dialogue", (Action)CompleteMemberDialogue);
+        dialogueRunner.AddCommandHandler<string>("run_action", RunAction);
     }
 
     private void Update()
@@ -51,7 +49,7 @@ public class DialogueController : MonoBehaviour
 
         dialogueRunner.onDialogueComplete.RemoveListener(HandleDialogueCompleted);
         dialogueRunner.RemoveFunction("has_capability");
-        dialogueRunner.RemoveCommandHandler("complete_member_dialogue");
+        dialogueRunner.RemoveCommandHandler("run_action");
     }
 
     public void OpenDialogue(DialogueNPC npc)
@@ -113,11 +111,11 @@ public class DialogueController : MonoBehaviour
         return memberAssembly.HasCapability(capabilityCode);
     }
 
-    private void CompleteMemberDialogue()
+    private void RunAction(string actionId)
     {
         if (currentNpc == null)
             return;
 
-        currentNpc.CompleteMemberDialogue();
+        currentNpc.ExecuteAction(actionId);
     }
 }

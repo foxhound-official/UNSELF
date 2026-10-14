@@ -6,5 +6,5 @@ WORKER: You're not authorized to be here.
     WORKER: Then leave.
 -> S_1: Section 7-B grants me access to this area. <<if has_capability("CORPORATE_LAW")>>
     WORKER: Fine. Your authorization checks out.
-    <<complete_member_dialogue>>
+    <<run_action "grant_access">>
 ===
