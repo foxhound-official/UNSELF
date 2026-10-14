@@ -5798,6 +5798,7 @@ RectTransform:
   m_Children:
   - {fileID: 1572921780}
   - {fileID: 517262438}
+  - {fileID: 1069171922}
   - {fileID: 1389138858}
   - {fileID: 2008638854}
   - {fileID: 1663398791}
@@ -8724,6 +8725,81 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1069171921
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1069171922}
+  - component: {fileID: 1069171924}
+  - component: {fileID: 1069171923}
+  m_Layer: 5
+  m_Name: AimPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1069171922
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1069171921}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 596034179}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 3, y: 3}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1069171923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1069171921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.79607844}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1069171924
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1069171921}
+  m_CullTransparentMesh: 1
 --- !u!1 &1118534482
 GameObject:
   m_ObjectHideFlags: 0
@@ -14839,7 +14915,11 @@ GameObject:
   - component: {fileID: 2081653488}
   - component: {fileID: 2081653487}
   - component: {fileID: 2081653486}
-  - component: {fileID: 2081653489}
+  - component: {fileID: 2081653494}
+  - component: {fileID: 2081653493}
+  - component: {fileID: 2081653492}
+  - component: {fileID: 2081653491}
+  - component: {fileID: 2081653490}
   m_Layer: 0
   m_Name: WoodenLog
   m_TagString: Untagged
@@ -14940,7 +15020,7 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2081653484}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &2081653489
+--- !u!114 &2081653490
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -14949,14 +15029,77 @@ MonoBehaviour:
   m_GameObject: {fileID: 2081653484}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fd29846c9cdc514996a368f942906fa, type: 3}
+  m_Script: {fileID: 11500000, guid: a05dd38c3a7425a46b7c77b1199ca653, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableBarricade
+  m_EditorClassIdentifier: Assembly-CSharp::DisableObjectAction
+  target: {fileID: 2081653484}
+--- !u!114 &2081653491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081653484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38bda7a32eea46843adf5e0f1cc002ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MemberCapabilityLogAction
   memberAssembly: {fileID: 1806691670}
   memberHud: {fileID: 1572921781}
-  requiredMember: {fileID: 11400000, guid: 28b48165fc52bd6488b708ce14a9ea0d, type: 2}
-  targetRenderer: {fileID: 2081653487}
+  capability: {fileID: 11400000, guid: 4805cb221677f2c40ae3d1025bf000e7, type: 2}
+  message: BARRIER BREACHED
+--- !u!114 &2081653492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081653484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9b1b13c28d931479e390ffb2416cca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CapabilityPerceptionFeedback
+  requiredCapability: {fileID: 11400000, guid: 4805cb221677f2c40ae3d1025bf000e7, type: 2}
+  memberHud: {fileID: 1572921781}
+  targetRenderers:
+  - {fileID: 2081653487}
+  logMessage: BREACH POINT DETECTED
+  highlightMultiplier: 1.35
   logCooldown: 3
+--- !u!114 &2081653493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081653484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b854d860f8c8662459367ddd331f1b3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MemberCapabilityRequirement
+  memberAssembly: {fileID: 1806691670}
+  requiredCapability: {fileID: 11400000, guid: 4805cb221677f2c40ae3d1025bf000e7, type: 2}
+--- !u!114 &2081653494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081653484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 006aae68273bda745a60910c31760a59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractionController
+  interactionPrompt: BREAK BARRICADE
+  requirements:
+  - {fileID: 2081653493}
+  actions:
+  - {fileID: 2081653491}
+  - {fileID: 2081653490}
 --- !u!1 &2083720992
 GameObject:
   m_ObjectHideFlags: 0
