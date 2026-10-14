@@ -14,11 +14,6 @@ public class PlayerLook : MonoBehaviour
         Cursor.visible = false;
     }
 
-    public void ResetRotation()
-    {
-        verticalRotation = 0f;
-    }
-
     private void Update()
     {
         if (Mouse.current == null)
@@ -34,7 +29,27 @@ public class PlayerLook : MonoBehaviour
         verticalRotation -= mouseY;
         verticalRotation = Mathf.Clamp(verticalRotation, -80f, 80f);
 
-        cameraTransform.localRotation =
-            Quaternion.Euler(verticalRotation, 0f, 0f);
+        ApplyCameraRotation();
+    }
+
+    public void AddRecoil(float pitch, float yaw)
+    {
+        verticalRotation -= pitch;
+        verticalRotation = Mathf.Clamp(verticalRotation, -80f, 80f);
+
+        transform.Rotate(Vector3.up * yaw);
+
+        ApplyCameraRotation();
+    }
+
+    public void ResetRotation()
+    {
+        verticalRotation = 0f;
+        ApplyCameraRotation();
+    }
+
+    private void ApplyCameraRotation()
+    {
+        cameraTransform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
     }
 }

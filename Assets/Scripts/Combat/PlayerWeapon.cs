@@ -6,6 +6,8 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private WeaponDefinition weapon;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask hitMask = ~0;
+    [SerializeField] private PlayerLook playerLook;
+    [SerializeField] private WeaponRecoil weaponRecoil;
 
     private int currentAmmo;
     private int reserveAmmo;
@@ -57,12 +59,13 @@ public class PlayerWeapon : MonoBehaviour
             playerCamera.transform.forward
         );
 
-        if (!Physics.Raycast(ray, out RaycastHit hit, weapon.Range, hitMask, QueryTriggerInteraction.Ignore))
-            return;
+        if (Physics.Raycast(ray, out RaycastHit hit, weapon.Range, hitMask, QueryTriggerInteraction.Ignore))
+        {
+            IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
+            damageable?.TakeDamage(weapon.Damage);
+        }
 
-        IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
-
-        damageable?.TakeDamage(weapon.Damage);
+        ApplyRecoil();
     }
 
     private void StartReload()
@@ -83,5 +86,16 @@ public class PlayerWeapon : MonoBehaviour
         reserveAmmo -= loadedAmmo;
 
         isReloading = false;
+    }
+
+    private void ApplyRecoil()
+    {
+        float yaw = Random.Range(-weapon.RecoilYaw, weapon.RecoilYaw);
+
+        if (playerLook != null)
+            playerLook.AddRecoil(weapon.RecoilPitch, yaw);
+
+        if (weaponRecoil != null)
+            weaponRecoil.Kick(weapon);
     }
 }
