@@ -22,12 +22,12 @@ public class WakeUpSequence : MonoBehaviour
         if (skipSequence)
         {
             playerLook.enabled = true;
-            playerMovement.enabled = true;
+            playerMovement.SetMovementMode(PlayerMovementMode.Locomotion);
             return;
         }
 
         playerLook.enabled = false;
-        playerMovement.enabled = false;
+        playerMovement.SetMovementMode(PlayerMovementMode.Disabled);
     }
 
     public void Begin()
@@ -92,7 +92,7 @@ public class WakeUpSequence : MonoBehaviour
 
         playerLook.ResetRotation();
         playerLook.enabled = true;
-        playerMovement.enabled = true;
+        playerMovement.SetMovementMode(PlayerMovementMode.Locomotion);
     }
 
     private IEnumerator RotateCamera(Quaternion from, Quaternion to, float duration)

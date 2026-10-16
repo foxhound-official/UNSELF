@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private PlayerMovementProfile movementProfile;
     [SerializeField] private PlayerInputReader inputReader;
     [SerializeField] private Transform cameraPivot;
+    [SerializeField] private GroundProbe groundProbe;
 
     [Header("Enhanced Mobility")]
     [SerializeField] private MemberAssembly memberAssembly;
@@ -30,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
     private bool HasEnhancedMobility => memberAssembly != null && enhancedMobilityCapability != null && memberAssembly.HasCapability(enhancedMobilityCapability);
     private float CurrentSprintSpeed => HasEnhancedMobility ? movementProfile.EnhancedSprintSpeed : movementProfile.SprintSpeed;
     private float CurrentJumpHeight => HasEnhancedMobility ? movementProfile.EnhancedJumpHeight : movementProfile.JumpHeight;
+    private PlayerMovementMode movementMode = PlayerMovementMode.Locomotion;
 
     public event Action<float> Landed;
 
@@ -39,10 +41,12 @@ public class PlayerMovement : MonoBehaviour
     public float SprintRatio => CurrentSprintSpeed > movementProfile.MoveSpeed ? Mathf.InverseLerp(movementProfile.MoveSpeed, CurrentSprintSpeed, HorizontalSpeed) : 0f;
     public float SpeedRatio => CurrentSprintSpeed > 0f ? Mathf.Clamp01(HorizontalSpeed / CurrentSprintSpeed) : 0f;
 
-    public bool IsGrounded => characterController != null && characterController.isGrounded;
+    public bool IsOnSteepSlope => groundProbe != null && groundProbe.IsGrounded && groundProbe.GroundAngle > movementProfile.SlopeLimit;
+    public bool IsGrounded => groundProbe != null && groundProbe.IsGrounded;
     public bool IsSprinting { get; private set; }
     public bool IsCrouching => isCrouching;
     public bool IsSliding => isSliding;
+    public PlayerMovementMode MovementMode => movementMode;
 
     private void Awake()
     {
@@ -52,11 +56,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (movementProfile == null || inputReader == null)
+        if (movementProfile == null || inputReader == null || groundProbe == null)
             return;
 
+        if (movementMode != PlayerMovementMode.Locomotion)
+            return;
+
+        groundProbe.Probe();
+
         Vector2 input = inputReader.Move;
-        bool groundedBeforeMove = characterController.isGrounded;
+        bool groundedBeforeMove = groundProbe.IsGrounded;
 
         UpdateCrouchAndSlide(groundedBeforeMove);
         UpdateBodyHeight();
@@ -74,12 +83,14 @@ public class PlayerMovement : MonoBehaviour
 
         characterController.Move(velocity * Time.deltaTime);
 
-        bool groundedAfterMove = characterController.isGrounded;
+        groundProbe.Probe();
+
+        bool groundedAfterMove = groundProbe.IsGrounded;
 
         if (!groundedBeforeMove && groundedAfterMove && verticalVelocity < 0f)
             Landed?.Invoke(-verticalVelocity);
 
-        if (groundedAfterMove && verticalVelocity < 0f)
+        if (groundedAfterMove && !IsOnSteepSlope && verticalVelocity < 0f)
             verticalVelocity = movementProfile.GroundedVelocity;
 
         UpdateCameraHeight();
@@ -144,6 +155,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateHorizontalVelocity(Vector2 input, bool grounded)
     {
+        if (grounded && IsOnSteepSlope)
+        {
+            UpdateSteepSlopeVelocity();
+            return;
+        }
+
         Vector3 direction = transform.forward * input.y + transform.right * input.x * movementProfile.StrafeSpeedMultiplier;
         direction = Vector3.ClampMagnitude(direction, 1f);
 
@@ -162,6 +179,18 @@ public class PlayerMovement : MonoBehaviour
             acceleration = movementProfile.GroundAcceleration;
 
         horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, acceleration * Time.deltaTime);
+    }
+
+    private void UpdateSteepSlopeVelocity()
+    {
+        Vector3 slideDirection = Vector3.ProjectOnPlane(Vector3.down, groundProbe.GroundNormal).normalized;
+        float currentSlideSpeed = Vector3.Dot(horizontalVelocity, slideDirection);
+
+        if (currentSlideSpeed < movementProfile.SteepSlopeInitialSpeed)
+            horizontalVelocity += slideDirection * (movementProfile.SteepSlopeInitialSpeed - currentSlideSpeed);
+
+        Vector3 targetVelocity = slideDirection * movementProfile.SteepSlopeMaximumSpeed;
+        horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, movementProfile.SteepSlopeSlideAcceleration * Time.deltaTime);
     }
 
     private void UpdateSlide(Vector2 input, bool grounded)
@@ -191,12 +220,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateVerticalVelocity(bool grounded)
     {
-        if (grounded && verticalVelocity < 0f)
+        if (grounded && !IsOnSteepSlope && verticalVelocity < 0f)
             verticalVelocity = movementProfile.GroundedVelocity;
         else
             verticalVelocity += movementProfile.Gravity * Time.deltaTime;
 
-        if (!grounded || isCrouching || !inputReader.JumpPressed)
+        if (!grounded || IsOnSteepSlope || isCrouching || !inputReader.JumpPressed)
             return;
 
         verticalVelocity = Mathf.Sqrt(CurrentJumpHeight * -2f * movementProfile.Gravity);
@@ -204,7 +233,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool CanStartSlide(bool grounded)
     {
-        return HasEnhancedMobility && grounded && inputReader.SprintHeld && inputReader.Move.y > 0f && HorizontalSpeed >= movementProfile.SlideMinimumStartSpeed;
+        return HasEnhancedMobility && grounded && !IsOnSteepSlope && inputReader.SprintHeld && inputReader.Move.y > 0f && HorizontalSpeed >= movementProfile.SlideMinimumStartSpeed;
     }
 
     private void StartSlide()
@@ -261,5 +290,27 @@ public class PlayerMovement : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void SetMovementMode(PlayerMovementMode mode)
+    {
+        if (movementMode == mode)
+            return;
+
+        movementMode = mode;
+
+        if (movementMode != PlayerMovementMode.Locomotion)
+            ResetLocomotion();
+    }
+
+    private void ResetLocomotion()
+    {
+        horizontalVelocity = Vector3.zero;
+        verticalVelocity = 0f;
+        slideDirection = Vector3.zero;
+        slideTimer = 0f;
+
+        IsSprinting = false;
+        isSliding = false;
     }
 }
