@@ -41,7 +41,6 @@ public class PlayerCameraMotion : MonoBehaviour
     private float bobPhase;
     private float landingOffset;
     private float currentRoll;
-    private bool isSuppressed;
 
     private void Awake()
     {
@@ -64,12 +63,6 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (isSuppressed)
-        {
-            ResetPresentation();
-            return;
-        }
-
         Vector3 localVelocity = playerMovement.transform.InverseTransformDirection(
             playerMovement.HorizontalVelocity
         );
@@ -164,30 +157,5 @@ public class PlayerCameraMotion : MonoBehaviour
     {
         float impact = Mathf.Max(0f, impactSpeed - landingImpactThreshold);
         landingOffset = -Mathf.Min(impact * landingImpactScale, maximumLandingDip);
-    }
-
-    public void SetSuppressed(bool suppressed)
-    {
-        isSuppressed = suppressed;
-
-        if (suppressed)
-            ResetPresentation();
-    }
-
-    private void ResetPresentation()
-    {
-        currentBobOffset = Vector3.zero;
-        currentInertiaOffset = Vector3.zero;
-        previousLocalVelocity = Vector3.zero;
-
-        bobPhase = 0f;
-        landingOffset = 0f;
-        currentRoll = 0f;
-
-        transform.localPosition = baseLocalPosition;
-        transform.localRotation = baseLocalRotation;
-
-        if (playerCamera != null)
-            playerCamera.fieldOfView = baseFieldOfView;
     }
 }
