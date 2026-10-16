@@ -17,9 +17,7 @@ public class PlayerInteraction : MonoBehaviour
 
     private void OnDisable()
     {
-        // The prompt may already be destroyed while the scene is shutting down.
-        if (interactionPrompt != null)
-            interactionPrompt.Hide();
+        HideInteractionPrompt();
     }
 
     private void UpdateInteractionPrompt()
@@ -28,7 +26,7 @@ public class PlayerInteraction : MonoBehaviour
 
         if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
         {
-            interactionPrompt.Hide();
+            HideInteractionPrompt();
             return;
         }
 
@@ -36,17 +34,18 @@ public class PlayerInteraction : MonoBehaviour
 
         if (interactable == null)
         {
-            interactionPrompt.Hide();
+            HideInteractionPrompt();
             return;
         }
 
         if (interactable is IConditionalInteractable conditional && !conditional.CanInteract)
         {
-            interactionPrompt.Hide();
+            HideInteractionPrompt();
             return;
         }
 
-        interactionPrompt.Show($"[F] {interactable.InteractionPrompt}");
+        if (interactionPrompt != null)
+            interactionPrompt.Show($"[F] {interactable.InteractionPrompt}");
     }
 
     private void TryInteract()
@@ -65,5 +64,11 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         interactable.Interact();
+    }
+
+    private void HideInteractionPrompt()
+    {
+        if (interactionPrompt != null)
+            interactionPrompt.Hide();
     }
 }

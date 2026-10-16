@@ -9,6 +9,7 @@ public class WakeUpSequence : MonoBehaviour
     [SerializeField] private float duration = 2f;
     [SerializeField] private float startHeightOffset = 0.35f;
     [SerializeField] private float startLookDown = 55f;
+    [SerializeField] private bool skipSequence;
 
     private Vector3 standingPosition;
     private Quaternion standingRotation;
@@ -18,12 +19,22 @@ public class WakeUpSequence : MonoBehaviour
         standingPosition = cameraTransform.localPosition;
         standingRotation = cameraTransform.localRotation;
 
+        if (skipSequence)
+        {
+            playerLook.enabled = true;
+            playerMovement.enabled = true;
+            return;
+        }
+
         playerLook.enabled = false;
         playerMovement.enabled = false;
     }
 
     public void Begin()
     {
+        if (skipSequence)
+            return;
+
         StartCoroutine(WakeUp());
     }
 
