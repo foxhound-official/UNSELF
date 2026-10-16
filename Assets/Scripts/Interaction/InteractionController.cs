@@ -5,8 +5,6 @@ public class InteractionController : MonoBehaviour, IInteractable, IConditionalI
     [SerializeField] private string interactionPrompt = "INTERACT";
     [SerializeField] private InteractionRequirement[] requirements;
     [SerializeField] private WorldAction[] actions;
-    [SerializeField] private PlayerLook playerLook;
-    [SerializeField] private WeaponRecoil weaponRecoil;
 
     public string InteractionPrompt => interactionPrompt;
     public bool CanInteract => AreRequirementsMet();
