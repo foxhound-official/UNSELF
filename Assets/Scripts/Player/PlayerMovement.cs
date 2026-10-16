@@ -288,6 +288,17 @@ public class PlayerMovement : MonoBehaviour
         isCrouching = crouchHeld || !CanStand();
     }
 
+    public void ResetTraversalVelocity()
+    {
+        horizontalVelocity = Vector3.zero;
+        verticalVelocity = 0f;
+
+        IsSprinting = false;
+
+        if (isSliding)
+            EndSlide();
+    }
+
     private void UpdateCameraHeight()
     {
         float targetHeight = isCrouching
