@@ -42,10 +42,10 @@ public class TraversalResolver : MonoBehaviour
             return CurrentType;
         }
 
-        if (candidate.Height <= maximumMantleHeight && HasMantleClearance(candidate))
+        if (candidate.Height <= maximumMantleHeight && TryResolveMantle(candidate, out Vector3 mantleLandingPoint))
         {
             CurrentType = TraversalType.Mantle;
-            LandingPoint = candidate.TopPoint;
+            LandingPoint = mantleLandingPoint;
             return CurrentType;
         }
 
@@ -102,15 +102,19 @@ public class TraversalResolver : MonoBehaviour
         return false;
     }
 
-    private bool HasMantleClearance(TraversalCandidate candidate)
+    private bool TryResolveMantle(TraversalCandidate candidate, out Vector3 landingPoint)
     {
-        float radius = landingClearanceRadius;
-        float height = Mathf.Max(landingClearanceHeight, radius * 2f);
+        landingPoint = Vector3.zero;
 
-        Vector3 bottom = candidate.TopPoint + Vector3.up * radius;
-        Vector3 top = candidate.TopPoint + Vector3.up * (height - radius);
+        Vector3 forward = -candidate.ObstacleNormal;
+        float landingOffset = characterController.radius + characterController.skinWidth + landingEdgeClearance;
 
-        return !Physics.CheckCapsule(bottom, top, radius, traversalMask, QueryTriggerInteraction.Ignore);
+        Vector3 searchOrigin = candidate.TopPoint + forward * landingOffset + Vector3.up * landingSearchHeight;
+
+        if (!Physics.Raycast(searchOrigin, Vector3.down, out RaycastHit hit, landingSearchHeight * 2f, traversalMask, QueryTriggerInteraction.Ignore))
+            return false;
+
+        return TryValidateLanding(hit.point, out landingPoint);
     }
 
     private bool TryValidateLanding(Vector3 point, out Vector3 landingPoint)

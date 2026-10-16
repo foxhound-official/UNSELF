@@ -102,17 +102,28 @@ MonoBehaviour:
   horizontalBobAmplitude: 0.012
   verticalBobAmplitude: 0.018
   bobReturnSpeed: 10
+  sprintBobAmplitudeMultiplier: 1.35
+  sprintForwardPitch: 1.5
+  sprintCameraDrop: 0.015
+  sprintPresentationSpeed: 7
+  vaultCameraDip: 0.06
+  vaultPitch: 3
+  vaultPresentationDuration: 0.4
+  mantleCameraDip: 0.12
+  mantlePitch: 5
+  mantlePresentationDuration: 0.65
   inertiaScale: 0.0015
   maximumInertiaOffset: 0.025
-  inertiaResponseSpeed: 8
+  inertiaResponseSpeed: 11
   strafeTiltAngle: 1.8
-  tiltResponseSpeed: 7
-  sprintFovIncrease: 3
-  fovResponseSpeed: 5
+  tiltResponseSpeed: 9
+  sprintFovIncrease: 5
+  fovResponseSpeed: 7
   landingImpactThreshold: 4
   landingImpactScale: 0.012
   maximumLandingDip: 0.1
   landingRecoverySpeed: 9
+  traversalMotor: {fileID: 6095724821681654881}
 --- !u!1 &2045478783104088046
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,6 +377,7 @@ MonoBehaviour:
   probeDistance: 0.35
   probeRadius: 0.22
   maximumGroundAngle: 80
+  stableGroundAngle: 50
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295

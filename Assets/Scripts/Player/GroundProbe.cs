@@ -8,6 +8,7 @@ public class GroundProbe : MonoBehaviour
     [SerializeField] private float probeDistance = 0.35f;
     [SerializeField] private float probeRadius = 0.22f;
     [SerializeField] private float maximumGroundAngle = 80f;
+    [SerializeField] private float stableGroundAngle = 50f;
     [SerializeField] private LayerMask groundMask = Physics.DefaultRaycastLayers;
 
     private readonly RaycastHit[] hits = new RaycastHit[HitCapacity];
@@ -32,8 +33,13 @@ public class GroundProbe : MonoBehaviour
         {
             if (IsValidGround(centerHit))
             {
-                SetGround(centerHit);
-                return;
+                float centerAngle = Vector3.Angle(centerHit.normal, Vector3.up);
+
+                if (centerAngle <= stableGroundAngle)
+                {
+                    SetGround(centerHit);
+                    return;
+                }
             }
         }
 
