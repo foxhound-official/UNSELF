@@ -133,6 +133,10 @@ GameObject:
   - component: {fileID: 1663315588707905105}
   - component: {fileID: 6463050797957328960}
   - component: {fileID: -7374595258758169816}
+  - component: {fileID: 917541584800632762}
+  - component: {fileID: -6372525234246893969}
+  - component: {fileID: -61749087359978468}
+  - component: {fileID: 6095724821681654881}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -185,6 +189,7 @@ MonoBehaviour:
   movementProfile: {fileID: 11400000, guid: 9d6c4d2a4e1581d499cd84f8165403d5, type: 2}
   inputReader: {fileID: -7374595258758169816}
   cameraPivot: {fileID: 6827311536476278540}
+  groundProbe: {fileID: 917541584800632762}
   memberAssembly: {fileID: 1663315588707905105}
   enhancedMobilityCapability: {fileID: 11400000, guid: 737833db12c05eb44be87685d66e619b, type: 2}
 --- !u!143 &2125054624159809285
@@ -345,6 +350,93 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1625a9160c436494eb6382ace1e162fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputReader
+--- !u!114 &917541584800632762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 089115b76ebf3214aa7d70ff26577833, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GroundProbe
+  probeStartHeight: 0.2
+  probeDistance: 0.35
+  probeRadius: 0.22
+  maximumGroundAngle: 80
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &-6372525234246893969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32471629b58dfb74bbf6ec5f2657009a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TraversalDetector
+  obstacleProbeHeight: 1
+  obstacleProbeRadius: 0.15
+  obstacleProbeDistance: 1
+  maximumTraversalHeight: 2.2
+  minimumTraversalHeight: 0.25
+  topSearchStartDepth: 0.03
+  topSearchMaximumDepth: 0.4
+  topSearchStep: 0.05
+  topSearchExtraHeight: 0.2
+  maximumTopSurfaceAngle: 45
+  traversalMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &-61749087359978468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe83782747e4e2046a779ad739bf9d25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TraversalResolver
+  maximumVaultHeight: 1.2
+  maximumVaultDepth: 1
+  vaultDepthStep: 0.1
+  maximumMantleHeight: 2.2
+  landingSearchHeight: 1.5
+  landingSearchDistance: 0.5
+  landingClearanceHeight: 1.8
+  landingClearanceRadius: 0.3
+  landingEdgeClearance: 0.1
+  traversalMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &6095724821681654881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fe4dc50f9fba6240ae687f01fabce7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TraversalMotor
+  traversalProfile: {fileID: 11400000, guid: 9d1a1736c3673844bab19dd32cc76ece, type: 2}
+  playerMovement: {fileID: 2692815587688714831}
+  inputReader: {fileID: -7374595258758169816}
+  traversalDetector: {fileID: -6372525234246893969}
+  traversalResolver: {fileID: -61749087359978468}
+  memberAssembly: {fileID: 1663315588707905105}
+  enhancedMobilityCapability: {fileID: 11400000, guid: 737833db12c05eb44be87685d66e619b, type: 2}
 --- !u!1 &2798576144553698930
 GameObject:
   m_ObjectHideFlags: 0

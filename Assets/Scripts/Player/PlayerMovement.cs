@@ -313,4 +313,11 @@ public class PlayerMovement : MonoBehaviour
         IsSprinting = false;
         isSliding = false;
     }
+
+    public void CompleteTraversal(Vector3 exitVelocity)
+    {
+        horizontalVelocity = exitVelocity;
+        verticalVelocity = movementProfile.GroundedVelocity;
+        movementMode = PlayerMovementMode.Locomotion;
+    }
 }
