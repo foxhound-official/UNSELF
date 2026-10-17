@@ -2,16 +2,14 @@ using UnityEngine;
 
 public class GroundProbe : MonoBehaviour
 {
-    private const int HitCapacity = 8;
+    private const int PeripheralProbeCount = 4;
 
     [SerializeField] private float probeStartHeight = 0.2f;
     [SerializeField] private float probeDistance = 0.35f;
-    [SerializeField] private float probeRadius = 0.22f;
+    [SerializeField] private float supportProbeOffset = 0.18f;
+    [SerializeField] private int minimumPeripheralSupportHits = 2;
     [SerializeField] private float maximumGroundAngle = 80f;
-    [SerializeField] private float stableGroundAngle = 50f;
     [SerializeField] private LayerMask groundMask = Physics.DefaultRaycastLayers;
-
-    private readonly RaycastHit[] hits = new RaycastHit[HitCapacity];
 
     private CharacterController characterController;
 
@@ -27,57 +25,56 @@ public class GroundProbe : MonoBehaviour
 
     public void Probe()
     {
-        Vector3 origin = transform.position + Vector3.up * probeStartHeight;
+        Vector3 centerOrigin = transform.position + Vector3.up * probeStartHeight;
 
-        if (Physics.Raycast(origin, Vector3.down, out RaycastHit centerHit, probeStartHeight + probeDistance, groundMask, QueryTriggerInteraction.Ignore))
+        if (TryProbe(centerOrigin, out RaycastHit centerHit))
         {
-            if (IsValidGround(centerHit))
-            {
-                float centerAngle = Vector3.Angle(centerHit.normal, Vector3.up);
-
-                if (centerAngle <= stableGroundAngle)
-                {
-                    SetGround(centerHit);
-                    return;
-                }
-            }
+            SetGround(centerHit.point, centerHit.normal);
+            return;
         }
 
-        Vector3 sphereOrigin = transform.position + Vector3.up * probeRadius;
-        int hitCount = Physics.SphereCastNonAlloc(sphereOrigin, probeRadius, Vector3.down, hits, probeDistance, groundMask, QueryTriggerInteraction.Ignore);
+        Vector3 right = transform.right * supportProbeOffset;
+        Vector3 forward = transform.forward * supportProbeOffset;
 
-        bool foundGround = false;
-        RaycastHit bestHit = default;
-        float bestUpAlignment = -1f;
-
-        for (int index = 0; index < hitCount; index++)
+        Vector3[] origins =
         {
-            RaycastHit hit = hits[index];
+            centerOrigin + right,
+            centerOrigin - right,
+            centerOrigin + forward,
+            centerOrigin - forward
+        };
 
-            if (!IsValidGround(hit))
+        int supportHits = 0;
+        Vector3 accumulatedPoint = Vector3.zero;
+        Vector3 accumulatedNormal = Vector3.zero;
+
+        for (int index = 0; index < PeripheralProbeCount; index++)
+        {
+            if (!TryProbe(origins[index], out RaycastHit hit))
                 continue;
 
-            float upAlignment = Vector3.Dot(hit.normal, Vector3.up);
-
-            if (upAlignment <= bestUpAlignment)
-                continue;
-
-            foundGround = true;
-            bestHit = hit;
-            bestUpAlignment = upAlignment;
+            supportHits++;
+            accumulatedPoint += hit.point;
+            accumulatedNormal += hit.normal;
         }
 
-        if (foundGround)
+        if (supportHits >= minimumPeripheralSupportHits)
         {
-            SetGround(bestHit);
+            Vector3 groundPoint = accumulatedPoint / supportHits;
+            Vector3 groundNormal = accumulatedNormal.normalized;
+
+            SetGround(groundPoint, groundNormal);
             return;
         }
 
         ClearGround();
     }
 
-    private bool IsValidGround(RaycastHit hit)
+    private bool TryProbe(Vector3 origin, out RaycastHit hit)
     {
+        if (!Physics.Raycast(origin, Vector3.down, out hit, probeStartHeight + probeDistance, groundMask, QueryTriggerInteraction.Ignore))
+            return false;
+
         if (hit.collider == null || hit.collider == characterController)
             return false;
 
@@ -85,12 +82,12 @@ public class GroundProbe : MonoBehaviour
         return angle <= maximumGroundAngle;
     }
 
-    private void SetGround(RaycastHit hit)
+    private void SetGround(Vector3 point, Vector3 normal)
     {
         IsGrounded = true;
-        GroundPoint = hit.point;
-        GroundNormal = hit.normal;
-        GroundAngle = Vector3.Angle(hit.normal, Vector3.up);
+        GroundPoint = point;
+        GroundNormal = normal;
+        GroundAngle = Vector3.Angle(normal, Vector3.up);
     }
 
     private void ClearGround()
@@ -103,11 +100,19 @@ public class GroundProbe : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Vector3 rayOrigin = transform.position + Vector3.up * probeStartHeight;
-        Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * (probeStartHeight + probeDistance));
+        Vector3 centerOrigin = transform.position + Vector3.up * probeStartHeight;
+        Vector3 right = transform.right * supportProbeOffset;
+        Vector3 forward = transform.forward * supportProbeOffset;
 
-        Vector3 sphereOrigin = transform.position + Vector3.up * probeRadius;
-        Gizmos.DrawWireSphere(sphereOrigin, probeRadius);
-        Gizmos.DrawWireSphere(sphereOrigin + Vector3.down * probeDistance, probeRadius);
+        DrawProbe(centerOrigin);
+        DrawProbe(centerOrigin + right);
+        DrawProbe(centerOrigin - right);
+        DrawProbe(centerOrigin + forward);
+        DrawProbe(centerOrigin - forward);
+    }
+
+    private void DrawProbe(Vector3 origin)
+    {
+        Gizmos.DrawLine(origin, origin + Vector3.down * (probeStartHeight + probeDistance));
     }
 }

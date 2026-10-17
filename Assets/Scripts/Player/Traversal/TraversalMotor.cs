@@ -10,6 +10,7 @@ public class TraversalMotor : MonoBehaviour
     [SerializeField] private PlayerInputReader inputReader;
     [SerializeField] private TraversalDetector traversalDetector;
     [SerializeField] private TraversalResolver traversalResolver;
+    [SerializeField] private TraversalPathValidator pathValidator;
 
     [Header("Enhanced Mobility")]
     [SerializeField] private MemberAssembly memberAssembly;
@@ -48,12 +49,59 @@ public class TraversalMotor : MonoBehaviour
 
     private void StartMantle(TraversalCandidate candidate, Vector3 landingPoint)
     {
+        Vector3 startPoint = transform.position;
+        Vector3 traversalDirection = -candidate.ObstacleNormal;
+
+        float wallOffset = characterController.radius + traversalProfile.MantleWallClearance;
+
+        Vector3 wallPoint = candidate.ObstaclePoint + candidate.ObstacleNormal * wallOffset;
+        wallPoint.y = startPoint.y;
+
+        Vector3 pullPoint = wallPoint + traversalDirection * traversalProfile.MantlePullForward;
+        pullPoint.y = candidate.TopPoint.y - characterController.radius;
+
+        Vector3 crestPoint = candidate.TopPoint + traversalDirection * traversalProfile.MantleCrestForward;
+        crestPoint.y = candidate.TopPoint.y + traversalProfile.MantleTopClearance;
+
+        Vector3 settlePoint = landingPoint + Vector3.up * traversalProfile.MantleSettleHeight;
+        Vector3 finalLandingPoint = landingPoint + Vector3.up * characterController.skinWidth;
+
+        if (!pathValidator.IsSegmentClear(startPoint, wallPoint, candidate.Collider))
+            return;
+
+        if (!pathValidator.IsSegmentClear(wallPoint, pullPoint, candidate.Collider))
+            return;
+
+        if (!pathValidator.IsQuadraticBezierClear(pullPoint, crestPoint, settlePoint, candidate.Collider))
+            return;
+
+        if (!pathValidator.IsSegmentClear(settlePoint, finalLandingPoint, candidate.Collider))
+            return;
+
         TraversalStarted?.Invoke(TraversalType.Mantle);
         traversalRoutine = StartCoroutine(Mantle(candidate, landingPoint));
     }
 
     private void StartVault(TraversalCandidate candidate, Vector3 landingPoint)
     {
+        Vector3 startPoint = transform.position;
+        Vector3 traversalDirection = -candidate.ObstacleNormal;
+
+        Vector3 entryPoint = candidate.ObstaclePoint + candidate.ObstacleNormal * (characterController.radius + traversalProfile.VaultEntryClearance);
+        entryPoint.y = startPoint.y + traversalProfile.VaultEntryRise;
+
+        Vector3 clearancePoint = candidate.TopPoint + traversalDirection * traversalProfile.VaultForwardClearance;
+        clearancePoint.y = candidate.TopPoint.y + traversalProfile.VaultTopClearance;
+
+        if (!pathValidator.IsSegmentClear(startPoint, entryPoint, candidate.Collider))
+            return;
+
+        if (!pathValidator.IsSegmentClear(entryPoint, clearancePoint, candidate.Collider))
+            return;
+
+        if (!pathValidator.IsSegmentClear(clearancePoint, landingPoint, candidate.Collider))
+            return;
+
         TraversalStarted?.Invoke(TraversalType.Vault);
         traversalRoutine = StartCoroutine(Vault(candidate, landingPoint));
     }

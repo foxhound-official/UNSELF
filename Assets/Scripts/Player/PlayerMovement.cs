@@ -28,15 +28,17 @@ public class PlayerMovement : MonoBehaviour
     private bool isCrouching;
     private bool isSliding;
 
+    private PlayerMovementMode movementMode = PlayerMovementMode.Locomotion;
+
     private bool HasEnhancedMobility => memberAssembly != null && enhancedMobilityCapability != null && memberAssembly.HasCapability(enhancedMobilityCapability);
     private float CurrentSprintSpeed => HasEnhancedMobility ? movementProfile.EnhancedSprintSpeed : movementProfile.SprintSpeed;
     private float CurrentJumpHeight => HasEnhancedMobility ? movementProfile.EnhancedJumpHeight : movementProfile.JumpHeight;
-    private PlayerMovementMode movementMode = PlayerMovementMode.Locomotion;
 
     public event Action<float> Landed;
 
     public Vector3 HorizontalVelocity => horizontalVelocity;
 
+    public float VerticalVelocity => verticalVelocity;
     public float HorizontalSpeed => horizontalVelocity.magnitude;
     public float SprintRatio => CurrentSprintSpeed > movementProfile.MoveSpeed ? Mathf.InverseLerp(movementProfile.MoveSpeed, CurrentSprintSpeed, HorizontalSpeed) : 0f;
     public float SpeedRatio => CurrentSprintSpeed > 0f ? Mathf.Clamp01(HorizontalSpeed / CurrentSprintSpeed) : 0f;
@@ -56,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (movementProfile == null || inputReader == null || groundProbe == null)
+        if (movementProfile == null || inputReader == null || groundProbe == null || characterController == null)
             return;
 
         if (movementMode != PlayerMovementMode.Locomotion)
@@ -96,14 +98,6 @@ public class PlayerMovement : MonoBehaviour
         UpdateCameraHeight();
     }
 
-    private void UpdateBodyHeight()
-    {
-        float targetHeight = isCrouching ? movementProfile.CrouchingHeight : movementProfile.StandingHeight;
-
-        characterController.height = Mathf.MoveTowards(characterController.height, targetHeight, movementProfile.CrouchTransitionSpeed * Time.deltaTime);
-        characterController.center = new Vector3(0f, characterController.height * 0.5f, 0f);
-    }
-
     private void ApplyMovementProfile()
     {
         if (movementProfile == null || characterController == null)
@@ -113,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
         characterController.radius = movementProfile.Radius;
         characterController.center = new Vector3(0f, movementProfile.StandingHeight * 0.5f, 0f);
         characterController.slopeLimit = movementProfile.SlopeLimit;
-        characterController.stepOffset = movementProfile.StepOffset;
+        characterController.stepOffset = 0f;
         characterController.skinWidth = movementProfile.SkinWidth;
 
         if (cameraPivot == null)
@@ -122,6 +116,14 @@ public class PlayerMovement : MonoBehaviour
         Vector3 cameraPosition = cameraPivot.localPosition;
         cameraPosition.y = movementProfile.StandingCameraHeight;
         cameraPivot.localPosition = cameraPosition;
+    }
+
+    private void UpdateBodyHeight()
+    {
+        float targetHeight = isCrouching ? movementProfile.CrouchingHeight : movementProfile.StandingHeight;
+
+        characterController.height = Mathf.MoveTowards(characterController.height, targetHeight, movementProfile.CrouchTransitionSpeed * Time.deltaTime);
+        characterController.center = new Vector3(0f, characterController.height * 0.5f, 0f);
     }
 
     private void UpdateCrouchAndSlide(bool grounded)
@@ -183,13 +185,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateSteepSlopeVelocity()
     {
-        Vector3 slideDirection = Vector3.ProjectOnPlane(Vector3.down, groundProbe.GroundNormal).normalized;
-        float currentSlideSpeed = Vector3.Dot(horizontalVelocity, slideDirection);
+        Vector3 slopeDirection = Vector3.ProjectOnPlane(Vector3.down, groundProbe.GroundNormal).normalized;
+        float currentSlideSpeed = Vector3.Dot(horizontalVelocity, slopeDirection);
 
         if (currentSlideSpeed < movementProfile.SteepSlopeInitialSpeed)
-            horizontalVelocity += slideDirection * (movementProfile.SteepSlopeInitialSpeed - currentSlideSpeed);
+            horizontalVelocity += slopeDirection * (movementProfile.SteepSlopeInitialSpeed - currentSlideSpeed);
 
-        Vector3 targetVelocity = slideDirection * movementProfile.SteepSlopeMaximumSpeed;
+        Vector3 targetVelocity = slopeDirection * movementProfile.SteepSlopeMaximumSpeed;
         horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, movementProfile.SteepSlopeSlideAcceleration * Time.deltaTime);
     }
 
@@ -284,6 +286,9 @@ public class PlayerMovement : MonoBehaviour
             Collider overlap = clearanceOverlaps[index];
 
             if (overlap == null || overlap == characterController)
+                continue;
+
+            if (overlap.transform.IsChildOf(transform))
                 continue;
 
             return false;

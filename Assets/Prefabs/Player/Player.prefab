@@ -150,6 +150,8 @@ GameObject:
   - component: {fileID: -6372525234246893969}
   - component: {fileID: -61749087359978468}
   - component: {fileID: 6095724821681654881}
+  - component: {fileID: 4789770326826038882}
+  - component: {fileID: 1758593635354070285}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -377,9 +379,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GroundProbe
   probeStartHeight: 0.2
   probeDistance: 0.35
-  probeRadius: 0.22
+  supportProbeOffset: 0.18
+  minimumPeripheralSupportHits: 2
   maximumGroundAngle: 80
-  stableGroundAngle: 50
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -420,6 +422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe83782747e4e2046a779ad739bf9d25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TraversalResolver
+  maximumApproachAngle: 60
   maximumVaultHeight: 1.2
   maximumVaultDepth: 1
   vaultDepthStep: 0.1
@@ -429,6 +432,7 @@ MonoBehaviour:
   landingClearanceHeight: 1.8
   landingClearanceRadius: 0.3
   landingEdgeClearance: 0.1
+  maximumLandingSurfaceAngle: 45
   traversalMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -449,8 +453,42 @@ MonoBehaviour:
   inputReader: {fileID: -7374595258758169816}
   traversalDetector: {fileID: -6372525234246893969}
   traversalResolver: {fileID: -61749087359978468}
+  pathValidator: {fileID: 4789770326826038882}
   memberAssembly: {fileID: 1663315588707905105}
   enhancedMobilityCapability: {fileID: 11400000, guid: 737833db12c05eb44be87685d66e619b, type: 2}
+--- !u!114 &4789770326826038882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcceb8033df02fc44a70f98a3cf2ea60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TraversalPathValidator
+  sampleDistance: 0.1
+  traversalMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &1758593635354070285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 709597f3d1662a346a2f0213a90f7b04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCollisionMotor
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maximumIterations: 5
+  minimumMovementDistance: 0.001
 --- !u!1 &2798576144553698930
 GameObject:
   m_ObjectHideFlags: 0

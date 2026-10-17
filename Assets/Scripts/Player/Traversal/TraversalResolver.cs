@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class TraversalResolver : MonoBehaviour
 {
+    [Header("Approach")]
+    [SerializeField] private float maximumApproachAngle = 60f;
+
     [Header("Vault")]
     [SerializeField] private float maximumVaultHeight = 1.2f;
     [SerializeField] private float maximumVaultDepth = 1f;
@@ -16,6 +19,7 @@ public class TraversalResolver : MonoBehaviour
     [SerializeField] private float landingClearanceHeight = 1.8f;
     [SerializeField] private float landingClearanceRadius = 0.3f;
     [SerializeField] private float landingEdgeClearance = 0.1f;
+    [SerializeField] private float maximumLandingSurfaceAngle = 45f;
 
     [Header("Collision")]
     [SerializeField] private LayerMask traversalMask = Physics.DefaultRaycastLayers;
@@ -35,6 +39,9 @@ public class TraversalResolver : MonoBehaviour
         CurrentType = TraversalType.None;
         LandingPoint = Vector3.zero;
 
+        if (!IsValidApproach(candidate))
+            return CurrentType;
+
         if (candidate.Height <= maximumVaultHeight && TryResolveVault(candidate, out Vector3 vaultLandingPoint))
         {
             CurrentType = TraversalType.Vault;
@@ -51,6 +58,18 @@ public class TraversalResolver : MonoBehaviour
 
         return CurrentType;
     }
+
+    private bool IsValidApproach(TraversalCandidate candidate)
+    {
+        Vector3 playerForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        Vector3 traversalDirection = Vector3.ProjectOnPlane(-candidate.ObstacleNormal, Vector3.up).normalized;
+
+        if (traversalDirection.sqrMagnitude <= 0.0001f)
+            return false;
+
+        return Vector3.Angle(playerForward, traversalDirection) <= maximumApproachAngle;
+    }
+
     private bool TryResolveVault(TraversalCandidate candidate, out Vector3 landingPoint)
     {
         landingPoint = Vector3.zero;
@@ -75,7 +94,7 @@ public class TraversalResolver : MonoBehaviour
                 Vector3 landingSearchOrigin = samplePosition + forward * landingOffset + Vector3.up * landingSearchHeight;
 
                 if (Physics.Raycast(landingSearchOrigin, Vector3.down, out RaycastHit landingHit, landingSearchHeight * 2f, traversalMask, QueryTriggerInteraction.Ignore) &&
-                    TryValidateLanding(landingHit.point, out landingPoint))
+                    TryValidateLanding(landingHit, out landingPoint))
                     return true;
             }
             else
@@ -84,21 +103,13 @@ public class TraversalResolver : MonoBehaviour
 
                 if (Physics.Raycast(searchOrigin, Vector3.down, out RaycastHit landingHit, landingSearchHeight * 2f, traversalMask, QueryTriggerInteraction.Ignore))
                 {
-                    bool validLanding = TryValidateLanding(landingHit.point, out landingPoint);
-
-                    Debug.Log($"Vault fallback: hit {landingHit.collider.name}, valid = {validLanding}");
+                    bool validLanding = TryValidateLanding(landingHit, out landingPoint);
 
                     if (validLanding)
                         return true;
                 }
-                else
-                {
-                    Debug.Log("Vault fallback: no ground hit");
-                }
             }
         }
-
-        Debug.Log("Vault resolution failed");
         return false;
     }
 
@@ -114,24 +125,29 @@ public class TraversalResolver : MonoBehaviour
         if (!Physics.Raycast(searchOrigin, Vector3.down, out RaycastHit hit, landingSearchHeight * 2f, traversalMask, QueryTriggerInteraction.Ignore))
             return false;
 
-        return TryValidateLanding(hit.point, out landingPoint);
+        return TryValidateLanding(hit, out landingPoint);
     }
 
-    private bool TryValidateLanding(Vector3 point, out Vector3 landingPoint)
+    private bool TryValidateLanding(RaycastHit hit, out Vector3 landingPoint)
     {
         landingPoint = Vector3.zero;
+
+        float surfaceAngle = Vector3.Angle(hit.normal, Vector3.up);
+
+        if (surfaceAngle > maximumLandingSurfaceAngle)
+            return false;
 
         float radius = landingClearanceRadius;
         float height = Mathf.Max(landingClearanceHeight, radius * 2f);
         float clearanceOffset = characterController.skinWidth;
 
-        Vector3 bottom = point + Vector3.up * (radius + clearanceOffset);
-        Vector3 top = point + Vector3.up * (height - radius + clearanceOffset);
+        Vector3 bottom = hit.point + Vector3.up * (radius + clearanceOffset);
+        Vector3 top = hit.point + Vector3.up * (height - radius + clearanceOffset);
 
         if (Physics.CheckCapsule(bottom, top, radius, traversalMask, QueryTriggerInteraction.Ignore))
             return false;
 
-        landingPoint = point;
+        landingPoint = hit.point;
         return true;
     }
 
