@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.janooba.kcc": {
+      "version": "https://github.com/Janooba/KinematicCharacterController.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c4ff70b5b6f9765c27e5a16a0b317acf50b697c1"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
