@@ -5937,10 +5937,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2045478783104088046, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1168474911}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
 --- !u!1 &392012881
 GameObject:
@@ -24822,51 +24819,6 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!1 &1168474893 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2045478783104088046, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
-  m_PrefabInstance: {fileID: 388262986}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1168474897 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 917541584800632762, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
-  m_PrefabInstance: {fileID: 388262986}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1168474893}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 089115b76ebf3214aa7d70ff26577833, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GroundProbe
---- !u!114 &1168474907 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2692815587688714831, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
-  m_PrefabInstance: {fileID: 388262986}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1168474893}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbccb4c46bd7ceb4bade1f0695da5c0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
---- !u!114 &1168474911
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1168474893}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6794d5edb256b19428f6b0b3dbd0de8c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterControllerDebugProbe
-  playerMovement: {fileID: 1168474907}
-  collisionMotor: {fileID: 0}
-  groundProbe: {fileID: 1168474897}
-  captureFrameCount: 60
-  remainingCaptureFrames: 0
-  previousPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &1303028939
 GameObject:
   m_ObjectHideFlags: 0

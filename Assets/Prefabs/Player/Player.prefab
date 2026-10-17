@@ -154,6 +154,7 @@ GameObject:
   - component: {fileID: 4789770326826038882}
   - component: {fileID: 2542528788446594114}
   - component: {fileID: 1857696973418738092}
+  - component: {fileID: 1375624109738447693}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -495,6 +496,37 @@ MonoBehaviour:
   CheckMovementInitialOverlaps: 1
   KillVelocityWhenExceedMaxMovementIterations: 1
   KillRemainingMovementWhenExceedMaxMovementIterations: 1
+--- !u!114 &1375624109738447693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0999d2bb6cf3b764a87802c4a8cc8bdd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LedgeGrabDetector
+  minimumProbeHeight: 0.65
+  maximumProbeHeight: 2.4
+  probeHeightStep: 0.15
+  wallProbeRadius: 0.12
+  wallProbeDistance: 0.75
+  topProbeForwardOffset: 0.2
+  topProbeStartHeight: 0.6
+  topProbeDistance: 1.2
+  maximumTopSurfaceAngle: 45
+  minimumLedgeHeight: 0.45
+  maximumLedgeHeight: 2.55
+  maximumWallAngle: 50
+  traversalMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  debugState: 
+  debugWallCollider: 
+  debugTopCollider: 
+  debugLedgeHeight: 0
 --- !u!1 &2798576144553698930
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,8 +5,12 @@ using UnityEngine.InputSystem;
 public class PlayerInputReader : MonoBehaviour
 {
     public Vector2 Move { get; private set; }
+
     public bool JumpPressed { get; private set; }
+    public bool JumpHeld { get; private set; }
+
     public bool SprintHeld { get; private set; }
+
     public bool CrouchPressed { get; private set; }
     public bool CrouchHeld { get; private set; }
 
@@ -34,8 +38,12 @@ public class PlayerInputReader : MonoBehaviour
             horizontal -= 1f;
 
         Move = Vector2.ClampMagnitude(new Vector2(horizontal, vertical), 1f);
+
         JumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame;
+        JumpHeld = Keyboard.current.spaceKey.isPressed;
+
         SprintHeld = Keyboard.current.leftShiftKey.isPressed;
+
         CrouchPressed = Keyboard.current.leftCtrlKey.wasPressedThisFrame;
         CrouchHeld = Keyboard.current.leftCtrlKey.isPressed;
     }
@@ -43,8 +51,12 @@ public class PlayerInputReader : MonoBehaviour
     private void ResetInput()
     {
         Move = Vector2.zero;
+
         JumpPressed = false;
+        JumpHeld = false;
+
         SprintHeld = false;
+
         CrouchPressed = false;
         CrouchHeld = false;
     }

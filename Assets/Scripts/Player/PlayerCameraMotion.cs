@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerCameraMotion : MonoBehaviour
 {
@@ -23,9 +24,16 @@ public class PlayerCameraMotion : MonoBehaviour
     [SerializeField] private float vaultPitch = 3f;
     [SerializeField] private float vaultRollAngle = 2.5f;
     [SerializeField] private float vaultPresentationDuration = 0.4f;
-    [SerializeField] private float mantleCameraDip = 0.12f;
-    [SerializeField] private float mantlePitch = 5f;
-    [SerializeField] private float mantlePresentationDuration = 0.65f;
+
+    [FormerlySerializedAs("mantleCameraDip")]
+    [SerializeField] private float ledgeClimbCameraDip = 0.12f;
+
+    [FormerlySerializedAs("mantlePitch")]
+    [SerializeField] private float ledgeClimbPitch = 5f;
+
+    [FormerlySerializedAs("mantlePresentationDuration")]
+    [SerializeField] private float ledgeClimbPresentationDuration = 0.65f;
+
     [SerializeField] private float traversalRecoverySpeed = 12f;
 
     [Header("Movement Inertia")]
@@ -71,6 +79,7 @@ public class PlayerCameraMotion : MonoBehaviour
     private float traversalPitch;
     private float traversalRoll;
     private float vaultRollDirection = 1f;
+
     private TraversalType activeTraversalType = TraversalType.None;
 
     private void Awake()
@@ -100,7 +109,8 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private void LateUpdate()
     {
-        Vector3 localVelocity = playerMovement.transform.InverseTransformDirection(playerMovement.HorizontalVelocity);
+        Vector3 localVelocity =
+            playerMovement.transform.InverseTransformDirection(playerMovement.HorizontalVelocity);
 
         UpdateBob();
         UpdateMovementInertia(localVelocity);
@@ -110,16 +120,30 @@ public class PlayerCameraMotion : MonoBehaviour
         UpdateSprintPresentation();
         UpdateTraversalPresentation();
 
-        transform.localPosition = baseLocalPosition + currentBobOffset + currentInertiaOffset + Vector3.up * (landingOffset + currentSprintDrop + traversalDip);
+        transform.localPosition =
+            baseLocalPosition +
+            currentBobOffset +
+            currentInertiaOffset +
+            Vector3.up * (landingOffset + currentSprintDrop + traversalDip);
 
-        transform.localRotation = baseLocalRotation * Quaternion.Euler(currentSprintPitch + traversalPitch, 0f, currentRoll + traversalRoll);
+        transform.localRotation =
+            baseLocalRotation *
+            Quaternion.Euler(
+                currentSprintPitch + traversalPitch,
+                0f,
+                currentRoll + traversalRoll
+            );
 
         previousLocalVelocity = localVelocity;
     }
 
     private void UpdateBob()
     {
-        bool isMoving = playerMovement.IsGrounded && playerMovement.HorizontalSpeed > 0.1f && !playerMovement.IsSliding;
+        bool isMoving =
+            playerMovement.IsGrounded &&
+            playerMovement.HorizontalSpeed > 0.1f &&
+            !playerMovement.IsSliding;
+
         Vector3 targetOffset = Vector3.zero;
 
         if (isMoving)
@@ -131,8 +155,17 @@ public class PlayerCameraMotion : MonoBehaviour
             bobPhase += frequency * Time.deltaTime;
 
             float intensity = Mathf.Lerp(0.65f, 1f, playerMovement.SpeedRatio);
-            float horizontalOffset = Mathf.Sin(bobPhase) * horizontalBobAmplitude * intensity * amplitudeMultiplier;
-            float verticalOffset = Mathf.Sin(bobPhase * 2f) * verticalBobAmplitude * intensity * amplitudeMultiplier;
+            float horizontalOffset =
+                Mathf.Sin(bobPhase) *
+                horizontalBobAmplitude *
+                intensity *
+                amplitudeMultiplier;
+
+            float verticalOffset =
+                Mathf.Sin(bobPhase * 2f) *
+                verticalBobAmplitude *
+                intensity *
+                amplitudeMultiplier;
 
             targetOffset = new Vector3(horizontalOffset, verticalOffset, 0f);
         }
@@ -165,9 +198,9 @@ public class PlayerCameraMotion : MonoBehaviour
             vaultRollDirection = -vaultRollDirection;
             traversalDuration = vaultPresentationDuration;
         }
-        else if (traversalType == TraversalType.Mantle)
+        else if (traversalType == TraversalType.LedgeClimb)
         {
-            traversalDuration = mantlePresentationDuration;
+            traversalDuration = ledgeClimbPresentationDuration;
         }
     }
 
@@ -184,7 +217,9 @@ public class PlayerCameraMotion : MonoBehaviour
             traversalPitch = Mathf.Lerp(traversalPitch, 0f, recoveryBlend);
             traversalRoll = Mathf.Lerp(traversalRoll, 0f, recoveryBlend);
 
-            if (Mathf.Abs(traversalDip) < 0.001f && Mathf.Abs(traversalPitch) < 0.01f && Mathf.Abs(traversalRoll) < 0.01f)
+            if (Mathf.Abs(traversalDip) < 0.001f &&
+                Mathf.Abs(traversalPitch) < 0.01f &&
+                Mathf.Abs(traversalRoll) < 0.01f)
             {
                 traversalDip = 0f;
                 traversalPitch = 0f;
@@ -206,10 +241,10 @@ public class PlayerCameraMotion : MonoBehaviour
             traversalPitch = vaultPitch * impulse;
             traversalRoll = vaultRollAngle * vaultRollDirection * impulse;
         }
-        else if (activeTraversalType == TraversalType.Mantle)
+        else if (activeTraversalType == TraversalType.LedgeClimb)
         {
-            traversalDip = -mantleCameraDip * impulse;
-            traversalPitch = mantlePitch * impulse;
+            traversalDip = -ledgeClimbCameraDip * impulse;
+            traversalPitch = ledgeClimbPitch * impulse;
             traversalRoll = 0f;
         }
     }
@@ -221,8 +256,17 @@ public class PlayerCameraMotion : MonoBehaviour
 
         Vector3 localAcceleration = (localVelocity - previousLocalVelocity) / Time.deltaTime;
 
-        float targetX = Mathf.Clamp(-localAcceleration.x * inertiaScale, -maximumInertiaOffset, maximumInertiaOffset);
-        float targetZ = Mathf.Clamp(-localAcceleration.z * inertiaScale, -maximumInertiaOffset, maximumInertiaOffset);
+        float targetX = Mathf.Clamp(
+            -localAcceleration.x * inertiaScale,
+            -maximumInertiaOffset,
+            maximumInertiaOffset
+        );
+
+        float targetZ = Mathf.Clamp(
+            -localAcceleration.z * inertiaScale,
+            -maximumInertiaOffset,
+            maximumInertiaOffset
+        );
 
         Vector3 targetOffset = new Vector3(targetX, 0f, targetZ);
         float blend = 1f - Mathf.Exp(-inertiaResponseSpeed * Time.deltaTime);
@@ -251,7 +295,8 @@ public class PlayerCameraMotion : MonoBehaviour
         float targetFieldOfView = baseFieldOfView + sprintFovIncrease * sprintAmount;
         float blend = 1f - Mathf.Exp(-fovResponseSpeed * Time.deltaTime);
 
-        playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFieldOfView, blend);
+        playerCamera.fieldOfView =
+            Mathf.Lerp(playerCamera.fieldOfView, targetFieldOfView, blend);
     }
 
     private void UpdateLanding()
@@ -266,7 +311,8 @@ public class PlayerCameraMotion : MonoBehaviour
         landingOffset = Mathf.Clamp(
             landingOffset,
             -maximumLandingOffset,
-            maximumLandingOffset);
+            maximumLandingOffset
+        );
 
         if (Mathf.Abs(landingOffset) < 0.0001f &&
             Mathf.Abs(landingVelocity) < 0.001f)
@@ -278,10 +324,7 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private void HandleLanding(float impactSpeed)
     {
-        float impact =
-            Mathf.Max(
-                0f,
-                impactSpeed - landingImpactThreshold);
+        float impact = Mathf.Max(0f, impactSpeed - landingImpactThreshold);
 
         if (impact <= 0f)
             return;
@@ -290,10 +333,7 @@ public class PlayerCameraMotion : MonoBehaviour
             Mathf.Pow(impact, landingImpactExponent) *
             landingImpulseScale;
 
-        impulse =
-            Mathf.Min(
-                impulse,
-                maximumLandingImpulse);
+        impulse = Mathf.Min(impulse, maximumLandingImpulse);
 
         landingVelocity -= impulse;
     }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "TraversalProfile", menuName = "UNSELF/Player/Traversal Profile")]
 public class TraversalProfile : ScriptableObject
@@ -15,19 +16,39 @@ public class TraversalProfile : ScriptableObject
     [SerializeField] private float vaultExitSpeedBoost = 0.75f;
     [SerializeField] private float enhancedVaultExitSpeedBoost = 1.5f;
 
-    [Header("Mantle")]
-    [SerializeField] private float mantleMinimumDuration = 0.45f;
-    [SerializeField] private float mantleMaximumDuration = 0.75f;
-    [SerializeField] private float mantleMinimumTraversalSpeed = 2.5f;
-    [SerializeField] private float mantleWallClearance = 0.05f;
-    [SerializeField] private float mantleTopClearance = 0.1f;
-    [SerializeField] private AnimationCurve mantleProgress = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+    [Header("Ledge Climb")]
+    [FormerlySerializedAs("ledgeGrabMaximumUpwardSpeed")]
+    [SerializeField] private float ledgeClimbMaximumUpwardSpeed = 9f;
 
-    [Header("Mantle Motion")]
-    [SerializeField] private float mantlePullForward = 0.12f;
-    [SerializeField] private float mantleCrestForward = 0.2f;
-    [SerializeField] private float mantleSettleHeight = 0.08f;
+    [FormerlySerializedAs("ledgeGrabWallClearance")]
+    [SerializeField] private float ledgeClimbWallClearance = 0.05f;
 
+    [FormerlySerializedAs("ledgeGrabHangDepth")]
+    [SerializeField] private float ledgeClimbHangDepth = 1.9f;
+
+    [FormerlySerializedAs("ledgeGrabTopClearance")]
+    [SerializeField] private float ledgeClimbTopClearance = 0.12f;
+
+    [FormerlySerializedAs("ledgeGrabCrestForward")]
+    [SerializeField] private float ledgeClimbCrestForward = 0.25f;
+
+    [FormerlySerializedAs("ledgeGrabLandingForward")]
+    [SerializeField] private float ledgeClimbLandingForward = 0.45f;
+
+    [FormerlySerializedAs("ledgeGrabCatchDuration")]
+    [SerializeField] private float ledgeClimbCatchDuration = 0.12f;
+
+    [FormerlySerializedAs("ledgeGrabPullDuration")]
+    [SerializeField] private float ledgeClimbPullDuration = 0.42f;
+
+    [FormerlySerializedAs("ledgeGrabExitSpeedMultiplier")]
+    [SerializeField] private float ledgeClimbExitSpeedMultiplier = 0.5f;
+
+    [FormerlySerializedAs("ledgeGrabCooldown")]
+    [SerializeField] private float ledgeClimbCooldown = 0.3f;
+
+    [FormerlySerializedAs("ledgeGrabProgress")]
+    [SerializeField] private AnimationCurve ledgeClimbProgress = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     public float VaultMinimumDuration => vaultMinimumDuration;
     public float VaultMaximumDuration => vaultMaximumDuration;
@@ -40,14 +61,15 @@ public class TraversalProfile : ScriptableObject
     public float VaultExitSpeedBoost => vaultExitSpeedBoost;
     public float EnhancedVaultExitSpeedBoost => enhancedVaultExitSpeedBoost;
 
-    public float MantleMinimumDuration => mantleMinimumDuration;
-    public float MantleMaximumDuration => mantleMaximumDuration;
-    public float MantleMinimumTraversalSpeed => mantleMinimumTraversalSpeed;
-    public float MantleWallClearance => mantleWallClearance;
-    public float MantleTopClearance => mantleTopClearance;
-    public AnimationCurve MantleProgress => mantleProgress;
-
-    public float MantlePullForward => mantlePullForward;
-    public float MantleCrestForward => mantleCrestForward;
-    public float MantleSettleHeight => mantleSettleHeight;
+    public float LedgeClimbMaximumUpwardSpeed => ledgeClimbMaximumUpwardSpeed;
+    public float LedgeClimbWallClearance => ledgeClimbWallClearance;
+    public float LedgeClimbHangDepth => ledgeClimbHangDepth;
+    public float LedgeClimbTopClearance => ledgeClimbTopClearance;
+    public float LedgeClimbCrestForward => ledgeClimbCrestForward;
+    public float LedgeClimbLandingForward => ledgeClimbLandingForward;
+    public float LedgeClimbCatchDuration => ledgeClimbCatchDuration;
+    public float LedgeClimbPullDuration => ledgeClimbPullDuration;
+    public float LedgeClimbExitSpeedMultiplier => ledgeClimbExitSpeedMultiplier;
+    public float LedgeClimbCooldown => ledgeClimbCooldown;
+    public AnimationCurve LedgeClimbProgress => ledgeClimbProgress;
 }

@@ -13,9 +13,6 @@ public class TraversalResolver : MonoBehaviour
     [SerializeField] private float maximumVaultDepth = 1f;
     [SerializeField] private float vaultDepthStep = 0.1f;
 
-    [Header("Mantle")]
-    [SerializeField] private float maximumMantleHeight = 2.2f;
-
     [Header("Landing")]
     [SerializeField] private float landingSearchHeight = 1.5f;
     [SerializeField] private float landingSearchDistance = 0.5f;
@@ -37,8 +34,7 @@ public class TraversalResolver : MonoBehaviour
         motor = GetComponent<KinematicCharacterMotor>();
     }
 
-    public TraversalType Resolve(
-        TraversalCandidate candidate)
+    public TraversalType Resolve(TraversalCandidate candidate)
     {
         CurrentType = TraversalType.None;
         LandingPoint = Vector3.zero;
@@ -46,77 +42,40 @@ public class TraversalResolver : MonoBehaviour
         if (!IsValidApproach(candidate))
             return CurrentType;
 
-        if (candidate.Height <= maximumVaultHeight &&
-            TryResolveVault(
-                candidate,
-                out Vector3 vaultLandingPoint))
-        {
-            CurrentType = TraversalType.Vault;
-            LandingPoint = vaultLandingPoint;
-
+        if (candidate.Height > maximumVaultHeight)
             return CurrentType;
-        }
 
-        if (candidate.Height <= maximumMantleHeight &&
-            TryResolveMantle(
-                candidate,
-                out Vector3 mantleLandingPoint))
-        {
-            CurrentType = TraversalType.Mantle;
-            LandingPoint = mantleLandingPoint;
-
+        if (!TryResolveVault(candidate, out Vector3 landingPoint))
             return CurrentType;
-        }
+
+        CurrentType = TraversalType.Vault;
+        LandingPoint = landingPoint;
 
         return CurrentType;
     }
 
-    private bool IsValidApproach(
-        TraversalCandidate candidate)
+    private bool IsValidApproach(TraversalCandidate candidate)
     {
-        Vector3 playerForward =
-            Vector3.ProjectOnPlane(
-                transform.forward,
-                Vector3.up).normalized;
-
-        Vector3 traversalDirection =
-            Vector3.ProjectOnPlane(
-                -candidate.ObstacleNormal,
-                Vector3.up).normalized;
+        Vector3 playerForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        Vector3 traversalDirection = Vector3.ProjectOnPlane(-candidate.ObstacleNormal, Vector3.up).normalized;
 
         if (traversalDirection.sqrMagnitude <= 0.0001f)
             return false;
 
-        return Vector3.Angle(
-                   playerForward,
-                   traversalDirection) <=
-               maximumApproachAngle;
+        return Vector3.Angle(playerForward, traversalDirection) <= maximumApproachAngle;
     }
 
-    private bool TryResolveVault(
-        TraversalCandidate candidate,
-        out Vector3 landingPoint)
+    private bool TryResolveVault(TraversalCandidate candidate, out Vector3 landingPoint)
     {
         landingPoint = Vector3.zero;
 
-        Vector3 forward =
-            -candidate.ObstacleNormal;
+        Vector3 forward = -candidate.ObstacleNormal;
+        Vector3 lastObstaclePoint = candidate.TopPoint;
 
-        Vector3 lastObstaclePoint =
-            candidate.TopPoint;
-
-        for (float depth = vaultDepthStep;
-             depth <= maximumVaultDepth;
-             depth += vaultDepthStep)
+        for (float depth = vaultDepthStep; depth <= maximumVaultDepth; depth += vaultDepthStep)
         {
-            Vector3 samplePosition =
-                candidate.TopPoint +
-                forward * depth;
-
-            Vector3 rayOrigin =
-                samplePosition +
-                Vector3.up *
-                landingSearchHeight;
+            Vector3 samplePosition = candidate.TopPoint + forward * depth;
+            Vector3 rayOrigin = samplePosition + Vector3.up * landingSearchHeight;
 
             if (Physics.Raycast(
                     rayOrigin,
@@ -126,25 +85,18 @@ public class TraversalResolver : MonoBehaviour
                     traversalMask,
                     QueryTriggerInteraction.Ignore))
             {
-                if (hit.collider ==
-                    candidate.Collider)
+                if (hit.collider == candidate.Collider)
                 {
-                    lastObstaclePoint =
-                        hit.point;
-
+                    lastObstaclePoint = hit.point;
                     continue;
                 }
 
-                float landingOffset =
-                    motor.Capsule.radius +
-                    CollisionClearance +
-                    landingEdgeClearance;
+                float landingOffset = motor.Capsule.radius + CollisionClearance + landingEdgeClearance;
 
                 Vector3 landingSearchOrigin =
                     samplePosition +
                     forward * landingOffset +
-                    Vector3.up *
-                    landingSearchHeight;
+                    Vector3.up * landingSearchHeight;
 
                 if (Physics.Raycast(
                         landingSearchOrigin,
@@ -153,9 +105,7 @@ public class TraversalResolver : MonoBehaviour
                         landingSearchHeight * 2f,
                         traversalMask,
                         QueryTriggerInteraction.Ignore) &&
-                    TryValidateLanding(
-                        landingHit,
-                        out landingPoint))
+                    TryValidateLanding(landingHit, out landingPoint))
                 {
                     return true;
                 }
@@ -164,10 +114,8 @@ public class TraversalResolver : MonoBehaviour
             {
                 Vector3 searchOrigin =
                     lastObstaclePoint +
-                    forward *
-                    landingSearchDistance +
-                    Vector3.up *
-                    landingSearchHeight;
+                    forward * landingSearchDistance +
+                    Vector3.up * landingSearchHeight;
 
                 if (Physics.Raycast(
                         searchOrigin,
@@ -175,14 +123,10 @@ public class TraversalResolver : MonoBehaviour
                         out RaycastHit landingHit,
                         landingSearchHeight * 2f,
                         traversalMask,
-                        QueryTriggerInteraction.Ignore))
+                        QueryTriggerInteraction.Ignore) &&
+                    TryValidateLanding(landingHit, out landingPoint))
                 {
-                    if (TryValidateLanding(
-                            landingHit,
-                            out landingPoint))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
@@ -190,88 +134,23 @@ public class TraversalResolver : MonoBehaviour
         return false;
     }
 
-    private bool TryResolveMantle(
-        TraversalCandidate candidate,
-        out Vector3 landingPoint)
+    private bool TryValidateLanding(RaycastHit hit, out Vector3 landingPoint)
     {
         landingPoint = Vector3.zero;
 
-        Vector3 forward =
-            -candidate.ObstacleNormal;
+        float surfaceAngle = Vector3.Angle(hit.normal, Vector3.up);
 
-        float landingOffset =
-            motor.Capsule.radius +
-            CollisionClearance +
-            landingEdgeClearance;
-
-        Vector3 searchOrigin =
-            candidate.TopPoint +
-            forward * landingOffset +
-            Vector3.up *
-            landingSearchHeight;
-
-        if (!Physics.Raycast(
-                searchOrigin,
-                Vector3.down,
-                out RaycastHit hit,
-                landingSearchHeight * 2f,
-                traversalMask,
-                QueryTriggerInteraction.Ignore))
-        {
+        if (surfaceAngle > maximumLandingSurfaceAngle)
             return false;
-        }
 
-        return TryValidateLanding(
-            hit,
-            out landingPoint);
-    }
+        float radius = landingClearanceRadius;
+        float height = Mathf.Max(landingClearanceHeight, radius * 2f);
 
-    private bool TryValidateLanding(
-        RaycastHit hit,
-        out Vector3 landingPoint)
-    {
-        landingPoint = Vector3.zero;
+        Vector3 bottom = hit.point + Vector3.up * (radius + CollisionClearance);
+        Vector3 top = hit.point + Vector3.up * (height - radius + CollisionClearance);
 
-        float surfaceAngle =
-            Vector3.Angle(
-                hit.normal,
-                Vector3.up);
-
-        if (surfaceAngle >
-            maximumLandingSurfaceAngle)
-        {
+        if (Physics.CheckCapsule(bottom, top, radius, traversalMask, QueryTriggerInteraction.Ignore))
             return false;
-        }
-
-        float radius =
-            landingClearanceRadius;
-
-        float height =
-            Mathf.Max(
-                landingClearanceHeight,
-                radius * 2f);
-
-        Vector3 bottom =
-            hit.point +
-            Vector3.up *
-            (radius + CollisionClearance);
-
-        Vector3 top =
-            hit.point +
-            Vector3.up *
-            (height -
-             radius +
-             CollisionClearance);
-
-        if (Physics.CheckCapsule(
-                bottom,
-                top,
-                radius,
-                traversalMask,
-                QueryTriggerInteraction.Ignore))
-        {
-            return false;
-        }
 
         landingPoint = hit.point;
         return true;
@@ -279,14 +158,9 @@ public class TraversalResolver : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (CurrentType ==
-            TraversalType.None)
-        {
+        if (CurrentType == TraversalType.None)
             return;
-        }
 
-        Gizmos.DrawWireSphere(
-            LandingPoint,
-            landingClearanceRadius);
+        Gizmos.DrawWireSphere(LandingPoint, landingClearanceRadius);
     }
 }

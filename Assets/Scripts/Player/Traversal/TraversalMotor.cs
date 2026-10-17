@@ -6,7 +6,9 @@ using UnityEngine;
 [DefaultExecutionOrder(-50)]
 public class TraversalMotor : MonoBehaviour
 {
+    private const float DirectionThresholdSqr = 0.0001f;
     private const float LandingSurfaceOffset = 0.02f;
+    private const float MinimumPathDistance = 0.001f;
 
     [SerializeField] private TraversalProfile traversalProfile;
     [SerializeField] private PlayerMovement playerMovement;
@@ -19,7 +21,11 @@ public class TraversalMotor : MonoBehaviour
     [SerializeField] private MemberCapability enhancedMobilityCapability;
 
     private KinematicCharacterMotor motor;
+    private PlayerInputReader inputReader;
+    private LedgeGrabDetector ledgeGrabDetector;
+
     private Coroutine traversalRoutine;
+    private float ledgeClimbCooldownUntil;
 
     private bool HasEnhancedMobility =>
         memberAssembly != null &&
@@ -33,6 +39,13 @@ public class TraversalMotor : MonoBehaviour
     private void Awake()
     {
         motor = GetComponent<KinematicCharacterMotor>();
+        inputReader = GetComponent<PlayerInputReader>();
+        ledgeGrabDetector = GetComponent<LedgeGrabDetector>();
+    }
+
+    private void Update()
+    {
+        TryStartAirborneLedgeClimb();
     }
 
     public bool TryStartTraversal()
@@ -55,48 +68,94 @@ public class TraversalMotor : MonoBehaviour
 
         TraversalType traversalType = traversalResolver.Resolve(candidate);
 
-        if (traversalType == TraversalType.Vault)
-            return TryStartVault(candidate, traversalResolver.LandingPoint);
+        if (traversalType != TraversalType.Vault)
+            return false;
 
-        if (traversalType == TraversalType.Mantle)
-            return TryStartMantle(candidate, traversalResolver.LandingPoint);
-
-        return false;
+        return TryStartVault(candidate, traversalResolver.LandingPoint);
     }
 
-    private bool TryStartMantle(TraversalCandidate candidate, Vector3 landingPoint)
+    private void TryStartAirborneLedgeClimb()
     {
+        if (IsTraversing || traversalProfile == null || ledgeGrabDetector == null || inputReader == null)
+            return;
+
+        if (Time.time < ledgeClimbCooldownUntil)
+            return;
+
+        if (!inputReader.JumpHeld)
+            return;
+
+        if (playerMovement.MovementMode != PlayerMovementMode.Locomotion)
+            return;
+
+        if (playerMovement.IsGrounded || playerMovement.IsCrouching || playerMovement.IsSliding)
+            return;
+
+        if (playerMovement.VerticalVelocity > traversalProfile.LedgeClimbMaximumUpwardSpeed)
+            return;
+
+        if (!ledgeGrabDetector.TryDetect(out LedgeGrabCandidate candidate))
+            return;
+
+        TryStartLedgeClimb(candidate);
+    }
+
+    private bool TryStartLedgeClimb(LedgeGrabCandidate candidate)
+    {
+        Vector3 up = motor.CharacterUp;
+        Vector3 wallNormal = Vector3.ProjectOnPlane(candidate.WallNormal, up).normalized;
+
+        if (wallNormal.sqrMagnitude <= DirectionThresholdSqr)
+            return false;
+
+        Vector3 traversalDirection = -wallNormal;
         Vector3 startPoint = motor.TransientPosition;
-        Vector3 traversalDirection = -candidate.ObstacleNormal;
 
-        float wallOffset = motor.Capsule.radius + traversalProfile.MantleWallClearance;
+        float wallOffset = motor.Capsule.radius + traversalProfile.LedgeClimbWallClearance;
 
-        Vector3 wallPoint = candidate.ObstaclePoint + candidate.ObstacleNormal * wallOffset;
-        wallPoint.y = startPoint.y;
+        Vector3 catchPoint =
+            candidate.TopPoint +
+            wallNormal * wallOffset -
+            up * traversalProfile.LedgeClimbHangDepth;
 
-        Vector3 pullPoint = wallPoint + traversalDirection * traversalProfile.MantlePullForward;
-        pullPoint.y = candidate.TopPoint.y - motor.Capsule.radius;
+        Vector3 pullPoint =
+            candidate.TopPoint +
+            wallNormal * wallOffset +
+            up * traversalProfile.LedgeClimbTopClearance;
 
-        Vector3 crestPoint = candidate.TopPoint + traversalDirection * traversalProfile.MantleCrestForward;
-        crestPoint.y = candidate.TopPoint.y + traversalProfile.MantleTopClearance;
+        Vector3 crestPoint =
+            candidate.TopPoint +
+            traversalDirection * traversalProfile.LedgeClimbCrestForward +
+            up * traversalProfile.LedgeClimbTopClearance;
 
-        Vector3 settlePoint = landingPoint + Vector3.up * traversalProfile.MantleSettleHeight;
-        Vector3 finalLandingPoint = landingPoint + Vector3.up * LandingSurfaceOffset;
+        Vector3 landingPoint =
+            candidate.TopPoint +
+            traversalDirection * traversalProfile.LedgeClimbLandingForward +
+            up * LandingSurfaceOffset;
 
-        if (!pathValidator.IsSegmentClear(startPoint, wallPoint, candidate.Collider))
+        if (!pathValidator.IsSegmentClear(startPoint, catchPoint, candidate.Collider))
             return false;
 
-        if (!pathValidator.IsSegmentClear(wallPoint, pullPoint, candidate.Collider))
+        if (!pathValidator.IsSegmentClear(catchPoint, pullPoint, candidate.Collider))
             return false;
 
-        if (!pathValidator.IsQuadraticBezierClear(pullPoint, crestPoint, settlePoint, candidate.Collider))
+        if (!pathValidator.IsSegmentClear(pullPoint, crestPoint, candidate.Collider))
             return false;
 
-        if (!pathValidator.IsSegmentClear(settlePoint, finalLandingPoint, candidate.Collider))
+        if (!pathValidator.IsSegmentClear(crestPoint, landingPoint, candidate.Collider))
             return false;
 
-        TraversalStarted?.Invoke(TraversalType.Mantle);
-        traversalRoutine = StartCoroutine(Mantle(candidate, landingPoint));
+        TraversalStarted?.Invoke(TraversalType.LedgeClimb);
+
+        traversalRoutine = StartCoroutine(
+            LedgeClimb(
+                catchPoint,
+                pullPoint,
+                crestPoint,
+                landingPoint,
+                traversalDirection
+            )
+        );
 
         return true;
     }
@@ -135,10 +194,14 @@ public class TraversalMotor : MonoBehaviour
         return true;
     }
 
-    private IEnumerator Mantle(TraversalCandidate candidate, Vector3 landingPoint)
+    private IEnumerator LedgeClimb(
+        Vector3 catchPoint,
+        Vector3 pullPoint,
+        Vector3 crestPoint,
+        Vector3 landingPoint,
+        Vector3 traversalDirection)
     {
         float entrySpeed = playerMovement.HorizontalSpeed;
-        Vector3 traversalDirection = -candidate.ObstacleNormal;
 
         playerMovement.SetMovementMode(PlayerMovementMode.Traversal);
         BeginAuthoredTraversal();
@@ -147,95 +210,93 @@ public class TraversalMotor : MonoBehaviour
         {
             Vector3 startPoint = motor.TransientPosition;
 
-            float wallOffset = motor.Capsule.radius + traversalProfile.MantleWallClearance;
+            float catchElapsed = 0f;
+            float catchDuration = Mathf.Max(0.01f, traversalProfile.LedgeClimbCatchDuration);
 
-            Vector3 wallPoint = candidate.ObstaclePoint + candidate.ObstacleNormal * wallOffset;
-            wallPoint.y = startPoint.y;
-
-            Vector3 pullPoint = wallPoint + traversalDirection * traversalProfile.MantlePullForward;
-            pullPoint.y = candidate.TopPoint.y - motor.Capsule.radius;
-
-            Vector3 crestPoint = candidate.TopPoint + traversalDirection * traversalProfile.MantleCrestForward;
-            crestPoint.y = candidate.TopPoint.y + traversalProfile.MantleTopClearance;
-
-            Vector3 settlePoint = landingPoint + Vector3.up * traversalProfile.MantleSettleHeight;
-            Vector3 finalLandingPoint = landingPoint + Vector3.up * LandingSurfaceOffset;
-
-            float approachDistance = Vector3.Distance(startPoint, wallPoint);
-            float pullDistance = Vector3.Distance(wallPoint, pullPoint);
-            float crestDistance = Vector3.Distance(pullPoint, crestPoint);
-            float settleDistance = Vector3.Distance(crestPoint, settlePoint);
-            float landingDistance = Vector3.Distance(settlePoint, finalLandingPoint);
-
-            float totalDistance =
-                approachDistance + pullDistance + crestDistance + settleDistance + landingDistance;
-
-            float traversalSpeed = Mathf.Max(entrySpeed, traversalProfile.MantleMinimumTraversalSpeed);
-            float duration = Mathf.Clamp(
-                totalDistance / traversalSpeed,
-                traversalProfile.MantleMinimumDuration,
-                traversalProfile.MantleMaximumDuration
-            );
-
-            float approachEnd = approachDistance / totalDistance;
-            float pullEnd = (approachDistance + pullDistance) / totalDistance;
-            float settleEnd =
-                (approachDistance + pullDistance + crestDistance + settleDistance) / totalDistance;
-
-            float elapsed = 0f;
-
-            while (true)
+            while (catchElapsed < catchDuration)
             {
-                elapsed += Time.deltaTime;
+                catchElapsed += Time.deltaTime;
 
-                float normalizedTime = Mathf.Clamp01(elapsed / duration);
-                float progress = traversalProfile.MantleProgress.Evaluate(normalizedTime);
+                float normalizedTime = Mathf.Clamp01(catchElapsed / catchDuration);
+                float progress = traversalProfile.LedgeClimbProgress.Evaluate(normalizedTime);
 
-                Vector3 targetPosition;
-
-                if (progress < approachEnd)
-                {
-                    float segmentProgress = progress / approachEnd;
-                    targetPosition = Vector3.Lerp(startPoint, wallPoint, segmentProgress);
-                }
-                else if (progress < pullEnd)
-                {
-                    float segmentProgress = (progress - approachEnd) / (pullEnd - approachEnd);
-                    targetPosition = Vector3.Lerp(wallPoint, pullPoint, segmentProgress);
-                }
-                else if (progress < settleEnd)
-                {
-                    float segmentProgress = (progress - pullEnd) / (settleEnd - pullEnd);
-                    targetPosition = EvaluateQuadraticBezier(
-                        pullPoint,
-                        crestPoint,
-                        settlePoint,
-                        segmentProgress
-                    );
-                }
-                else
-                {
-                    float segmentProgress = (progress - settleEnd) / (1f - settleEnd);
-                    targetPosition = Vector3.Lerp(settlePoint, finalLandingPoint, segmentProgress);
-                }
-
-                motor.SetPosition(targetPosition);
-
-                if (normalizedTime >= 1f)
-                    break;
+                motor.SetPosition(Vector3.Lerp(startPoint, catchPoint, progress));
 
                 yield return null;
             }
 
-            motor.SetPosition(finalLandingPoint);
+            motor.SetPosition(catchPoint);
+
+            float pullDistance = Vector3.Distance(catchPoint, pullPoint);
+            float crestDistance = Vector3.Distance(pullPoint, crestPoint);
+            float landingDistance = Vector3.Distance(crestPoint, landingPoint);
+
+            float totalDistance = Mathf.Max(
+                MinimumPathDistance,
+                pullDistance + crestDistance + landingDistance
+            );
+
+            float pullEnd = pullDistance / totalDistance;
+            float crestEnd = (pullDistance + crestDistance) / totalDistance;
+
+            float pullElapsed = 0f;
+            float pullDuration = Mathf.Max(0.01f, traversalProfile.LedgeClimbPullDuration);
+
+            while (pullElapsed < pullDuration)
+            {
+                pullElapsed += Time.deltaTime;
+
+                float normalizedTime = Mathf.Clamp01(pullElapsed / pullDuration);
+                float progress = traversalProfile.LedgeClimbProgress.Evaluate(normalizedTime);
+
+                Vector3 targetPosition;
+
+                if (progress < pullEnd)
+                {
+                    float segmentProgress = pullEnd > MinimumPathDistance
+                        ? progress / pullEnd
+                        : 1f;
+
+                    targetPosition = Vector3.Lerp(catchPoint, pullPoint, segmentProgress);
+                }
+                else if (progress < crestEnd)
+                {
+                    float segmentLength = crestEnd - pullEnd;
+
+                    float segmentProgress = segmentLength > MinimumPathDistance
+                        ? (progress - pullEnd) / segmentLength
+                        : 1f;
+
+                    targetPosition = Vector3.Lerp(pullPoint, crestPoint, segmentProgress);
+                }
+                else
+                {
+                    float segmentLength = 1f - crestEnd;
+
+                    float segmentProgress = segmentLength > MinimumPathDistance
+                        ? (progress - crestEnd) / segmentLength
+                        : 1f;
+
+                    targetPosition = Vector3.Lerp(crestPoint, landingPoint, segmentProgress);
+                }
+
+                motor.SetPosition(targetPosition);
+
+                yield return null;
+            }
+
+            motor.SetPosition(landingPoint);
         }
         finally
         {
             EndAuthoredTraversal();
 
-            Vector3 exitVelocity = traversalDirection * entrySpeed;
-            playerMovement.CompleteTraversal(exitVelocity);
+            float exitSpeed = entrySpeed * traversalProfile.LedgeClimbExitSpeedMultiplier;
+            Vector3 exitVelocity = traversalDirection * exitSpeed;
 
+            ledgeClimbCooldownUntil = Time.time + traversalProfile.LedgeClimbCooldown;
+
+            playerMovement.CompleteTraversal(exitVelocity);
             traversalRoutine = null;
         }
     }
@@ -269,9 +330,11 @@ public class TraversalMotor : MonoBehaviour
             float entryDistance = Vector3.Distance(startPoint, entryPoint);
             float clearanceDistance = Vector3.Distance(entryPoint, clearancePoint);
             float landingDistance = Vector3.Distance(clearancePoint, finalLandingPoint);
+
             float totalDistance = entryDistance + clearanceDistance + landingDistance;
 
             float traversalSpeed = Mathf.Max(entrySpeed, traversalProfile.VaultMinimumTraversalSpeed);
+
             float duration = Mathf.Clamp(
                 totalDistance / traversalSpeed,
                 traversalProfile.VaultMinimumDuration,
@@ -327,14 +390,13 @@ public class TraversalMotor : MonoBehaviour
             Vector3 exitVelocity = traversalDirection * exitSpeed;
 
             playerMovement.CompleteTraversal(exitVelocity);
-
             traversalRoutine = null;
         }
     }
 
     private void BeginAuthoredTraversal()
     {
-        // The path has already been validated, so KCC collision solving must not fight the authored motion.
+        // The path is validated before traversal starts, so KCC solving must not fight authored motion.
         motor.BaseVelocity = Vector3.zero;
         motor.SetMovementCollisionsSolvingActivation(false);
         motor.SetGroundSolvingActivation(false);
@@ -344,18 +406,5 @@ public class TraversalMotor : MonoBehaviour
     {
         motor.SetMovementCollisionsSolvingActivation(true);
         motor.SetGroundSolvingActivation(true);
-    }
-
-    private Vector3 EvaluateQuadraticBezier(
-        Vector3 start,
-        Vector3 control,
-        Vector3 end,
-        float progress)
-    {
-        float inverseProgress = 1f - progress;
-
-        return inverseProgress * inverseProgress * start +
-               2f * inverseProgress * progress * control +
-               progress * progress * end;
     }
 }
