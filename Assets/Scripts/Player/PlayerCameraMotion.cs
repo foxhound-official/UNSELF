@@ -21,6 +21,7 @@ public class PlayerCameraMotion : MonoBehaviour
     [Header("Traversal")]
     [SerializeField] private float vaultCameraDip = 0.06f;
     [SerializeField] private float vaultPitch = 3f;
+    [SerializeField] private float vaultRollAngle = 2.5f;
     [SerializeField] private float vaultPresentationDuration = 0.4f;
     [SerializeField] private float mantleCameraDip = 0.12f;
     [SerializeField] private float mantlePitch = 5f;
@@ -64,6 +65,8 @@ public class PlayerCameraMotion : MonoBehaviour
     private float traversalDuration;
     private float traversalDip;
     private float traversalPitch;
+    private float traversalRoll;
+    private float vaultRollDirection = 1f;
     private TraversalType activeTraversalType = TraversalType.None;
 
     private void Awake()
@@ -93,9 +96,7 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private void LateUpdate()
     {
-        Vector3 localVelocity = playerMovement.transform.InverseTransformDirection(
-            playerMovement.HorizontalVelocity
-        );
+        Vector3 localVelocity = playerMovement.transform.InverseTransformDirection(playerMovement.HorizontalVelocity);
 
         UpdateBob();
         UpdateMovementInertia(localVelocity);
@@ -107,7 +108,7 @@ public class PlayerCameraMotion : MonoBehaviour
 
         transform.localPosition = baseLocalPosition + currentBobOffset + currentInertiaOffset + Vector3.up * (landingOffset + currentSprintDrop + traversalDip);
 
-        transform.localRotation = baseLocalRotation * Quaternion.Euler(currentSprintPitch + traversalPitch, 0f, currentRoll);
+        transform.localRotation = baseLocalRotation * Quaternion.Euler(currentSprintPitch + traversalPitch, 0f, currentRoll + traversalRoll);
 
         previousLocalVelocity = localVelocity;
     }
@@ -153,11 +154,17 @@ public class PlayerCameraMotion : MonoBehaviour
         traversalTimer = 0f;
         traversalDip = 0f;
         traversalPitch = 0f;
+        traversalRoll = 0f;
 
         if (traversalType == TraversalType.Vault)
+        {
+            vaultRollDirection = -vaultRollDirection;
             traversalDuration = vaultPresentationDuration;
+        }
         else if (traversalType == TraversalType.Mantle)
+        {
             traversalDuration = mantlePresentationDuration;
+        }
     }
 
     private void UpdateTraversalPresentation()
@@ -171,11 +178,13 @@ public class PlayerCameraMotion : MonoBehaviour
 
             traversalDip = Mathf.Lerp(traversalDip, 0f, recoveryBlend);
             traversalPitch = Mathf.Lerp(traversalPitch, 0f, recoveryBlend);
+            traversalRoll = Mathf.Lerp(traversalRoll, 0f, recoveryBlend);
 
-            if (Mathf.Abs(traversalDip) < 0.001f && Mathf.Abs(traversalPitch) < 0.01f)
+            if (Mathf.Abs(traversalDip) < 0.001f && Mathf.Abs(traversalPitch) < 0.01f && Mathf.Abs(traversalRoll) < 0.01f)
             {
                 traversalDip = 0f;
                 traversalPitch = 0f;
+                traversalRoll = 0f;
                 activeTraversalType = TraversalType.None;
             }
 
@@ -191,11 +200,13 @@ public class PlayerCameraMotion : MonoBehaviour
         {
             traversalDip = -vaultCameraDip * impulse;
             traversalPitch = vaultPitch * impulse;
+            traversalRoll = vaultRollAngle * vaultRollDirection * impulse;
         }
         else if (activeTraversalType == TraversalType.Mantle)
         {
             traversalDip = -mantleCameraDip * impulse;
             traversalPitch = mantlePitch * impulse;
+            traversalRoll = 0f;
         }
     }
 

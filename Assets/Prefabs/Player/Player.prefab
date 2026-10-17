@@ -108,10 +108,12 @@ MonoBehaviour:
   sprintPresentationSpeed: 7
   vaultCameraDip: 0.06
   vaultPitch: 3
+  vaultRollAngle: 2.5
   vaultPresentationDuration: 0.4
   mantleCameraDip: 0.12
   mantlePitch: 5
   mantlePresentationDuration: 0.65
+  traversalRecoverySpeed: 12
   inertiaScale: 0.0015
   maximumInertiaOffset: 0.025
   inertiaResponseSpeed: 11
@@ -163,7 +165,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2045478783104088046}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1.933, y: 0.487, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

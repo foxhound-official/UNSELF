@@ -96,12 +96,12 @@ public class TraversalMotor : MonoBehaviour
 
             float approachEnd = approachDistance / totalDistance;
             float pullEnd = (approachDistance + pullDistance) / totalDistance;
-            float crestEnd = (approachDistance + pullDistance + crestDistance) / totalDistance;
             float settleEnd = (approachDistance + pullDistance + crestDistance + settleDistance) / totalDistance;
 
             float elapsed = 0f;
+            Vector3 finalLandingPoint = landingPoint + Vector3.up * characterController.skinWidth;
 
-            while (elapsed < duration)
+            while (true)
             {
                 elapsed += Time.deltaTime;
 
@@ -120,28 +120,24 @@ public class TraversalMotor : MonoBehaviour
                     float segmentProgress = (progress - approachEnd) / (pullEnd - approachEnd);
                     targetPosition = Vector3.Lerp(wallPoint, pullPoint, segmentProgress);
                 }
-                else if (progress < crestEnd)
-                {
-                    float segmentProgress = (progress - pullEnd) / (crestEnd - pullEnd);
-                    targetPosition = Vector3.Lerp(pullPoint, crestPoint, segmentProgress);
-                }
                 else if (progress < settleEnd)
                 {
-                    float segmentProgress = (progress - crestEnd) / (settleEnd - crestEnd);
-                    targetPosition = Vector3.Lerp(crestPoint, settlePoint, segmentProgress);
+                    float segmentProgress = (progress - pullEnd) / (settleEnd - pullEnd);
+                    targetPosition = EvaluateQuadraticBezier(pullPoint, crestPoint, settlePoint, segmentProgress);
                 }
                 else
                 {
                     float segmentProgress = (progress - settleEnd) / (1f - settleEnd);
-                    targetPosition = Vector3.Lerp(settlePoint, landingPoint, segmentProgress);
+                    targetPosition = Vector3.Lerp(settlePoint, finalLandingPoint, segmentProgress);
                 }
 
                 transform.position = targetPosition;
 
+                if (normalizedTime >= 1f)
+                    break;
+
                 yield return null;
             }
-
-            transform.position = landingPoint;
         }
         finally
         {
@@ -152,6 +148,12 @@ public class TraversalMotor : MonoBehaviour
 
             traversalRoutine = null;
         }
+    }
+
+    private Vector3 EvaluateQuadraticBezier(Vector3 start, Vector3 control, Vector3 end, float progress)
+    {
+        float inverseProgress = 1f - progress;
+        return inverseProgress * inverseProgress * start + 2f * inverseProgress * progress * control + progress * progress * end;
     }
 
     private IEnumerator Vault(TraversalCandidate candidate, Vector3 landingPoint)
