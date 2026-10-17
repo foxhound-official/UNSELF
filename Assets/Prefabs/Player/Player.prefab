@@ -122,9 +122,12 @@ MonoBehaviour:
   sprintFovIncrease: 5
   fovResponseSpeed: 7
   landingImpactThreshold: 4
-  landingImpactScale: 0.012
-  maximumLandingDip: 0.1
-  landingRecoverySpeed: 9
+  landingImpulseScale: 0.09
+  landingImpactExponent: 1.35
+  maximumLandingImpulse: 2.2
+  maximumLandingOffset: 0.14
+  landingSpringStrength: 160
+  landingSpringDamping: 20
   traversalMotor: {fileID: 6095724821681654881}
 --- !u!1 &2045478783104088046
 GameObject:
@@ -137,7 +140,6 @@ GameObject:
   - component: {fileID: 4690737619415367569}
   - component: {fileID: 2825991303417419793}
   - component: {fileID: 2692815587688714831}
-  - component: {fileID: 2125054624159809285}
   - component: {fileID: 2502117316157530115}
   - component: {fileID: 5138143148506769027}
   - component: {fileID: 2015471127190627147}
@@ -146,11 +148,12 @@ GameObject:
   - component: {fileID: 1663315588707905105}
   - component: {fileID: 6463050797957328960}
   - component: {fileID: -7374595258758169816}
-  - component: {fileID: 917541584800632762}
   - component: {fileID: -6372525234246893969}
   - component: {fileID: -61749087359978468}
   - component: {fileID: 6095724821681654881}
   - component: {fileID: 4789770326826038882}
+  - component: {fileID: 2542528788446594114}
+  - component: {fileID: 1857696973418738092}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -203,34 +206,8 @@ MonoBehaviour:
   movementProfile: {fileID: 11400000, guid: 9d6c4d2a4e1581d499cd84f8165403d5, type: 2}
   inputReader: {fileID: -7374595258758169816}
   cameraPivot: {fileID: 6827311536476278540}
-  groundProbe: {fileID: 917541584800632762}
   memberAssembly: {fileID: 1663315588707905105}
   enhancedMobilityCapability: {fileID: 11400000, guid: 737833db12c05eb44be87685d66e619b, type: 2}
---- !u!143 &2125054624159809285
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2045478783104088046}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 0.9
-  m_Radius: 0.35
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!114 &2502117316157530115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -339,7 +316,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2045478783104088046}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b566fd3a84816d140a16570f11e905fb, type: 3}
   m_Name: 
@@ -364,26 +341,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1625a9160c436494eb6382ace1e162fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputReader
---- !u!114 &917541584800632762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2045478783104088046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 089115b76ebf3214aa7d70ff26577833, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GroundProbe
-  probeStartHeight: 0.2
-  probeDistance: 0.35
-  supportProbeOffset: 0.18
-  minimumPeripheralSupportHits: 2
-  maximumGroundAngle: 80
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &-6372525234246893969
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -396,7 +353,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32471629b58dfb74bbf6ec5f2657009a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TraversalDetector
-  obstacleProbeHeight: 1
+  obstacleProbeMinimumHeight: 0.3
+  obstacleProbeMaximumHeight: 1.1
+  obstacleProbeHeightStep: 0.2
   obstacleProbeRadius: 0.15
   obstacleProbeDistance: 1
   maximumTraversalHeight: 2.2
@@ -449,7 +408,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TraversalMotor
   traversalProfile: {fileID: 11400000, guid: 9d1a1736c3673844bab19dd32cc76ece, type: 2}
   playerMovement: {fileID: 2692815587688714831}
-  inputReader: {fileID: -7374595258758169816}
   traversalDetector: {fileID: -6372525234246893969}
   traversalResolver: {fileID: -61749087359978468}
   pathValidator: {fileID: 4789770326826038882}
@@ -471,6 +429,72 @@ MonoBehaviour:
   traversalMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!136 &2542528788446594114
+CapsuleCollider:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.35
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &1857696973418738092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d1bc5515e3ab954e80599c538834774, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Gawidev.KCC::KinematicCharacterController.KinematicCharacterMotor
+  Capsule: {fileID: 2542528788446594114}
+  CapsuleRadius: 0.35
+  CapsuleHeight: 1.8
+  CapsuleYOffset: 0.9
+  CapsulePhysicsMaterial: {fileID: 0}
+  GroundDetectionExtraDistance: 0
+  MaxStableSlopeAngle: 45
+  StableGroundLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  DiscreteCollisionEvents: 0
+  StepHandling: 1
+  MaxStepHeight: 0.3
+  AllowSteppingWithoutStableGrounding: 0
+  MinRequiredStepDepth: 0
+  LedgeAndDenivelationHandling: 1
+  MaxStableDistanceFromLedge: 0
+  MaxVelocityForLedgeSnap: 0
+  MaxStableDenivelationAngle: 180
+  InteractiveRigidbodyHandling: 1
+  RigidbodyInteractionType: 0
+  SimulatedCharacterMass: 1
+  PreserveAttachedRigidbodyMomentum: 1
+  RigidbodySlipVelocity: 5
+  HasPlanarConstraint: 0
+  PlanarConstraintAxis: {x: 0, y: 0, z: 1}
+  MaxMovementIterations: 5
+  MaxDecollisionIterations: 1
+  CheckMovementInitialOverlaps: 1
+  KillVelocityWhenExceedMaxMovementIterations: 1
+  KillRemainingMovementWhenExceedMaxMovementIterations: 1
 --- !u!1 &2798576144553698930
 GameObject:
   m_ObjectHideFlags: 0

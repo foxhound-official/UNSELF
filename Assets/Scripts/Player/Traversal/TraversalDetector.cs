@@ -1,3 +1,4 @@
+using KinematicCharacterController;
 using UnityEngine;
 
 public class TraversalDetector : MonoBehaviour
@@ -5,7 +6,9 @@ public class TraversalDetector : MonoBehaviour
     private const int HitCapacity = 8;
 
     [Header("Obstacle Detection")]
-    [SerializeField] private float obstacleProbeHeight = 1f;
+    [SerializeField] private float obstacleProbeMinimumHeight = 0.3f;
+    [SerializeField] private float obstacleProbeMaximumHeight = 1.1f;
+    [SerializeField] private float obstacleProbeHeightStep = 0.2f;
     [SerializeField] private float obstacleProbeRadius = 0.15f;
     [SerializeField] private float obstacleProbeDistance = 1f;
 
@@ -24,14 +27,14 @@ public class TraversalDetector : MonoBehaviour
     private readonly RaycastHit[] obstacleHits = new RaycastHit[HitCapacity];
     private readonly RaycastHit[] topHits = new RaycastHit[HitCapacity];
 
-    private CharacterController characterController;
+    private KinematicCharacterMotor motor;
 
     public bool HasCandidate { get; private set; }
     public TraversalCandidate CurrentCandidate { get; private set; }
 
     private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
+        motor = GetComponent<KinematicCharacterMotor>();
     }
 
     private void Update()
@@ -47,9 +50,11 @@ public class TraversalDetector : MonoBehaviour
         candidate = default;
 
         Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-        Vector3 obstacleOrigin = transform.position + Vector3.up * obstacleProbeHeight;
 
-        if (!TryFindObstacle(obstacleOrigin, forward, out RaycastHit obstacleHit))
+        if (forward.sqrMagnitude <= 0.0001f)
+            return false;
+
+        if (!TryFindObstacle(forward, out RaycastHit obstacleHit))
             return false;
 
         if (!TryFindTop(obstacleHit, out RaycastHit topHit))
@@ -77,36 +82,44 @@ public class TraversalDetector : MonoBehaviour
         return true;
     }
 
-    private bool TryFindObstacle(Vector3 origin, Vector3 direction, out RaycastHit bestHit)
+    private bool TryFindObstacle(Vector3 direction, out RaycastHit bestHit)
     {
         bestHit = default;
-
-        int hitCount = Physics.SphereCastNonAlloc(
-            origin,
-            obstacleProbeRadius,
-            direction,
-            obstacleHits,
-            obstacleProbeDistance,
-            traversalMask,
-            QueryTriggerInteraction.Ignore
-        );
 
         bool foundHit = false;
         float nearestDistance = float.MaxValue;
 
-        for (int index = 0; index < hitCount; index++)
+        // Probe several heights so low obstacles are not missed by a single horizontal cast.
+        for (float height = obstacleProbeMinimumHeight;
+             height <= obstacleProbeMaximumHeight + 0.001f;
+             height += obstacleProbeHeightStep)
         {
-            RaycastHit hit = obstacleHits[index];
+            Vector3 origin = transform.position + Vector3.up * height;
 
-            if (!IsValidExternalCollider(hit.collider))
-                continue;
+            int hitCount = Physics.SphereCastNonAlloc(
+                origin,
+                obstacleProbeRadius,
+                direction,
+                obstacleHits,
+                obstacleProbeDistance,
+                traversalMask,
+                QueryTriggerInteraction.Ignore
+            );
 
-            if (hit.distance >= nearestDistance)
-                continue;
+            for (int index = 0; index < hitCount; index++)
+            {
+                RaycastHit hit = obstacleHits[index];
 
-            foundHit = true;
-            nearestDistance = hit.distance;
-            bestHit = hit;
+                if (!IsValidExternalCollider(hit.collider))
+                    continue;
+
+                if (hit.distance >= nearestDistance)
+                    continue;
+
+                foundHit = true;
+                nearestDistance = hit.distance;
+                bestHit = hit;
+            }
         }
 
         return foundHit;
@@ -116,13 +129,25 @@ public class TraversalDetector : MonoBehaviour
     {
         bestHit = default;
 
-        for (float depth = topSearchStartDepth; depth <= topSearchMaximumDepth; depth += topSearchStep)
+        for (float depth = topSearchStartDepth;
+             depth <= topSearchMaximumDepth + 0.001f;
+             depth += topSearchStep)
         {
             Vector3 searchPoint = obstacleHit.point - obstacleHit.normal * depth;
             Vector3 origin = searchPoint + Vector3.up * (maximumTraversalHeight + topSearchExtraHeight);
             float distance = maximumTraversalHeight + topSearchExtraHeight;
 
-            int hitCount = Physics.RaycastNonAlloc(origin, Vector3.down, topHits, distance, traversalMask, QueryTriggerInteraction.Ignore);
+            int hitCount = Physics.RaycastNonAlloc(
+                origin,
+                Vector3.down,
+                topHits,
+                distance,
+                traversalMask,
+                QueryTriggerInteraction.Ignore
+            );
+
+            bool foundHit = false;
+            float nearestDistance = float.MaxValue;
 
             for (int index = 0; index < hitCount; index++)
             {
@@ -139,9 +164,16 @@ public class TraversalDetector : MonoBehaviour
                 if (topAngle > maximumTopSurfaceAngle)
                     continue;
 
+                if (hit.distance >= nearestDistance)
+                    continue;
+
+                nearestDistance = hit.distance;
                 bestHit = hit;
-                return true;
+                foundHit = true;
             }
+
+            if (foundHit)
+                return true;
         }
 
         return false;
@@ -149,7 +181,10 @@ public class TraversalDetector : MonoBehaviour
 
     private bool IsValidExternalCollider(Collider collider)
     {
-        if (collider == null || collider == characterController)
+        if (collider == null)
+            return false;
+
+        if (motor != null && collider == motor.Capsule)
             return false;
 
         return !collider.transform.IsChildOf(transform);
@@ -158,20 +193,32 @@ public class TraversalDetector : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-        Vector3 obstacleOrigin = transform.position + Vector3.up * obstacleProbeHeight;
-        Vector3 obstacleEnd = obstacleOrigin + forward * obstacleProbeDistance;
 
-        Gizmos.DrawWireSphere(obstacleOrigin, obstacleProbeRadius);
-        Gizmos.DrawWireSphere(obstacleEnd, obstacleProbeRadius);
-        Gizmos.DrawLine(obstacleOrigin, obstacleEnd);
+        for (float height = obstacleProbeMinimumHeight;
+             height <= obstacleProbeMaximumHeight + 0.001f;
+             height += obstacleProbeHeightStep)
+        {
+            Vector3 obstacleOrigin = transform.position + Vector3.up * height;
+            Vector3 obstacleEnd = obstacleOrigin + forward * obstacleProbeDistance;
+
+            Gizmos.DrawWireSphere(obstacleOrigin, obstacleProbeRadius);
+            Gizmos.DrawWireSphere(obstacleEnd, obstacleProbeRadius);
+            Gizmos.DrawLine(obstacleOrigin, obstacleEnd);
+        }
 
         if (!HasCandidate)
             return;
 
         Gizmos.DrawWireSphere(CurrentCandidate.ObstaclePoint, obstacleProbeRadius);
-        Gizmos.DrawLine(CurrentCandidate.ObstaclePoint, CurrentCandidate.ObstaclePoint + CurrentCandidate.ObstacleNormal * 0.4f);
+        Gizmos.DrawLine(
+            CurrentCandidate.ObstaclePoint,
+            CurrentCandidate.ObstaclePoint + CurrentCandidate.ObstacleNormal * 0.4f
+        );
 
         Gizmos.DrawWireSphere(CurrentCandidate.TopPoint, obstacleProbeRadius);
-        Gizmos.DrawLine(CurrentCandidate.TopPoint, CurrentCandidate.TopPoint + CurrentCandidate.TopNormal * 0.4f);
+        Gizmos.DrawLine(
+            CurrentCandidate.TopPoint,
+            CurrentCandidate.TopPoint + CurrentCandidate.TopNormal * 0.4f
+        );
     }
 }

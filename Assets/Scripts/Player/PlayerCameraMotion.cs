@@ -42,10 +42,13 @@ public class PlayerCameraMotion : MonoBehaviour
     [SerializeField] private float fovResponseSpeed = 5f;
 
     [Header("Landing")]
-    [SerializeField] private float landingImpactThreshold = 4f;
-    [SerializeField] private float landingImpactScale = 0.012f;
-    [SerializeField] private float maximumLandingDip = 0.1f;
-    [SerializeField] private float landingRecoverySpeed = 9f;
+    [SerializeField] private float landingImpactThreshold = 2.5f;
+    [SerializeField] private float landingImpulseScale = 0.09f;
+    [SerializeField] private float landingImpactExponent = 1.35f;
+    [SerializeField] private float maximumLandingImpulse = 2.2f;
+    [SerializeField] private float maximumLandingOffset = 0.14f;
+    [SerializeField] private float landingSpringStrength = 160f;
+    [SerializeField] private float landingSpringDamping = 20f;
 
     [SerializeField] private TraversalMotor traversalMotor;
 
@@ -58,6 +61,7 @@ public class PlayerCameraMotion : MonoBehaviour
     private float baseFieldOfView;
     private float bobPhase;
     private float landingOffset;
+    private float landingVelocity;
     private float currentRoll;
     private float currentSprintPitch;
     private float currentSprintDrop;
@@ -252,13 +256,45 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private void UpdateLanding()
     {
-        float blend = 1f - Mathf.Exp(-landingRecoverySpeed * Time.deltaTime);
-        landingOffset = Mathf.Lerp(landingOffset, 0f, blend);
+        float springAcceleration =
+            -landingOffset * landingSpringStrength -
+            landingVelocity * landingSpringDamping;
+
+        landingVelocity += springAcceleration * Time.deltaTime;
+        landingOffset += landingVelocity * Time.deltaTime;
+
+        landingOffset = Mathf.Clamp(
+            landingOffset,
+            -maximumLandingOffset,
+            maximumLandingOffset);
+
+        if (Mathf.Abs(landingOffset) < 0.0001f &&
+            Mathf.Abs(landingVelocity) < 0.001f)
+        {
+            landingOffset = 0f;
+            landingVelocity = 0f;
+        }
     }
 
     private void HandleLanding(float impactSpeed)
     {
-        float impact = Mathf.Max(0f, impactSpeed - landingImpactThreshold);
-        landingOffset = -Mathf.Min(impact * landingImpactScale, maximumLandingDip);
+        float impact =
+            Mathf.Max(
+                0f,
+                impactSpeed - landingImpactThreshold);
+
+        if (impact <= 0f)
+            return;
+
+        float impulse =
+            Mathf.Pow(impact, landingImpactExponent) *
+            landingImpulseScale;
+
+        impulse =
+            Mathf.Min(
+                impulse,
+                maximumLandingImpulse);
+
+        landingVelocity -= impulse;
     }
 }

@@ -6,7 +6,16 @@ public class PlayerLook : MonoBehaviour
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private float mouseSensitivity = 0.08f;
 
+    private float horizontalRotation;
     private float verticalRotation;
+
+    public Quaternion DesiredBodyRotation =>
+        Quaternion.Euler(0f, horizontalRotation, 0f);
+
+    private void Awake()
+    {
+        horizontalRotation = transform.eulerAngles.y;
+    }
 
     private void Start()
     {
@@ -24,7 +33,7 @@ public class PlayerLook : MonoBehaviour
         float mouseX = mouseDelta.x * mouseSensitivity;
         float mouseY = mouseDelta.y * mouseSensitivity;
 
-        transform.Rotate(Vector3.up * mouseX);
+        horizontalRotation += mouseX;
 
         verticalRotation -= mouseY;
         verticalRotation = Mathf.Clamp(verticalRotation, -80f, 80f);
@@ -37,7 +46,7 @@ public class PlayerLook : MonoBehaviour
         verticalRotation -= pitch;
         verticalRotation = Mathf.Clamp(verticalRotation, -80f, 80f);
 
-        transform.Rotate(Vector3.up * yaw);
+        horizontalRotation += yaw;
 
         ApplyCameraRotation();
     }

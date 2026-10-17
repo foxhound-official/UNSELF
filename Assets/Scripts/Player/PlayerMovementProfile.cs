@@ -9,7 +9,6 @@ public class PlayerMovementProfile : ScriptableObject
     [SerializeField] private float radius = 0.35f;
     [SerializeField] private float slopeLimit = 45f;
     [SerializeField] private float stepOffset = 0.3f;
-    [SerializeField] private float skinWidth = 0.05f;
 
     [Header("Camera")]
     [SerializeField] private float standingCameraHeight = 1.62f;
@@ -53,7 +52,6 @@ public class PlayerMovementProfile : ScriptableObject
     public float Radius => radius;
     public float SlopeLimit => slopeLimit;
     public float StepOffset => stepOffset;
-    public float SkinWidth => skinWidth;
 
     public float StandingCameraHeight => standingCameraHeight;
     public float CrouchingCameraHeight => crouchingCameraHeight;

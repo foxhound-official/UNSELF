@@ -5886,6 +5886,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1663315588707905105, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
+      propertyPath: 'installedMembers.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: f75906661aba27c4896ab3739a69b4e8, type: 2}
     - target: {fileID: 2045478783104088046, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
       propertyPath: m_Name
       value: Player
