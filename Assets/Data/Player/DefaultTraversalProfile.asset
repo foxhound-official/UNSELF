@@ -45,49 +45,17 @@ MonoBehaviour:
     m_RotationOrder: 4
   vaultExitSpeedBoost: 0.75
   enhancedVaultExitSpeedBoost: 1.5
-  mantleMinimumDuration: 0.45
-  mantleMaximumDuration: 0.75
-  mantleMinimumTraversalSpeed: 2.5
-  mantleWallClearance: 0.05
-  mantleTopClearance: 0.1
-  mantleProgress:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  mantlePullForward: 0.12
-  mantleCrestForward: 0.2
-  mantleSettleHeight: 0.08
-  ledgeGrabMaximumUpwardSpeed: 9
-  ledgeGrabWallClearance: 0.05
-  ledgeGrabHangDepth: 1.35
-  ledgeGrabTopClearance: 0.12
-  ledgeGrabCrestForward: 0.25
-  ledgeGrabLandingForward: 0.45
-  ledgeGrabCatchDuration: 0.12
-  ledgeGrabPullDuration: 0.42
-  ledgeGrabExitSpeedMultiplier: 0.5
-  ledgeGrabCooldown: 0.3
-  ledgeGrabProgress:
+  ledgeClimbMaximumUpwardSpeed: 9
+  ledgeClimbWallClearance: 0.05
+  ledgeClimbHangDepth: 1.35
+  ledgeClimbTopClearance: 0.12
+  ledgeClimbCrestForward: 0.25
+  ledgeClimbLandingForward: 0.45
+  ledgeClimbCatchDuration: 0.16
+  ledgeClimbPullDuration: 0.55
+  ledgeClimbExitSpeedMultiplier: 0.5
+  ledgeClimbCooldown: 0.3
+  ledgeClimbProgress:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
