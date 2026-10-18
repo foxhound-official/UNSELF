@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,6 +17,8 @@ public class PlayerWeapon : MonoBehaviour
     private float nextFireTime;
     private float reloadEndTime;
     private bool isReloading;
+
+    public event Action Fired;
 
     public int CurrentAmmo => currentAmmo;
     public int ReserveAmmo => reserveAmmo;
@@ -72,13 +75,19 @@ public class PlayerWeapon : MonoBehaviour
             playerCamera.transform.forward
         );
 
-        if (Physics.Raycast(ray, out RaycastHit hit, weapon.Range, hitMask, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(
+            ray,
+            out RaycastHit hit,
+            weapon.Range,
+            hitMask,
+            QueryTriggerInteraction.Ignore))
         {
             IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
             damageable?.TakeDamage(weapon.Damage);
         }
 
         ApplyRecoil();
+        Fired?.Invoke();
     }
 
     private void StartReload()
@@ -103,7 +112,7 @@ public class PlayerWeapon : MonoBehaviour
 
     private void ApplyRecoil()
     {
-        float yaw = Random.Range(-weapon.RecoilYaw, weapon.RecoilYaw);
+        float yaw = UnityEngine.Random.Range(-weapon.RecoilYaw, weapon.RecoilYaw);
 
         if (playerLook != null)
             playerLook.AddRecoil(weapon.RecoilPitch, yaw);
