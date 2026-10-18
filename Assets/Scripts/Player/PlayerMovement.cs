@@ -255,9 +255,11 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         return true;
     }
-
     private bool CanStartSlide(Vector3 currentVelocity)
     {
+        if (isSliding)
+            return false;
+
         if (!HasEnhancedMobility)
             return false;
 
