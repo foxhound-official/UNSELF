@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: CAP_TerminalAccess
   m_EditorClassIdentifier: Assembly-CSharp::MemberCapability
   code: TERMINAL_ACCESS
+  displayName: Terminal Access
+  description: Enables interactions with terminals requiring specialized technical knowledge.

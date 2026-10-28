@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: CAP_Breach
   m_EditorClassIdentifier: Assembly-CSharp::MemberCapability
   code: BREACH
+  displayName: Breaching Expertise
+  description: Provides access to interactions requiring breaching expertise.

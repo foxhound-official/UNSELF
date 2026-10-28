@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public enum MemberClass
 {
@@ -19,11 +20,50 @@ public class MemberDefinition : ScriptableObject
     [SerializeField] private int slotCost = 1;
 
     [SerializeField] private MemberCapability[] capabilities;
+    
+    [Header("Description")]
+    [SerializeField, TextArea(2, 4)]
+    private string shortDescription;
+
+    [SerializeField, TextArea(4, 8)]
+    private string personalityDescription;
+
+    [Header("Recovered Memory")]
+    [SerializeField, TextArea(5, 12)]
+    private string memoryRecord;
+    [SerializeField]
+    private MemberMemoryFragment[] memoryFragments = System.Array.Empty<MemberMemoryFragment>();
+
+    [Header("Gameplay")]
+    [SerializeField, TextArea(3, 7)]
+    private string gameplayEffects;
+
+    [SerializeField, TextArea(3, 7)]
+    private string sideEffects;
+
+    [Header("Integrity")]
+    [SerializeField, TextArea(3, 7)]
+    private string integrityNotes;
+
+    [Header("Origin")]
+    [SerializeField, TextArea(3, 8)]
+    private string originNotes;
 
     public string Code => code;
     public string MemberName => memberName;
     public MemberClass Class => memberClass;
     public int SlotCost => slotCost;
+    
+    public string ShortDescription => shortDescription;
+    public string PersonalityDescription => personalityDescription;
+    public string MemoryRecord => memoryRecord;
+    public string GameplayEffects => gameplayEffects;
+    public string SideEffects => sideEffects;
+    public string IntegrityNotes => integrityNotes;
+    public string OriginNotes => originNotes;
+
+    public IReadOnlyList<MemberMemoryFragment> MemoryFragments => memoryFragments ?? System.Array.Empty<MemberMemoryFragment>();
+    public IReadOnlyList<MemberCapability> Capabilities => capabilities ?? System.Array.Empty<MemberCapability>();
 
     public bool HasCapability(MemberCapability capability)
     {

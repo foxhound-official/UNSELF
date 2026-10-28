@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: CAP_CorporateLaw
   m_EditorClassIdentifier: Assembly-CSharp::MemberCapability
   code: CORPORATE_LAW
+  displayName: Corporate Law
+  description: Unlocks interactions requiring knowledge of corporate regulations and procedures.

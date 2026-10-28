@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: CAP_EnhancedMobility
   m_EditorClassIdentifier: Assembly-CSharp::MemberCapability
   code: ENHANCED_MOBILITY
+  displayName: Enhanced Mobility
+  description: Enhances sprint speed, acceleration and jump height. Enables sliding.
