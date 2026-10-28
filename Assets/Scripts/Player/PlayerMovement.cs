@@ -344,6 +344,13 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         if (slideTimer >= movementProfile.SlideDuration ||
             newSpeed <= movementProfile.SlideEndSpeed)
         {
+            Debug.Log(
+                $"[SLIDE END] Frame={Time.frameCount} " +
+                $"Timer={slideTimer:F2}/{movementProfile.SlideDuration:F2} " +
+                $"Speed={newSpeed:F2}/{movementProfile.SlideEndSpeed:F2} " +
+                $"CtrlHeld={inputReader.CrouchHeld}"
+            );
+
             EndSlide();
         }
     }

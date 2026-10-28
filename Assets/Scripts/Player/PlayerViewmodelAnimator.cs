@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PlayerViewmodelAnimator : MonoBehaviour
 {
+    private static readonly int FallAllowedHash = Animator.StringToHash("FallAllowed");
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private static readonly int VerticalSpeedHash = Animator.StringToHash("VerticalSpeed");
     private static readonly int GroundedHash = Animator.StringToHash("Grounded");
@@ -13,11 +14,20 @@ public class PlayerViewmodelAnimator : MonoBehaviour
     private static readonly int LedgeClimbHash = Animator.StringToHash("LedgeClimb");
     private static readonly int LandHash = Animator.StringToHash("Land");
     private static readonly int FireHash = Animator.StringToHash("Fire");
+    private static readonly int TraversingHash = Animator.StringToHash("Traversing");
 
     [SerializeField] private Animator animator;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private TraversalMotor traversalMotor;
     [SerializeField] private PlayerWeapon playerWeapon;
+
+    [Header("Traversal Recovery")]
+    [SerializeField, Min(0f)] private float fallGraceDuration = 0.15f;
+    [SerializeField, Min(0f)] private float realFallSpeedThreshold = 2f;
+    [SerializeField, Min(0f)] private float landImpactThreshold = 2.5f;
+
+    private bool wasTraversing;
+    private float fallGraceUntil;
 
     private void OnEnable()
     {
@@ -55,11 +65,34 @@ public class PlayerViewmodelAnimator : MonoBehaviour
         animator.SetBool(SprintingHash, playerMovement.IsSprinting);
         animator.SetBool(CrouchingHash, playerMovement.IsCrouching);
         animator.SetBool(SlidingHash, playerMovement.IsSliding);
+
+        bool isTraversing =
+            traversalMotor != null && traversalMotor.IsTraversing;
+
+        if (wasTraversing && !isTraversing)
+            fallGraceUntil = Time.time + fallGraceDuration;
+
+        wasTraversing = isTraversing;
+
+        bool isBriefLandingGap =
+            Time.time < fallGraceUntil &&
+            !playerMovement.IsGrounded &&
+            playerMovement.VerticalVelocity > -realFallSpeedThreshold;
+
+        animator.SetBool(TraversingHash, isTraversing);
+
+        animator.SetBool(
+            FallAllowedHash,
+            !isTraversing && !isBriefLandingGap
+        );
     }
 
     private void HandleLanding(float impactSpeed)
     {
-        if (animator == null)
+        if (animator == null || impactSpeed < landImpactThreshold)
+            return;
+
+        if (traversalMotor != null && traversalMotor.IsTraversing)
             return;
 
         animator.SetTrigger(LandHash);
@@ -79,6 +112,9 @@ public class PlayerViewmodelAnimator : MonoBehaviour
     private void HandleFire()
     {
         if (animator == null)
+            return;
+
+        if (traversalMotor != null && traversalMotor.IsTraversing)
             return;
 
         animator.SetTrigger(FireHash);

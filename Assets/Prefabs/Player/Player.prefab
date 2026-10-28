@@ -999,7 +999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b74715f756f12de42b3ccf3bc9cc7895, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerViewmodelAnimator
-  animator: {fileID: 0}
+  animator: {fileID: 7487947043714021887}
   playerMovement: {fileID: 2692815587688714831}
   traversalMotor: {fileID: 6095724821681654881}
   playerWeapon: {fileID: 6463050797957328960}
