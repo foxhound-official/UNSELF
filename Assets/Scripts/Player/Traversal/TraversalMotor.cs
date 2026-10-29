@@ -27,9 +27,7 @@ public class TraversalMotor : MonoBehaviour
     private Coroutine traversalRoutine;
     private float ledgeClimbCooldownUntil;
 
-    private bool HasEnhancedMobility =>
-        memberAssembly != null &&
-        enhancedMobilityCapability != null &&
+    private bool HasEnhancedMobility => memberAssembly != null && enhancedMobilityCapability != null &&
         memberAssembly.HasCapability(enhancedMobilityCapability);
 
     public bool IsTraversing => traversalRoutine != null;
@@ -45,9 +43,11 @@ public class TraversalMotor : MonoBehaviour
 
     private void Update()
     {
+        // Подтягивание автоматически запускается при удержании прыжка рядом с уступом.
         TryStartAirborneLedgeClimb();
     }
 
+    // Vault доступен с земли, если перед игроком есть подходящее препятствие и место для приземления.
     public bool TryStartTraversal()
     {
         if (IsTraversing)
@@ -111,28 +111,21 @@ public class TraversalMotor : MonoBehaviour
         Vector3 traversalDirection = -wallNormal;
         Vector3 startPoint = motor.TransientPosition;
 
+        // Точки для захвата края, подъёма корпуса и выхода на верхнюю поверхность.
+
         float wallOffset = motor.Capsule.radius + traversalProfile.LedgeClimbWallClearance;
 
-        Vector3 catchPoint =
-            candidate.TopPoint +
-            wallNormal * wallOffset -
-            up * traversalProfile.LedgeClimbHangDepth;
+        Vector3 catchPoint = candidate.TopPoint + wallNormal * wallOffset - up * traversalProfile.LedgeClimbHangDepth;
 
-        Vector3 pullPoint =
-            candidate.TopPoint +
-            wallNormal * wallOffset +
+        Vector3 pullPoint = candidate.TopPoint + wallNormal * wallOffset + up * traversalProfile.LedgeClimbTopClearance;
+
+        Vector3 crestPoint = candidate.TopPoint + traversalDirection * traversalProfile.LedgeClimbCrestForward +
             up * traversalProfile.LedgeClimbTopClearance;
 
-        Vector3 crestPoint =
-            candidate.TopPoint +
-            traversalDirection * traversalProfile.LedgeClimbCrestForward +
-            up * traversalProfile.LedgeClimbTopClearance;
-
-        Vector3 landingPoint =
-            candidate.TopPoint +
-            traversalDirection * traversalProfile.LedgeClimbLandingForward +
+        Vector3 landingPoint = candidate.TopPoint + traversalDirection * traversalProfile.LedgeClimbLandingForward +
             up * LandingSurfaceOffset;
 
+        // Проверяем каждый отрезок пути, чтобы не проходить сквозь постороннюю геометрию.
         if (!pathValidator.IsSegmentClear(startPoint, catchPoint, candidate.Collider))
             return false;
 
@@ -147,15 +140,8 @@ public class TraversalMotor : MonoBehaviour
 
         TraversalStarted?.Invoke(TraversalType.LedgeClimb);
 
-        traversalRoutine = StartCoroutine(
-            LedgeClimb(
-                catchPoint,
-                pullPoint,
-                crestPoint,
-                landingPoint,
-                traversalDirection
-            )
-        );
+        traversalRoutine = StartCoroutine(LedgeClimb(catchPoint, pullPoint, crestPoint, landingPoint, traversalDirection)
+);
 
         return true;
     }
@@ -165,20 +151,18 @@ public class TraversalMotor : MonoBehaviour
         Vector3 startPoint = motor.TransientPosition;
         Vector3 traversalDirection = -candidate.ObstacleNormal;
 
-        Vector3 entryPoint = candidate.ObstaclePoint +
-                             candidate.ObstacleNormal *
+        Vector3 entryPoint = candidate.ObstaclePoint + candidate.ObstacleNormal *
                              (motor.Capsule.radius + traversalProfile.VaultEntryClearance);
 
         entryPoint.y = startPoint.y + traversalProfile.VaultEntryRise;
 
-        Vector3 clearancePoint = candidate.TopPoint +
-                                 traversalDirection *
-                                 traversalProfile.VaultForwardClearance;
+        Vector3 clearancePoint = candidate.TopPoint + traversalDirection * traversalProfile.VaultForwardClearance;
 
         clearancePoint.y = candidate.TopPoint.y + traversalProfile.VaultTopClearance;
 
         Vector3 finalLandingPoint = landingPoint + Vector3.up * LandingSurfaceOffset;
 
+        // Vault запускается только если все три участка траектории свободны.
         if (!pathValidator.IsSegmentClear(startPoint, entryPoint, candidate.Collider))
             return false;
 
@@ -194,15 +178,12 @@ public class TraversalMotor : MonoBehaviour
         return true;
     }
 
-    private IEnumerator LedgeClimb(
-        Vector3 catchPoint,
-        Vector3 pullPoint,
-        Vector3 crestPoint,
-        Vector3 landingPoint,
+    private IEnumerator LedgeClimb(Vector3 catchPoint, Vector3 pullPoint, Vector3 crestPoint, Vector3 landingPoint,
         Vector3 traversalDirection)
     {
         float entrySpeed = playerMovement.HorizontalSpeed;
 
+        // Пока идёт управляемое перемещение, обычная физика передвижения приостановлена.
         playerMovement.SetMovementMode(PlayerMovementMode.Traversal);
         BeginAuthoredTraversal();
 
@@ -231,10 +212,7 @@ public class TraversalMotor : MonoBehaviour
             float crestDistance = Vector3.Distance(pullPoint, crestPoint);
             float landingDistance = Vector3.Distance(crestPoint, landingPoint);
 
-            float totalDistance = Mathf.Max(
-                MinimumPathDistance,
-                pullDistance + crestDistance + landingDistance
-            );
+            float totalDistance = Mathf.Max(MinimumPathDistance, pullDistance + crestDistance + landingDistance);
 
             float pullEnd = pullDistance / totalDistance;
             float crestEnd = (pullDistance + crestDistance) / totalDistance;
@@ -253,9 +231,7 @@ public class TraversalMotor : MonoBehaviour
 
                 if (progress < pullEnd)
                 {
-                    float segmentProgress = pullEnd > MinimumPathDistance
-                        ? progress / pullEnd
-                        : 1f;
+                    float segmentProgress = pullEnd > MinimumPathDistance ? progress / pullEnd : 1f;
 
                     targetPosition = Vector3.Lerp(catchPoint, pullPoint, segmentProgress);
                 }
@@ -263,9 +239,7 @@ public class TraversalMotor : MonoBehaviour
                 {
                     float segmentLength = crestEnd - pullEnd;
 
-                    float segmentProgress = segmentLength > MinimumPathDistance
-                        ? (progress - pullEnd) / segmentLength
-                        : 1f;
+                    float segmentProgress = segmentLength > MinimumPathDistance ? (progress - pullEnd) / segmentLength : 1f;
 
                     targetPosition = Vector3.Lerp(pullPoint, crestPoint, segmentProgress);
                 }
@@ -273,13 +247,13 @@ public class TraversalMotor : MonoBehaviour
                 {
                     float segmentLength = 1f - crestEnd;
 
-                    float segmentProgress = segmentLength > MinimumPathDistance
-                        ? (progress - crestEnd) / segmentLength
+                    float segmentProgress = segmentLength > MinimumPathDistance ? (progress - crestEnd) / segmentLength
                         : 1f;
 
                     targetPosition = Vector3.Lerp(crestPoint, landingPoint, segmentProgress);
                 }
 
+                // Двигаем капсулу по заранее проверенной траектории.
                 motor.SetPosition(targetPosition);
 
                 yield return null;
@@ -289,13 +263,13 @@ public class TraversalMotor : MonoBehaviour
         }
         finally
         {
+            // После подтягивания сохраняем только часть входной скорости.
             EndAuthoredTraversal();
-
             float exitSpeed = entrySpeed * traversalProfile.LedgeClimbExitSpeedMultiplier;
             Vector3 exitVelocity = traversalDirection * exitSpeed;
 
+            // Не даём сразу повторно захватить тот же уступ.
             ledgeClimbCooldownUntil = Time.time + traversalProfile.LedgeClimbCooldown;
-
             playerMovement.CompleteTraversal(exitVelocity);
             traversalRoutine = null;
         }
@@ -313,15 +287,12 @@ public class TraversalMotor : MonoBehaviour
         {
             Vector3 startPoint = motor.TransientPosition;
 
-            Vector3 entryPoint = candidate.ObstaclePoint +
-                                 candidate.ObstacleNormal *
+            Vector3 entryPoint = candidate.ObstaclePoint + candidate.ObstacleNormal *
                                  (motor.Capsule.radius + traversalProfile.VaultEntryClearance);
 
             entryPoint.y = startPoint.y + traversalProfile.VaultEntryRise;
 
-            Vector3 clearancePoint = candidate.TopPoint +
-                                     traversalDirection *
-                                     traversalProfile.VaultForwardClearance;
+            Vector3 clearancePoint = candidate.TopPoint + traversalDirection * traversalProfile.VaultForwardClearance;
 
             clearancePoint.y = candidate.TopPoint.y + traversalProfile.VaultTopClearance;
 
@@ -333,13 +304,11 @@ public class TraversalMotor : MonoBehaviour
 
             float totalDistance = entryDistance + clearanceDistance + landingDistance;
 
+            // Чем выше скорость входа, тем меньше длительность перескока (в заданных пределах).
             float traversalSpeed = Mathf.Max(entrySpeed, traversalProfile.VaultMinimumTraversalSpeed);
 
-            float duration = Mathf.Clamp(
-                totalDistance / traversalSpeed,
-                traversalProfile.VaultMinimumDuration,
-                traversalProfile.VaultMaximumDuration
-            );
+            float duration = Mathf.Clamp(totalDistance / traversalSpeed, traversalProfile.VaultMinimumDuration,
+                traversalProfile.VaultMaximumDuration);
 
             float entryEnd = entryDistance / totalDistance;
             float clearanceEnd = (entryDistance + clearanceDistance) / totalDistance;
@@ -380,23 +349,25 @@ public class TraversalMotor : MonoBehaviour
         }
         finally
         {
+            // Обязательно восстанавливаем обработку столкновений перед возвращением управления игроку.
             EndAuthoredTraversal();
 
-            float exitSpeedBoost = HasEnhancedMobility
-                ? traversalProfile.EnhancedVaultExitSpeedBoost
+            // Сначала возвращаем входную скорость без резкого импульса.
+            float exitSpeedBoost = HasEnhancedMobility ? traversalProfile.EnhancedVaultExitSpeedBoost
                 : traversalProfile.VaultExitSpeedBoost;
+            Vector3 exitDirection = Vector3.ProjectOnPlane(traversalDirection, motor.CharacterUp).normalized;
 
-            float exitSpeed = entrySpeed + exitSpeedBoost;
-            Vector3 exitVelocity = traversalDirection * exitSpeed;
+            playerMovement.CompleteTraversal(exitDirection * entrySpeed);
 
-            playerMovement.CompleteTraversal(exitVelocity);
+            // Плавный бонус активируется только после восстановления коллизий и управления KCC.
+            playerMovement.BeginVaultExitBoost(exitDirection, entrySpeed, exitSpeedBoost);
             traversalRoutine = null;
         }
     }
 
     private void BeginAuthoredTraversal()
     {
-        // The path is validated before traversal starts, so KCC solving must not fight authored motion.
+        // Принимаем управление движением на себя: временно отключаем коллизии и поиск земли KCC.
         motor.BaseVelocity = Vector3.zero;
         motor.SetMovementCollisionsSolvingActivation(false);
         motor.SetGroundSolvingActivation(false);
@@ -404,6 +375,7 @@ public class TraversalMotor : MonoBehaviour
 
     private void EndAuthoredTraversal()
     {
+        // Должен вызываться при любом завершении Traversal, до CompleteTraversal().
         motor.SetMovementCollisionsSolvingActivation(true);
         motor.SetGroundSolvingActivation(true);
     }

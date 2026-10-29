@@ -15,6 +15,8 @@ public class TraversalProfile : ScriptableObject
     [SerializeField] private AnimationCurve vaultProgress = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     [SerializeField] private float vaultExitSpeedBoost = 0.75f;
     [SerializeField] private float enhancedVaultExitSpeedBoost = 1.5f;
+    [SerializeField, Min(0.01f)] private float vaultExitBoostRiseTime = 0.18f;
+    [SerializeField, Min(0.01f)] private float vaultExitBoostFallTime = 0.35f;
 
     [Header("Ledge Climb")]
     [FormerlySerializedAs("ledgeGrabMaximumUpwardSpeed")]
@@ -60,6 +62,9 @@ public class TraversalProfile : ScriptableObject
     public AnimationCurve VaultProgress => vaultProgress;
     public float VaultExitSpeedBoost => vaultExitSpeedBoost;
     public float EnhancedVaultExitSpeedBoost => enhancedVaultExitSpeedBoost;
+    public float VaultExitBoostRiseTime => vaultExitBoostRiseTime;
+    public float VaultExitBoostFallTime => vaultExitBoostFallTime;
+    
 
     public float LedgeClimbMaximumUpwardSpeed => ledgeClimbMaximumUpwardSpeed;
     public float LedgeClimbWallClearance => ledgeClimbWallClearance;

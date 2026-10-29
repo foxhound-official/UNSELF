@@ -22,12 +22,15 @@ MonoBehaviour:
   m_AdditionalPlatformBuildSettings: []
   m_OverrideGlobalSceneList: 1
   m_Scenes:
-  - m_enabled: 1
+  - m_enabled: 0
     m_path: Assets/Scenes/Act01_Scrapyard.unity
     m_guid: 99c9720ab356a0642a771bea13969a05
   - m_enabled: 0
     m_path: Assets/Scenes/MovementLab.unity
     m_guid: c80b9a671e678014c9611223f6df25fc
+  - m_enabled: 1
+    m_path: Assets/Scenes/MovementLab_Advanced.unity
+    m_guid: 7eed187691dd5a74a999b141f1ece8e5
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
