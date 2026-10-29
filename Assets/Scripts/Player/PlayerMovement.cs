@@ -28,7 +28,13 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
     private float verticalVelocity;
     private float slideTimer;
+    private float nextSlideAllowedTime;
     private float maximumAirborneFallSpeed;
+
+    [Header("Jump Assistance")]
+    [SerializeField, Min(0f)] private float coyoteTime = 0.12f;
+
+    private float lastStableGroundedTime = float.NegativeInfinity;
 
     private bool sprintHeld;
     private bool jumpRequested;
@@ -119,7 +125,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
             return;
 
         // Traversal has priority over a regular jump when both use the same input.
-        if (traversalMotor != null && traversalMotor.TryStartTraversal())
+       if (!isSliding && traversalMotor != null && traversalMotor.TryStartTraversal())
         {
             jumpRequested = false;
             return;
@@ -255,9 +261,14 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         return true;
     }
+
     private bool CanStartSlide(Vector3 currentVelocity)
     {
         if (isSliding)
+            return false;
+
+        // Следующий подкат ещё на кулдауне.
+        if (Time.time < nextSlideAllowedTime)
             return false;
 
         if (!HasEnhancedMobility)
@@ -269,9 +280,13 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         if (!sprintHeld || moveInput.y <= 0f)
             return false;
 
-        Vector3 planarVelocity = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
+        Vector3 planarVelocity = Vector3.ProjectOnPlane(
+            currentVelocity,
+            motor.CharacterUp
+        );
 
-        return planarVelocity.magnitude >= movementProfile.SlideMinimumStartSpeed;
+        return planarVelocity.magnitude >=
+            movementProfile.SlideMinimumStartSpeed;
     }
 
     private void StartSlide(ref Vector3 currentVelocity)
@@ -350,8 +365,14 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
     private void EndSlide()
     {
+        if (!isSliding)
+            return;
+
         isSliding = false;
         slideTimer = 0f;
+
+        // Начинаем отсчёт после завершения подката.
+        nextSlideAllowedTime = Time.time + movementProfile.SlideCooldown;
 
         isCrouching = inputReader.CrouchHeld || !CanStand();
     }
@@ -430,6 +451,17 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         if (isCrouching || isSliding)
             return;
 
+        if (IsOnSteepSlope)
+            return;
+
+        bool isGrounded = motor.GroundingStatus.IsStableOnGround;
+
+        bool canCoyoteJump =
+            Time.time - lastStableGroundedTime <= coyoteTime;
+
+        if (!isGrounded && !canCoyoteJump)
+            return;
+
         float jumpSpeed = Mathf.Sqrt(
             CurrentJumpHeight * -2f * movementProfile.Gravity
         );
@@ -438,6 +470,9 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         Vector3 planarVelocity = Vector3.ProjectOnPlane(currentVelocity, up);
 
         currentVelocity = planarVelocity + up * jumpSpeed;
+
+        // Запрещаем повторно использовать тот же допуск.
+        lastStableGroundedTime = float.NegativeInfinity;
 
         motor.ForceUnground();
     }
@@ -470,7 +505,13 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         slideDirection = Vector3.zero;
         slideTimer = 0f;
 
+        if (isSliding && movementProfile != null)
+        {
+            nextSlideAllowedTime = Time.time + movementProfile.SlideCooldown;
+        }
+
         maximumAirborneFallSpeed = 0f;
+        lastStableGroundedTime = float.NegativeInfinity;
 
         jumpRequested = false;
         slideRequested = false;
@@ -494,6 +535,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         movementMode = PlayerMovementMode.Locomotion;
 
         maximumAirborneFallSpeed = 0f;
+        lastStableGroundedTime = float.NegativeInfinity;
         jumpRequested = false;
         slideRequested = false;
 
@@ -550,9 +592,36 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         if (isSliding)
         {
-            UpdateSlide(ref currentVelocity, moveDirection, deltaTime);
-            SyncVelocity(currentVelocity);
-            return;
+            // Прыжок из подката.
+            if (jumpRequested)
+            {
+                if (motor.GroundingStatus.IsStableOnGround && CanStand())
+                {
+                    EndSlide();
+                    isCrouching = false;
+
+                    // Сохраняем горизонтальную скорость подката.
+                    TryJump(ref currentVelocity);
+
+                    SyncVelocity(currentVelocity);
+                    return;
+                }
+
+                // Нет устойчивой опоры или места для выпрямления.
+                jumpRequested = false;
+            }
+
+            // Отпустили Ctrl: прекращаем подкат.
+            if (!inputReader.CrouchHeld)
+                EndSlide();
+
+            // Если подкат не был прерван, продолжаем его.
+            if (isSliding)
+            {
+                UpdateSlide(ref currentVelocity, moveDirection, deltaTime);
+                SyncVelocity(currentVelocity);
+                return;
+            }
         }
 
         float targetSpeed = isCrouching
@@ -563,21 +632,35 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         if (motor.GroundingStatus.IsStableOnGround)
         {
-            UpdateGroundVelocity(ref currentVelocity, moveDirection, targetSpeed, deltaTime);
-            TryJump(ref currentVelocity);
+            UpdateGroundVelocity(
+                ref currentVelocity,
+                moveDirection,
+                targetSpeed,
+                deltaTime
+            );
         }
         else
         {
-            UpdateAirVelocity(ref currentVelocity, moveDirection, targetSpeed, deltaTime);
+            UpdateAirVelocity(
+                ref currentVelocity,
+                moveDirection,
+                targetSpeed,
+                deltaTime
+            );
 
             float fallSpeed = Mathf.Max(
                 0f,
                 -Vector3.Dot(currentVelocity, motor.CharacterUp)
             );
 
-            maximumAirborneFallSpeed = Mathf.Max(maximumAirborneFallSpeed, fallSpeed);
-            jumpRequested = false;
+            maximumAirborneFallSpeed = Mathf.Max(
+                maximumAirborneFallSpeed,
+                fallSpeed
+            );
         }
+
+        // Проверяем прыжок и на земле, и сразу после схода с края.
+        TryJump(ref currentVelocity);
 
         SyncVelocity(currentVelocity);
     }
@@ -589,6 +672,10 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
     public void AfterCharacterUpdate(float deltaTime)
     {
         bool grounded = motor.GroundingStatus.IsStableOnGround;
+        if (grounded && movementMode == PlayerMovementMode.Locomotion)
+        {
+            lastStableGroundedTime = Time.time;
+        }
 
         if (!wasGrounded && grounded)
         {
