@@ -17,22 +17,21 @@ MonoBehaviour:
   radius: 0.35
   slopeLimit: 45
   stepOffset: 0.3
-  skinWidth: 0.05
   standingCameraHeight: 1.62
   crouchingCameraHeight: 0.95
   crouchTransitionSpeed: 5
   moveSpeed: 4
   sprintSpeed: 6
   crouchSpeed: 2.2
-  groundAcceleration: 24
-  groundDeceleration: 28
-  airAcceleration: 7
   strafeSpeedMultiplier: 0.9
+  groundAcceleration: 22
+  groundDeceleration: 38
+  airAcceleration: 9
   gravity: -22
   jumpHeight: 1.2
   groundedVelocity: -2
   enhancedSprintSpeed: 6
-  enhancedSprintAcceleration: 18
+  enhancedSprintAcceleration: 30
   enhancedJumpHeight: 1.45
   slideMinimumStartSpeed: 4.5
   slideInitialBoost: 0.5
@@ -40,3 +39,7 @@ MonoBehaviour:
   slideEndSpeed: 2.5
   slideDuration: 1.15
   slideSteeringSpeed: 35
+  slideCooldown: 0.9
+  steepSlopeSlideAcceleration: 12
+  steepSlopeMaximumSpeed: 6
+  steepSlopeInitialSpeed: 2

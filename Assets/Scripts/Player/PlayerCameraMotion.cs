@@ -19,6 +19,10 @@ public class PlayerCameraMotion : MonoBehaviour
     [SerializeField] private float sprintCameraDrop = 0.015f;
     [SerializeField] private float sprintPresentationSpeed = 7f;
 
+    [Header("Slide")]
+    [SerializeField, Range(0f, 10f)] private float slideRollAngle = 3f;
+    [SerializeField, Min(0.1f)] private float slideRollResponseSpeed = 10f;
+
     [Header("Traversal")]
     [SerializeField] private float vaultCameraDip = 0.06f;
     [SerializeField] private float vaultPitch = 3f;
@@ -71,6 +75,7 @@ public class PlayerCameraMotion : MonoBehaviour
     private float landingOffset;
     private float landingVelocity;
     private float currentRoll;
+    private float currentSlideRoll;
     private float currentSprintPitch;
     private float currentSprintDrop;
     private float traversalTimer;
@@ -118,6 +123,7 @@ public class PlayerCameraMotion : MonoBehaviour
         UpdateSprintFov();
         UpdateLanding();
         UpdateSprintPresentation();
+        UpdateSlidePresentation();
         UpdateTraversalPresentation();
 
         transform.localPosition =
@@ -131,7 +137,7 @@ public class PlayerCameraMotion : MonoBehaviour
             Quaternion.Euler(
                 currentSprintPitch + traversalPitch,
                 0f,
-                currentRoll + traversalRoll
+                currentRoll + currentSlideRoll + traversalRoll
             );
 
         previousLocalVelocity = localVelocity;
@@ -172,6 +178,23 @@ public class PlayerCameraMotion : MonoBehaviour
 
         float blend = 1f - Mathf.Exp(-bobReturnSpeed * Time.deltaTime);
         currentBobOffset = Vector3.Lerp(currentBobOffset, targetOffset, blend);
+    }
+
+    private void UpdateSlidePresentation()
+    {
+        float targetRoll = playerMovement.IsSliding
+            ? -slideRollAngle
+            : 0f;
+
+        float blend = 1f - Mathf.Exp(
+            -slideRollResponseSpeed * Time.deltaTime
+        );
+
+        currentSlideRoll = Mathf.Lerp(
+            currentSlideRoll,
+            targetRoll,
+            blend
+        );
     }
 
     private void UpdateSprintPresentation()
