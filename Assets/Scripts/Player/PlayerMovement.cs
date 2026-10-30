@@ -2,6 +2,9 @@ using System;
 using KinematicCharacterController;
 using UnityEngine;
 
+/// <summary>
+/// Управляет наземным и воздушным движением через KCC, включая подкат, прыжки и импульс после Vault.
+/// </summary>
 [RequireComponent(typeof(KinematicCharacterMotor))]
 public class PlayerMovement : MonoBehaviour, ICharacterController
 {
@@ -59,13 +62,13 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
     private bool HasEnhancedMobility => memberAssembly != null && enhancedMobilityCapability != null &&
         memberAssembly.HasCapability(enhancedMobilityCapability);
 
-    private float CurrentSprintSpeed =>
-        HasEnhancedMobility ? movementProfile.EnhancedSprintSpeed : movementProfile.SprintSpeed;
+    private float CurrentSprintSpeed => HasEnhancedMobility ? movementProfile.EnhancedSprintSpeed : movementProfile.SprintSpeed;
 
-    private float CurrentJumpHeight =>
-        HasEnhancedMobility ? movementProfile.EnhancedJumpHeight : movementProfile.JumpHeight;
+    private float CurrentJumpHeight => HasEnhancedMobility ? movementProfile.EnhancedJumpHeight : movementProfile.JumpHeight;
 
     public event Action<float> Landed;
+
+    public event Action Jumped;
 
     public Vector3 HorizontalVelocity => horizontalVelocity;
 
@@ -103,6 +106,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         wasGrounded = motor.GroundingStatus.IsStableOnGround;
     }
 
+    // Читаем ввод, обновляем состояние приседания и отдаём приоритет перескоку перед обычным прыжком.
     private void Update()
     {
         if (movementProfile == null || inputReader == null || motor == null)
@@ -125,8 +129,8 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         if (!inputReader.JumpPressed)
             return;
 
-        // Traversal has priority over a regular jump when both use the same input.
-       if (!isSliding && traversalMotor != null && traversalMotor.TryStartTraversal())
+        // Vault имеет приоритет над обычным прыжком: обе механики используют Space.
+        if (!isSliding && traversalMotor != null && traversalMotor.TryStartTraversal())
         {
             jumpRequested = false;
             return;
@@ -148,6 +152,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         slideRequested = false;
     }
 
+    // Переносим размеры капсулы и ограничения движения из ScriptableObject в мотор KCC.
     private void ApplyMovementProfile()
     {
         if (movementProfile == null || motor == null)
@@ -167,6 +172,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         cameraPivot.localPosition = cameraPosition;
     }
 
+    // Не разрешаем встать, пока над капсулой недостаточно свободного пространства.
     private void UpdateCrouchState()
     {
         if (isSliding)
@@ -189,13 +195,13 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
     {
         float targetHeight = isCrouching ? movementProfile.CrouchingHeight : movementProfile.StandingHeight;
 
-        float newHeight = Mathf.MoveTowards(motor.Capsule.height, targetHeight,
-            movementProfile.CrouchTransitionSpeed * deltaTime);
+        float newHeight = Mathf.MoveTowards(motor.Capsule.height, targetHeight, movementProfile.CrouchTransitionSpeed * deltaTime);
 
         // Центр капсулы всегда на половине высоты, поэтому её низ остаётся на уровне ног.
         motor.SetCapsuleDimensions(movementProfile.Radius, newHeight, newHeight * 0.5f);
     }
 
+    // Высоту камеры меняем отдельно от капсулы, чтобы переход не был мгновенным.
     private void UpdateCameraHeight()
     {
         if (cameraPivot == null)
@@ -276,8 +282,8 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         Vector3 planarVelocity = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
 
-        Vector3 initialDirection = planarVelocity.sqrMagnitude > DirectionThresholdSqr ? planarVelocity.normalized
-            : motor.CharacterForward;
+        Vector3 initialDirection = planarVelocity.sqrMagnitude > DirectionThresholdSqr
+            ? planarVelocity.normalized : motor.CharacterForward;
 
         slideDirection = motor.GetDirectionTangentToSurface(initialDirection, motor.GroundingStatus.GroundNormal);
 
@@ -286,7 +292,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         currentVelocity = slideDirection * startSpeed;
     }
 
-    // При подкате скорость постепенно падает, но направление можно корректировать.
+    // Подкат учитывает направление движения, наклон поверхности и гравитацию.
     private void UpdateSlide(ref Vector3 currentVelocity, Vector3 moveDirection, float deltaTime)
     {
         if (!HasEnhancedMobility || !motor.GroundingStatus.IsStableOnGround)
@@ -299,6 +305,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         Vector3 groundNormal = motor.GroundingStatus.GroundNormal;
 
+        // Игрок может корректировать направление подката.
         if (moveDirection.sqrMagnitude > DirectionThresholdSqr)
         {
             Vector3 desiredDirection = motor.GetDirectionTangentToSurface(moveDirection.normalized, groundNormal);
@@ -309,16 +316,30 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         slideDirection = motor.GetDirectionTangentToSurface(slideDirection, groundNormal);
 
-        float currentSpeed = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp).magnitude;
+        // Проецируем гравитацию на поверхность, чтобы получить ускорение вдоль склона.
+        Vector3 gravity = motor.CharacterUp * movementProfile.Gravity;
+        Vector3 gravityAlongSlope = Vector3.ProjectOnPlane(gravity, groundNormal);
 
-        float newSpeed = Mathf.MoveTowards(currentSpeed, 0f, movementProfile.SlideDeceleration * deltaTime);
+        // Положительное значение: спуск. Отрицательное: подъём.
+        float slopeAcceleration = Vector3.Dot(gravityAlongSlope, slideDirection) *
+            movementProfile.SlideSlopeGravityMultiplier;
+
+        // Суммируем постоянное торможение и влияние наклона.
+        float acceleration = slopeAcceleration - movementProfile.SlideDeceleration;
+
+        // Используем полную скорость вдоль склона, включая её вертикальную составляющую.
+        float currentSpeed = currentVelocity.magnitude;
+        float newSpeed = Mathf.Clamp(currentSpeed + acceleration * deltaTime, 0f, movementProfile.SlideMaximumSpeed);
 
         currentVelocity = slideDirection * newSpeed;
 
-        if (slideTimer >= movementProfile.SlideDuration || newSpeed <= movementProfile.SlideEndSpeed)
-        {
+        // На спуске разрешаем более продолжительный подкат.
+        float maximumDuration = slopeAcceleration > 0f
+            ? Mathf.Max(movementProfile.SlideDuration, movementProfile.SlideDownhillMaximumDuration)
+            : movementProfile.SlideDuration;
+
+        if (slideTimer >= maximumDuration || newSpeed <= movementProfile.SlideEndSpeed)
             EndSlide();
-        }
     }
 
     private void EndSlide()
@@ -419,8 +440,12 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         lastStableGroundedTime = float.NegativeInfinity;
 
         motor.ForceUnground();
+
+        // Событие отправляется только после успешного выполнения прыжка.
+        Jumped?.Invoke();
     }
 
+    // Синхронизируем публичные скорости с фактическим вектором KCC для анимации и камеры.
     private void SyncVelocity(Vector3 velocity)
     {
         if (motor == null)
@@ -442,6 +467,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
             ResetLocomotion();
     }
 
+    // При передаче управления Traversal сбрасываем ввод и накопленные импульсы.
     private void ResetLocomotion()
     {
         horizontalVelocity = Vector3.zero;
@@ -551,6 +577,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         currentRotation = playerLook.DesiredBodyRotation;
     }
 
+    // Основная точка обновления движения KCC: Slide, наземная скорость, воздух и прыжок.
     public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
     {
         if (!isActiveAndEnabled || movementProfile == null || motor == null ||

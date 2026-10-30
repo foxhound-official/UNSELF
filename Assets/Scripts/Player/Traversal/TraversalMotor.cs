@@ -3,6 +3,9 @@ using System.Collections;
 using KinematicCharacterController;
 using UnityEngine;
 
+/// <summary>
+/// Выполняет автоматические Vault и Ledge Climb по проверенным траекториям, временно управляя KCC.
+/// </summary>
 [DefaultExecutionOrder(-50)]
 public class TraversalMotor : MonoBehaviour
 {
@@ -34,6 +37,7 @@ public class TraversalMotor : MonoBehaviour
 
     public event Action<TraversalType> TraversalStarted;
 
+    // Получаем мотор, источник ввода и детектор захвата уступа.
     private void Awake()
     {
         motor = GetComponent<KinematicCharacterMotor>();
@@ -74,6 +78,7 @@ public class TraversalMotor : MonoBehaviour
         return TryStartVault(candidate, traversalResolver.LandingPoint);
     }
 
+    // Подтягивание доступно только в воздухе при удержании прыжка и вне кулдауна.
     private void TryStartAirborneLedgeClimb()
     {
         if (IsTraversing || traversalProfile == null || ledgeGrabDetector == null || inputReader == null)
@@ -88,7 +93,8 @@ public class TraversalMotor : MonoBehaviour
         if (playerMovement.MovementMode != PlayerMovementMode.Locomotion)
             return;
 
-        if (playerMovement.IsGrounded || playerMovement.IsCrouching || playerMovement.IsSliding)
+        // Захват запрещён на земле и во время подката, но разрешён при удержании Ctrl в воздухе.
+        if (playerMovement.IsGrounded || playerMovement.IsSliding)
             return;
 
         if (playerMovement.VerticalVelocity > traversalProfile.LedgeClimbMaximumUpwardSpeed)
@@ -100,6 +106,7 @@ public class TraversalMotor : MonoBehaviour
         TryStartLedgeClimb(candidate);
     }
 
+    // Сначала рассчитываем точки захвата и подъёма, затем проверяем весь путь капсулы.
     private bool TryStartLedgeClimb(LedgeGrabCandidate candidate)
     {
         Vector3 up = motor.CharacterUp;
@@ -140,19 +147,19 @@ public class TraversalMotor : MonoBehaviour
 
         TraversalStarted?.Invoke(TraversalType.LedgeClimb);
 
-        traversalRoutine = StartCoroutine(LedgeClimb(catchPoint, pullPoint, crestPoint, landingPoint, traversalDirection)
-);
+        traversalRoutine = StartCoroutine(LedgeClimb(catchPoint, pullPoint, crestPoint, landingPoint, traversalDirection));
 
         return true;
     }
 
+    // Отдельно проверяем вход, верхнюю точку и безопасный выход с препятствия.
     private bool TryStartVault(TraversalCandidate candidate, Vector3 landingPoint)
     {
         Vector3 startPoint = motor.TransientPosition;
         Vector3 traversalDirection = -candidate.ObstacleNormal;
 
-        Vector3 entryPoint = candidate.ObstaclePoint + candidate.ObstacleNormal *
-                             (motor.Capsule.radius + traversalProfile.VaultEntryClearance);
+        Vector3 entryPoint = candidate.ObstaclePoint +
+            candidate.ObstacleNormal * (motor.Capsule.radius + traversalProfile.VaultEntryClearance);
 
         entryPoint.y = startPoint.y + traversalProfile.VaultEntryRise;
 
@@ -178,6 +185,7 @@ public class TraversalMotor : MonoBehaviour
         return true;
     }
 
+    // Корутинная траектория захвата и подтягивания; обычное движение временно приостановлено.
     private IEnumerator LedgeClimb(Vector3 catchPoint, Vector3 pullPoint, Vector3 crestPoint, Vector3 landingPoint,
         Vector3 traversalDirection)
     {
@@ -275,6 +283,7 @@ public class TraversalMotor : MonoBehaviour
         }
     }
 
+    // Корутинная траектория перескока. Коллизии обязательно восстанавливаются в finally.
     private IEnumerator Vault(TraversalCandidate candidate, Vector3 landingPoint)
     {
         float entrySpeed = playerMovement.HorizontalSpeed;

@@ -38,6 +38,9 @@ public class PlayerMovementProfile : ScriptableObject
     [SerializeField] private float slideMinimumStartSpeed = 4.5f;
     [SerializeField] private float slideInitialBoost = 0.8f;
     [SerializeField] private float slideDeceleration = 3f;
+    [SerializeField, Min(0f)] private float slideSlopeGravityMultiplier = 0.85f;
+    [SerializeField, Min(0f)] private float slideMaximumSpeed = 12f;
+    [SerializeField, Min(0f)] private float slideDownhillMaximumDuration = 2.25f;
     [SerializeField] private float slideEndSpeed = 2.5f;
     [SerializeField] private float slideDuration = 1.15f;
     [SerializeField] private float slideSteeringSpeed = 35f;
@@ -79,6 +82,9 @@ public class PlayerMovementProfile : ScriptableObject
     public float SlideMinimumStartSpeed => slideMinimumStartSpeed;
     public float SlideInitialBoost => slideInitialBoost;
     public float SlideDeceleration => slideDeceleration;
+    public float SlideSlopeGravityMultiplier => slideSlopeGravityMultiplier;
+    public float SlideMaximumSpeed => slideMaximumSpeed;
+    public float SlideDownhillMaximumDuration => slideDownhillMaximumDuration;
     public float SlideEndSpeed => slideEndSpeed;
     public float SlideDuration => slideDuration;
     public float SlideSteeringSpeed => slideSteeringSpeed;

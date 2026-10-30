@@ -199,7 +199,7 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private void UpdateSprintPresentation()
     {
-        float sprintAmount = playerMovement.IsSprinting ? playerMovement.SprintRatio : 0f;
+        float sprintAmount = playerMovement.IsGrounded && playerMovement.IsSprinting ? playerMovement.SprintRatio : 0f;
         float targetPitch = sprintForwardPitch * sprintAmount;
         float targetDrop = -sprintCameraDrop * sprintAmount;
         float blend = 1f - Mathf.Exp(-sprintPresentationSpeed * Time.deltaTime);
@@ -314,7 +314,7 @@ public class PlayerCameraMotion : MonoBehaviour
         if (playerCamera == null)
             return;
 
-        float sprintAmount = playerMovement.IsSprinting ? playerMovement.SprintRatio : 0f;
+        float sprintAmount = playerMovement.IsGrounded && playerMovement.IsSprinting ? playerMovement.SprintRatio : 0f;
         float targetFieldOfView = baseFieldOfView + sprintFovIncrease * sprintAmount;
         float blend = 1f - Mathf.Exp(-fovResponseSpeed * Time.deltaTime);
 

@@ -43,8 +43,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  vaultExitSpeedBoost: 1
-  enhancedVaultExitSpeedBoost: 2
+  vaultExitSpeedBoost: 0.75
+  enhancedVaultExitSpeedBoost: 1.5
   vaultExitBoostRiseTime: 0.18
   vaultExitBoostFallTime: 0.35
   ledgeClimbMaximumUpwardSpeed: 9
@@ -52,10 +52,10 @@ MonoBehaviour:
   ledgeClimbHangDepth: 1.35
   ledgeClimbTopClearance: 0.12
   ledgeClimbCrestForward: 0.25
-  ledgeClimbLandingForward: 0.45
+  ledgeClimbLandingForward: 0.35
   ledgeClimbCatchDuration: 0.16
   ledgeClimbPullDuration: 0.55
-  ledgeClimbExitSpeedMultiplier: 0.5
+  ledgeClimbExitSpeedMultiplier: 0
   ledgeClimbCooldown: 0.3
   ledgeClimbProgress:
     serializedVersion: 2

@@ -107,6 +107,8 @@ MonoBehaviour:
   sprintForwardPitch: 1.5
   sprintCameraDrop: 0.015
   sprintPresentationSpeed: 7
+  slideRollAngle: 3
+  slideRollResponseSpeed: 10
   vaultCameraDip: 0.06
   vaultPitch: 3
   vaultRollAngle: 2.5
@@ -210,6 +212,8 @@ MonoBehaviour:
   cameraPivot: {fileID: 6827311536476278540}
   memberAssembly: {fileID: 1663315588707905105}
   enhancedMobilityCapability: {fileID: 11400000, guid: 737833db12c05eb44be87685d66e619b, type: 2}
+  vaultBoostRiseTime: 0.18
+  vaultBoostFallTime: 0.35
   coyoteTime: 0.16
 --- !u!114 &2502117316157530115
 MonoBehaviour:
@@ -482,8 +486,8 @@ MonoBehaviour:
   AllowSteppingWithoutStableGrounding: 0
   MinRequiredStepDepth: 0
   LedgeAndDenivelationHandling: 1
-  MaxStableDistanceFromLedge: 0
-  MaxVelocityForLedgeSnap: 0
+  MaxStableDistanceFromLedge: 0.3
+  MaxVelocityForLedgeSnap: 1
   MaxStableDenivelationAngle: 180
   InteractiveRigidbodyHandling: 1
   RigidbodyInteractionType: 0
@@ -985,6 +989,7 @@ MonoBehaviour:
   fallGraceDuration: 0.15
   realFallSpeedThreshold: 2
   landImpactThreshold: 2.5
+  groundContactGraceDuration: 0.12
 --- !u!1 &5736127765591003186
 GameObject:
   m_ObjectHideFlags: 0

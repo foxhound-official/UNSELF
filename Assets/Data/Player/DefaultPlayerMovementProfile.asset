@@ -36,10 +36,15 @@ MonoBehaviour:
   slideMinimumStartSpeed: 4.5
   slideInitialBoost: 0.5
   slideDeceleration: 4
+  slideSlopeGravityMultiplier: 0.85
+  slideMaximumSpeed: 12
+  slideDownhillMaximumDuration: 2.25
   slideEndSpeed: 2.5
   slideDuration: 1.15
   slideSteeringSpeed: 35
   slideCooldown: 0.9
+  slideJumpSpeedBoost: 1
+  slideJumpMinimumSpeed: 7.5
   steepSlopeSlideAcceleration: 12
   steepSlopeMaximumSpeed: 6
   steepSlopeInitialSpeed: 2
