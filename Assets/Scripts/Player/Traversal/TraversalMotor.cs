@@ -191,52 +191,6 @@ public class TraversalMotor : MonoBehaviour
             return false;
         }
 
-        #if UNITY_EDITOR
-        // Проверяем фактическую высоту площадки под точкой выхода.
-        Vector3 rayOrigin = landingPoint + up * 2f;
-
-        if (candidate.Collider.Raycast(
-                new Ray(rayOrigin, -up),
-                out RaycastHit surfaceHit,
-                4f))
-        {
-            float heightDifference = Vector3.Dot(
-                landingPoint - surfaceHit.point,
-                up
-            );
-
-            float surfaceAngle = Vector3.Angle(surfaceHit.normal, up);
-
-            bool isPenetrating = Physics.ComputePenetration(
-                motor.Capsule,
-                landingPoint,
-                motor.TransientRotation,
-                candidate.Collider,
-                candidate.Collider.transform.position,
-                candidate.Collider.transform.rotation,
-                out Vector3 correctionDirection,
-                out float penetrationDepth
-            );
-
-            Debug.Log(
-                $"[Ledge Diagnostic] " +
-                $"Slope: {surfaceAngle:F1}° | " +
-                $"Height difference: {heightDifference:F3}m | " +
-                $"Penetration: {isPenetrating} | " +
-                $"Depth: {penetrationDepth:F3}m | " +
-                $"Correction: {correctionDirection}",
-                this
-            );
-
-            Debug.DrawLine(
-                landingPoint,
-                surfaceHit.point,
-                Color.magenta,
-                3f
-            );
-        }
-        #endif
-
         // Проверяем каждый отрезок пути, чтобы не проходить сквозь постороннюю геометрию.
         if (!pathValidator.IsSegmentClear(startPoint, catchPoint, candidate.Collider))
             return false;

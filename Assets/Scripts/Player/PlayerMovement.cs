@@ -325,7 +325,6 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         isCrouching = true;
         IsSprinting = false;
         slideTimer = 0f;
-        lastSprintTime = float.NegativeInfinity;
 
         Vector3 planarVelocity = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
 
