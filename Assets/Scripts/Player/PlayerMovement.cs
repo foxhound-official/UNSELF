@@ -47,6 +47,14 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
     [Header("Jump Assistance")]
     [SerializeField, Min(0f)] private float coyoteTime = 0.12f;
 
+    [Header("Sprint Grace")]
+    [SerializeField, Min(0f)] private float sprintGraceDuration = 0.2f;
+
+    private float lastSprintTime = float.NegativeInfinity;
+    private float lastSprintSpeed;
+
+    private bool IsWithinSprintGrace => Time.time - lastSprintTime <= sprintGraceDuration;
+
     private float lastStableGroundedTime = float.NegativeInfinity;
 
     private bool sprintHeld;
@@ -118,8 +126,32 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         moveInput = inputReader.Move;
         sprintHeld = inputReader.SprintHeld;
 
+        // Запоминаем фактическую скорость спринта.
+        // На обычное движение это значение не влияет.
+        if (sprintHeld &&
+            moveInput.y > 0f &&
+            !isCrouching &&
+            !isSliding &&
+            motor.GroundingStatus.IsStableOnGround &&
+            HorizontalSpeed >= movementProfile.SlideMinimumStartSpeed)
+        {
+            lastSprintTime = Time.time;
+            lastSprintSpeed = HorizontalSpeed;
+        }
+
         if (inputReader.CrouchPressed)
-            slideRequested = true;
+        {
+            if (isSliding)
+            {
+                // Повторное нажатие Ctrl отменяет текущий подкат.
+                EndSlide();
+            }
+            else
+            {
+                // Однократное нажатие запрашивает начало подката.
+                slideRequested = true;
+            }
+        }
 
         UpdateCrouchState();
         UpdateCameraHeight();
@@ -263,12 +295,26 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         if (!motor.GroundingStatus.IsStableOnGround)
             return false;
 
-        if (!sprintHeld || moveInput.y <= 0f)
+        if (moveInput.y <= 0f)
             return false;
 
-        Vector3 planarVelocity = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
+        bool canUseSprintGrace = !sprintHeld && IsWithinSprintGrace;
 
-        return planarVelocity.magnitude >= movementProfile.SlideMinimumStartSpeed;
+        if (!sprintHeld && !canUseSprintGrace)
+            return false;
+
+        Vector3 planarVelocity = Vector3.ProjectOnPlane(
+            currentVelocity,
+            motor.CharacterUp
+        );
+
+        float actualSpeed = planarVelocity.magnitude;
+
+        // При обычном спринте проверяем текущую скорость.
+        // В течение Sprint Grace разрешаем использовать сохранённую.
+        return actualSpeed >= movementProfile.SlideMinimumStartSpeed ||
+            (canUseSprintGrace &&
+                lastSprintSpeed >= movementProfile.SlideMinimumStartSpeed);
     }
 
     private void StartSlide(ref Vector3 currentVelocity)
@@ -279,6 +325,7 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         isCrouching = true;
         IsSprinting = false;
         slideTimer = 0f;
+        lastSprintTime = float.NegativeInfinity;
 
         Vector3 planarVelocity = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
 
@@ -287,9 +334,22 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         slideDirection = motor.GetDirectionTangentToSurface(initialDirection, motor.GroundingStatus.GroundNormal);
 
-        float startSpeed = Mathf.Max(planarVelocity.magnitude, CurrentSprintSpeed) + movementProfile.SlideInitialBoost;
+        float entrySpeed = planarVelocity.magnitude;
+
+        // Сохранённая скорость применяется только к начальному импульсу Slide.
+        if (!sprintHeld && IsWithinSprintGrace)
+        {
+            entrySpeed = Mathf.Max(entrySpeed, lastSprintSpeed);
+        }
+
+        float startSpeed = Mathf.Max(entrySpeed, CurrentSprintSpeed) +
+                        movementProfile.SlideInitialBoost;
 
         currentVelocity = slideDirection * startSpeed;
+
+        // После запуска подката сохранённые данные больше не нужны.
+        lastSprintTime = float.NegativeInfinity;
+        lastSprintSpeed = 0f;
     }
 
     // Подкат учитывает направление движения, наклон поверхности и гравитацию.
@@ -475,6 +535,8 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
 
         slideDirection = Vector3.zero;
         slideTimer = 0f;
+        lastSprintTime = float.NegativeInfinity;
+        lastSprintSpeed = 0f;
 
         if (isSliding && movementProfile != null)
         {
@@ -631,10 +693,6 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
                 // Нет устойчивой опоры или места для выпрямления.
                 jumpRequested = false;
             }
-
-            // Отпустили Ctrl: прекращаем подкат.
-            if (!inputReader.CrouchHeld)
-                EndSlide();
 
             // Если подкат не был прерван, продолжаем его.
             if (isSliding)
