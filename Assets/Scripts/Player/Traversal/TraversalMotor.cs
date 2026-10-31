@@ -106,6 +106,49 @@ public class TraversalMotor : MonoBehaviour
         TryStartLedgeClimb(candidate);
     }
 
+    private bool TryGetLedgeSurfacePoint(
+        LedgeGrabCandidate candidate,
+        Vector3 traversalDirection,
+        float forwardDistance,
+        float surfaceClearance,
+        out Vector3 result)
+    {
+        result = default;
+
+        Vector3 up = motor.CharacterUp;
+
+        // Определяем высоту поверхности в фактической точке выхода.
+        Vector3 rayOrigin =
+            candidate.TopPoint +
+            traversalDirection * forwardDistance +
+            up * 1f;
+
+        if (!candidate.Collider.Raycast(
+                new Ray(rayOrigin, -up),
+                out RaycastHit hit,
+                2f))
+        {
+            return false;
+        }
+
+        float normalUp = Vector3.Dot(hit.normal, up);
+
+        // Поверхность должна подходить для устойчивого положения KCC.
+        float minimumNormalUp =
+            Mathf.Cos(motor.MaxStableSlopeAngle * Mathf.Deg2Rad);
+
+        if (normalUp < minimumNormalUp)
+            return false;
+
+        // Учитываем нижнюю полусферу капсулы на наклонной плоскости.
+        float radius = motor.Capsule.radius;
+        float slopeLift = radius * (1f / normalUp - 1f);
+
+        result = hit.point + up * (surfaceClearance + slopeLift);
+
+        return true;
+    }
+
     // Сначала рассчитываем точки захвата и подъёма, затем проверяем весь путь капсулы.
     private bool TryStartLedgeClimb(LedgeGrabCandidate candidate)
     {
@@ -126,11 +169,73 @@ public class TraversalMotor : MonoBehaviour
 
         Vector3 pullPoint = candidate.TopPoint + wallNormal * wallOffset + up * traversalProfile.LedgeClimbTopClearance;
 
-        Vector3 crestPoint = candidate.TopPoint + traversalDirection * traversalProfile.LedgeClimbCrestForward +
-            up * traversalProfile.LedgeClimbTopClearance;
+        // Промежуточная точка над краем.
+        if (!TryGetLedgeSurfacePoint(
+                candidate,
+                traversalDirection,
+                traversalProfile.LedgeClimbCrestForward,
+                traversalProfile.LedgeClimbTopClearance,
+                out Vector3 crestPoint))
+        {
+            return false;
+        }
 
-        Vector3 landingPoint = candidate.TopPoint + traversalDirection * traversalProfile.LedgeClimbLandingForward +
-            up * LandingSurfaceOffset;
+        // Конечная точка подтягивания.
+        if (!TryGetLedgeSurfacePoint(
+                candidate,
+                traversalDirection,
+                traversalProfile.LedgeClimbLandingForward,
+                LandingSurfaceOffset,
+                out Vector3 landingPoint))
+        {
+            return false;
+        }
+
+        #if UNITY_EDITOR
+        // Проверяем фактическую высоту площадки под точкой выхода.
+        Vector3 rayOrigin = landingPoint + up * 2f;
+
+        if (candidate.Collider.Raycast(
+                new Ray(rayOrigin, -up),
+                out RaycastHit surfaceHit,
+                4f))
+        {
+            float heightDifference = Vector3.Dot(
+                landingPoint - surfaceHit.point,
+                up
+            );
+
+            float surfaceAngle = Vector3.Angle(surfaceHit.normal, up);
+
+            bool isPenetrating = Physics.ComputePenetration(
+                motor.Capsule,
+                landingPoint,
+                motor.TransientRotation,
+                candidate.Collider,
+                candidate.Collider.transform.position,
+                candidate.Collider.transform.rotation,
+                out Vector3 correctionDirection,
+                out float penetrationDepth
+            );
+
+            Debug.Log(
+                $"[Ledge Diagnostic] " +
+                $"Slope: {surfaceAngle:F1}° | " +
+                $"Height difference: {heightDifference:F3}m | " +
+                $"Penetration: {isPenetrating} | " +
+                $"Depth: {penetrationDepth:F3}m | " +
+                $"Correction: {correctionDirection}",
+                this
+            );
+
+            Debug.DrawLine(
+                landingPoint,
+                surfaceHit.point,
+                Color.magenta,
+                3f
+            );
+        }
+        #endif
 
         // Проверяем каждый отрезок пути, чтобы не проходить сквозь постороннюю геометрию.
         if (!pathValidator.IsSegmentClear(startPoint, catchPoint, candidate.Collider))

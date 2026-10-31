@@ -52,9 +52,9 @@ MonoBehaviour:
   ledgeClimbHangDepth: 1.35
   ledgeClimbTopClearance: 0.12
   ledgeClimbCrestForward: 0.25
-  ledgeClimbLandingForward: 0.35
-  ledgeClimbCatchDuration: 0.16
-  ledgeClimbPullDuration: 0.55
+  ledgeClimbLandingForward: 0.3
+  ledgeClimbCatchDuration: 0.18
+  ledgeClimbPullDuration: 0.48
   ledgeClimbExitSpeedMultiplier: 0
   ledgeClimbCooldown: 0.3
   ledgeClimbProgress:
