@@ -59,7 +59,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5811889299271135153}
   - component: {fileID: 6949305661290021031}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: CameraMotion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,8 +102,12 @@ MonoBehaviour:
   sprintBobFrequency: 10
   horizontalBobAmplitude: 0.012
   verticalBobAmplitude: 0.018
-  bobReturnSpeed: 10
-  sprintBobAmplitudeMultiplier: 1.35
+  bobReturnSpeed: 19
+  viewmodelAnimator: {fileID: 5725207397250869700}
+  sprintVerticalBobSpeedMultiplier: 0.85
+  sprintBobPhaseOffset: 0
+  sprintBobBlendSpeed: 10
+  sprintBobAmplitudeMultiplier: 2.2
   sprintForwardPitch: 1.5
   sprintCameraDrop: 0.015
   sprintPresentationSpeed: 7
@@ -158,7 +162,7 @@ GameObject:
   - component: {fileID: 2542528788446594114}
   - component: {fileID: 1857696973418738092}
   - component: {fileID: 1375624109738447693}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -215,6 +219,7 @@ MonoBehaviour:
   vaultBoostRiseTime: 0.18
   vaultBoostFallTime: 0.35
   coyoteTime: 0.16
+  sprintGraceDuration: 0.2
 --- !u!114 &2502117316157530115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -666,7 +671,7 @@ GameObject:
   - component: {fileID: 3700128254108882917}
   - component: {fileID: 8959954333542905771}
   - component: {fileID: 3388399989268521520}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ViewmodelCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -916,7 +921,7 @@ GameObject:
   - component: {fileID: 2612513539850896651}
   - component: {fileID: 2812006783588748189}
   - component: {fileID: 6610414952120736384}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ViewmodelRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1045,7 +1050,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3999932683448643997}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ArmsRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1077,7 +1082,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1099243697536724200}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ArmsVisualOffset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1259,7 +1264,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6827311536476278540}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: CameraPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1294,7 +1299,7 @@ GameObject:
   - component: {fileID: 8060483051278613544}
   - component: {fileID: 2167388811951760883}
   - component: {fileID: 3019837912693146237}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}

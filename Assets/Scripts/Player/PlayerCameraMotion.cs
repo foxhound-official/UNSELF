@@ -3,6 +3,7 @@ using UnityEngine.Serialization;
 
 public class PlayerCameraMotion : MonoBehaviour
 {
+    private static readonly int SprintStateHash = Animator.StringToHash("VM_Sprint");
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private Camera playerCamera;
 
@@ -12,6 +13,16 @@ public class PlayerCameraMotion : MonoBehaviour
     [SerializeField] private float horizontalBobAmplitude = 0.012f;
     [SerializeField] private float verticalBobAmplitude = 0.018f;
     [SerializeField] private float bobReturnSpeed = 10f;
+
+    [Header("Sprint Bob Synchronization")]
+    [SerializeField] private Animator viewmodelAnimator;
+    [SerializeField, Range(0.5f, 1.5f)] private float sprintVerticalBobSpeedMultiplier = 0.9f;
+
+    [SerializeField, Range(0f, 1f)]
+    private float sprintBobPhaseOffset = 0f;
+
+    [SerializeField, Min(0.1f)]
+    private float sprintBobBlendSpeed = 10f;
 
     [Header("Sprint")]
     [SerializeField] private float sprintBobAmplitudeMultiplier = 1.35f;
@@ -72,6 +83,7 @@ public class PlayerCameraMotion : MonoBehaviour
 
     private float baseFieldOfView;
     private float bobPhase;
+    private float sprintBobWeight;
     private float landingOffset;
     private float landingVelocity;
     private float currentRoll;
@@ -84,6 +96,9 @@ public class PlayerCameraMotion : MonoBehaviour
     private float traversalPitch;
     private float traversalRoll;
     private float vaultRollDirection = 1f;
+    private float sprintCameraCycle;
+    private float previousSprintAnimationTime;
+    private bool sprintCameraCycleInitialized;
 
     private TraversalType activeTraversalType = TraversalType.None;
 
@@ -143,6 +158,37 @@ public class PlayerCameraMotion : MonoBehaviour
         previousLocalVelocity = localVelocity;
     }
 
+    private bool TryGetSprintAnimationPhase(out float phase)
+    {
+        phase = 0f;
+
+        if (viewmodelAnimator == null ||
+            !viewmodelAnimator.isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        const int layer = 0;
+
+        AnimatorStateInfo state =
+            viewmodelAnimator.GetCurrentAnimatorStateInfo(layer);
+
+        if (viewmodelAnimator.IsInTransition(layer))
+        {
+            AnimatorStateInfo nextState =
+                viewmodelAnimator.GetNextAnimatorStateInfo(layer);
+
+            if (nextState.shortNameHash == SprintStateHash)
+                state = nextState;
+        }
+
+        if (state.shortNameHash != SprintStateHash)
+            return false;
+
+        phase = state.normalizedTime;
+        return true;
+    }
+
     private void UpdateBob()
     {
         bool isMoving =
@@ -150,34 +196,126 @@ public class PlayerCameraMotion : MonoBehaviour
             playerMovement.HorizontalSpeed > 0.1f &&
             !playerMovement.IsSliding;
 
+        if (!isMoving || !playerMovement.IsSprinting)
+            sprintCameraCycleInitialized = false;
+
+        float sprintTarget =
+            isMoving && playerMovement.IsSprinting
+                ? playerMovement.SprintRatio
+                : 0f;
+
+        float sprintBlend =
+            1f - Mathf.Exp(-sprintBobBlendSpeed * Time.deltaTime);
+
+        sprintBobWeight = Mathf.Lerp(
+            sprintBobWeight,
+            sprintTarget,
+            sprintBlend
+        );
+
         Vector3 targetOffset = Vector3.zero;
 
         if (isMoving)
         {
-            float sprintAmount = playerMovement.IsSprinting ? playerMovement.SprintRatio : 0f;
-            float frequency = Mathf.Lerp(walkBobFrequency, sprintBobFrequency, playerMovement.SpeedRatio);
-            float amplitudeMultiplier = Mathf.Lerp(1f, sprintBobAmplitudeMultiplier, sprintAmount);
+            float frequency = Mathf.Lerp(
+                walkBobFrequency,
+                sprintBobFrequency,
+                playerMovement.SpeedRatio
+            );
 
             bobPhase += frequency * Time.deltaTime;
 
-            float intensity = Mathf.Lerp(0.65f, 1f, playerMovement.SpeedRatio);
+            float intensity = Mathf.Lerp(
+                0.65f,
+                1f,
+                playerMovement.SpeedRatio
+            );
+
+            float amplitudeMultiplier = Mathf.Lerp(
+                1f,
+                sprintBobAmplitudeMultiplier,
+                sprintBobWeight
+            );
+
+            // Горизонтальный Bob оставляем прежним.
             float horizontalOffset =
                 Mathf.Sin(bobPhase) *
                 horizontalBobAmplitude *
                 intensity *
                 amplitudeMultiplier;
 
+            // Обычная вертикальная раскачка.
+            float walkVerticalWave =
+                Mathf.Sin(bobPhase * 2f);
+
+            float sprintVerticalWave = walkVerticalWave;
+
+            // Во время Sprint берём фазу непосредственно
+            // из анимации рук.
+            if (TryGetSprintAnimationPhase(out float animationTime))
+            {
+                if (!sprintCameraCycleInitialized)
+                {
+                    sprintCameraCycle = animationTime;
+                    sprintCameraCycleInitialized = true;
+                }
+                else
+                {
+                    float delta = animationTime - previousSprintAnimationTime;
+
+                    if (delta >= 0f && delta < 0.25f)
+                    {
+                        sprintCameraCycle +=
+                            delta * sprintVerticalBobSpeedMultiplier;
+                    }
+                    else
+                    {
+                        sprintCameraCycle = animationTime;
+                    }
+                }
+
+                previousSprintAnimationTime = animationTime;
+
+                float phase =
+                    (sprintCameraCycle + sprintBobPhaseOffset) *
+                    Mathf.PI * 4f;
+
+                sprintVerticalWave = Mathf.Sin(phase);
+            }
+            else
+            {
+                sprintCameraCycleInitialized = false;
+            }
+
+            // Плавно переключаем вертикальный Bob
+            // между обычным движением и спринтом.
+            float verticalWave = Mathf.Lerp(
+                walkVerticalWave,
+                sprintVerticalWave,
+                sprintBobWeight
+            );
+
             float verticalOffset =
-                Mathf.Sin(bobPhase * 2f) *
+                verticalWave *
                 verticalBobAmplitude *
                 intensity *
                 amplitudeMultiplier;
 
-            targetOffset = new Vector3(horizontalOffset, verticalOffset, 0f);
+            targetOffset = new Vector3(
+                horizontalOffset,
+                verticalOffset,
+                0f
+            );
         }
 
-        float blend = 1f - Mathf.Exp(-bobReturnSpeed * Time.deltaTime);
-        currentBobOffset = Vector3.Lerp(currentBobOffset, targetOffset, blend);
+        float blend =
+            1f - Mathf.Exp(-bobReturnSpeed * Time.deltaTime);
+
+        currentBobOffset = Vector3.Lerp(
+            currentBobOffset,
+            targetOffset,
+            blend
+        );
     }
 
     private void UpdateSlidePresentation()
