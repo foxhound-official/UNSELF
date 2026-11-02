@@ -20,13 +20,15 @@ MonoBehaviour:
   standingCameraHeight: 1.62
   crouchingCameraHeight: 0.95
   crouchTransitionSpeed: 5
-  moveSpeed: 4
-  sprintSpeed: 6
+  moveSpeed: 3
+  sprintSpeed: 5
   crouchSpeed: 2.2
   strafeSpeedMultiplier: 0.9
   groundAcceleration: 22
+  sprintAcceleration: 10
   groundDeceleration: 38
   airAcceleration: 9
+  sprintTurnAcceleration: 90
   gravity: -22
   jumpHeight: 1.2
   groundedVelocity: -2
