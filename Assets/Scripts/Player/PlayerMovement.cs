@@ -88,6 +88,10 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         : 0f;
 
     public float SpeedRatio => CurrentSprintSpeed > 0f ? Mathf.Clamp01(HorizontalSpeed / CurrentSprintSpeed) : 0f;
+    // Синхронизируем частоту движения рук с фактической скоростью бега относительно усиленного спринта.
+    public float SprintAnimationMultiplier => movementProfile != null
+        ? Mathf.Clamp(HorizontalSpeed / Mathf.Max(0.01f, movementProfile.EnhancedSprintSpeed), 0.6f, 1f)
+        : 1f;
 
     public bool IsOnSteepSlope => motor != null && motor.GroundingStatus.FoundAnyGround &&
         !motor.GroundingStatus.IsStableOnGround;
@@ -415,34 +419,50 @@ public class PlayerMovement : MonoBehaviour, ICharacterController
         isCrouching = inputReader.CrouchHeld || !CanStand();
     }
 
-    // На земле скорость плавно приближается к целевой; без ввода действует торможение.
-    private void UpdateGroundVelocity(ref Vector3 currentVelocity, Vector3 moveDirection, float targetSpeed,
-        float deltaTime)
+    private void UpdateGroundVelocity(ref Vector3 currentVelocity, Vector3 moveDirection, float targetSpeed, float deltaTime)
     {
-        Vector3 groundNormal = motor.GroundingStatus.GroundNormal;
+    Vector3 groundNormal = motor.GroundingStatus.GroundNormal;
 
-        currentVelocity = motor.GetDirectionTangentToSurface(currentVelocity, groundNormal) * currentVelocity.magnitude;
+    // Сохраняем направление скорости вдоль поверхности, учитывая её наклон.
+    currentVelocity = motor.GetDirectionTangentToSurface(currentVelocity, groundNormal) * currentVelocity.magnitude;
 
-        Vector3 targetVelocity = Vector3.zero;
+    Vector3 targetVelocity = Vector3.zero;
 
-        if (moveDirection.sqrMagnitude > DirectionThresholdSqr)
-        {
-            Vector3 groundMoveDirection = motor.GetDirectionTangentToSurface(moveDirection, groundNormal);
-
-            targetVelocity = groundMoveDirection * targetSpeed;
-        }
-
-        float acceleration;
-
-        if (moveDirection.sqrMagnitude <= DirectionThresholdSqr)
-            acceleration = movementProfile.GroundDeceleration;
-        else if (IsSprinting && HasEnhancedMobility)
-            acceleration = movementProfile.EnhancedSprintAcceleration;
-        else
-            acceleration = movementProfile.GroundAcceleration;
-
-        currentVelocity = Vector3.MoveTowards(currentVelocity, targetVelocity, acceleration * deltaTime);
+    // Определяем целевое направление движения по вводу игрока.
+    if (moveDirection.sqrMagnitude > DirectionThresholdSqr)
+    {
+        Vector3 groundMoveDirection = motor.GetDirectionTangentToSurface(moveDirection, groundNormal);
+        targetVelocity = groundMoveDirection * targetSpeed;
     }
+
+    float acceleration;
+
+    // При отсутствии ввода используем стандартное торможение.
+    if (moveDirection.sqrMagnitude <= DirectionThresholdSqr)
+        acceleration = movementProfile.GroundDeceleration;
+    // При спринте выбираем ускорение в зависимости от установленного MEMBER ловкости.
+    else if (IsSprinting)
+        acceleration = HasEnhancedMobility ? movementProfile.EnhancedSprintAcceleration : movementProfile.SprintAcceleration;
+    // Для обычного передвижения используем стандартное ускорение.
+    else
+        acceleration = movementProfile.GroundAcceleration;
+
+    // При смене направления во время спринта повышаем отзывчивость управления.
+    if (IsSprinting && currentVelocity.sqrMagnitude > DirectionThresholdSqr && targetVelocity.sqrMagnitude > DirectionThresholdSqr)
+    {
+        // Определяем угол между текущей скоростью и направлением ввода через скалярное произведение.
+        float directionAlignment = Vector3.Dot(currentVelocity.normalized, targetVelocity.normalized);
+
+        // Чем сильнее игрок меняет направление, тем выше ускорение поворота.
+        float turnFactor = Mathf.InverseLerp(0.98f, 0.35f, directionAlignment);
+
+        // Ускорение поворота не влияет на обычный разгон по прямой.
+        acceleration = Mathf.Lerp(acceleration, Mathf.Max(acceleration, movementProfile.SprintTurnAcceleration), turnFactor);
+    }
+
+    // Плавно изменяем текущую скорость с учётом выбранного ускорения.
+    currentVelocity = Vector3.MoveTowards(currentVelocity, targetVelocity, acceleration * deltaTime);
+}
 
     // В воздухе сохраняем полученный импульс и разрешаем ограниченную коррекцию направления.
     private void UpdateAirVelocity(ref Vector3 currentVelocity, Vector3 moveDirection, float targetSpeed, float deltaTime)

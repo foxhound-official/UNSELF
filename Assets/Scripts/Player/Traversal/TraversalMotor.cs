@@ -19,6 +19,9 @@ public class TraversalMotor : MonoBehaviour
     [SerializeField] private TraversalResolver traversalResolver;
     [SerializeField] private TraversalPathValidator pathValidator;
 
+    [Header("Ledge Climb Camera")]
+    [SerializeField, Range(0f, 80f)] private float maximumLedgeGrabLookDownAngle = 30f;
+
     [Header("Enhanced Mobility")]
     [SerializeField] private MemberAssembly memberAssembly;
     [SerializeField] private MemberCapability enhancedMobilityCapability;
@@ -26,6 +29,8 @@ public class TraversalMotor : MonoBehaviour
     private KinematicCharacterMotor motor;
     private PlayerInputReader inputReader;
     private LedgeGrabDetector ledgeGrabDetector;
+    private PlayerLook playerLook;
+    public bool IsLedgeClimbing { get; private set; }
 
     private Coroutine traversalRoutine;
     private float ledgeClimbCooldownUntil;
@@ -40,6 +45,7 @@ public class TraversalMotor : MonoBehaviour
     // Получаем мотор, источник ввода и детектор захвата уступа.
     private void Awake()
     {
+        playerLook = GetComponent<PlayerLook>();
         motor = GetComponent<KinematicCharacterMotor>();
         inputReader = GetComponent<PlayerInputReader>();
         ledgeGrabDetector = GetComponent<LedgeGrabDetector>();
@@ -54,7 +60,7 @@ public class TraversalMotor : MonoBehaviour
     // Vault доступен с земли, если перед игроком есть подходящее препятствие и место для приземления.
     public bool TryStartTraversal()
     {
-        if (IsTraversing)
+        if (!HasEnhancedMobility || IsTraversing)
             return false;
 
         if (motor == null || playerMovement == null || traversalDetector == null ||
@@ -81,7 +87,8 @@ public class TraversalMotor : MonoBehaviour
     // Подтягивание доступно только в воздухе при удержании прыжка и вне кулдауна.
     private void TryStartAirborneLedgeClimb()
     {
-        if (IsTraversing || traversalProfile == null || ledgeGrabDetector == null || inputReader == null)
+        // Запрещаем захват уступа без MEMBER ловкости, во время другого Traversal или при отсутствии необходимых компонентов.
+        if (!HasEnhancedMobility || IsTraversing || traversalProfile == null || ledgeGrabDetector == null || inputReader == null)
             return;
 
         if (Time.time < ledgeClimbCooldownUntil)
@@ -99,6 +106,12 @@ public class TraversalMotor : MonoBehaviour
 
         if (playerMovement.VerticalVelocity > traversalProfile.LedgeClimbMaximumUpwardSpeed)
             return;
+
+        if (playerLook != null &&
+            playerLook.Pitch > maximumLedgeGrabLookDownAngle)
+        {
+            return;
+        }
 
         if (!ledgeGrabDetector.TryDetect(out LedgeGrabCandidate candidate))
             return;
@@ -204,6 +217,7 @@ public class TraversalMotor : MonoBehaviour
         if (!pathValidator.IsSegmentClear(crestPoint, landingPoint, candidate.Collider))
             return false;
 
+        IsLedgeClimbing = true;
         TraversalStarted?.Invoke(TraversalType.LedgeClimb);
 
         traversalRoutine = StartCoroutine(LedgeClimb(catchPoint, pullPoint, crestPoint, landingPoint, traversalDirection));
@@ -339,6 +353,7 @@ public class TraversalMotor : MonoBehaviour
             ledgeClimbCooldownUntil = Time.time + traversalProfile.LedgeClimbCooldown;
             playerMovement.CompleteTraversal(exitVelocity);
             traversalRoutine = null;
+            IsLedgeClimbing = false;
         }
     }
 

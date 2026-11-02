@@ -9,6 +9,7 @@ public class PlayerViewmodelAnimator : MonoBehaviour
     private static readonly int SprintingHash = Animator.StringToHash("Sprinting");
     private static readonly int CrouchingHash = Animator.StringToHash("Crouching");
     private static readonly int SlidingHash = Animator.StringToHash("Sliding"); 
+    private static readonly int SprintAnimationMultiplierHash = Animator.StringToHash("SprintAnimationMultiplier");
 
     private static readonly int VaultHash = Animator.StringToHash("Vault");
     private static readonly int LedgeClimbHash = Animator.StringToHash("LedgeClimb");
@@ -73,6 +74,8 @@ public class PlayerViewmodelAnimator : MonoBehaviour
             return;
 
         animator.SetFloat(SpeedHash, playerMovement.SpeedRatio);
+        // Регулируем скорость анимации рук по фактической скорости персонажа.
+        animator.SetFloat(SprintAnimationMultiplierHash, playerMovement.SprintAnimationMultiplier);
         animator.SetFloat(VerticalSpeedHash, playerMovement.VerticalVelocity);
 
         bool isPhysicallyGrounded = playerMovement.IsGrounded;

@@ -199,6 +199,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLook
   cameraTransform: {fileID: 6827311536476278540}
   mouseSensitivity: 0.06
+  ledgeClimbTargetPitch: 0
+  ledgeClimbPitchSpeed: 300
 --- !u!114 &2692815587688714831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,7 +315,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MemberAssembly
   unlockedSlotCount: 2
   installedMembers:
-  - {fileID: 11400000, guid: f75906661aba27c4896ab3739a69b4e8, type: 2}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -422,6 +424,7 @@ MonoBehaviour:
   traversalDetector: {fileID: -6372525234246893969}
   traversalResolver: {fileID: -61749087359978468}
   pathValidator: {fileID: 4789770326826038882}
+  maximumLedgeGrabLookDownAngle: 45
   memberAssembly: {fileID: 1663315588707905105}
   enhancedMobilityCapability: {fileID: 11400000, guid: 737833db12c05eb44be87685d66e619b, type: 2}
 --- !u!114 &4789770326826038882

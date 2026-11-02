@@ -21,8 +21,11 @@ public class PlayerMovementProfile : ScriptableObject
     [SerializeField] private float crouchSpeed = 2.2f;
     [SerializeField] private float strafeSpeedMultiplier = 0.9f;
     [SerializeField] private float groundAcceleration = 24f;
+    [SerializeField, Min(0.1f)] private float sprintAcceleration = 10f;
     [SerializeField] private float groundDeceleration = 28f;
     [SerializeField] private float airAcceleration = 7f;
+    // Отдельное ускорение при смене направления во время спринта.
+    [SerializeField, Min(0.1f)] private float sprintTurnAcceleration = 90f;
 
     [Header("Vertical Movement")]
     [SerializeField] private float gravity = -22f;
@@ -68,8 +71,10 @@ public class PlayerMovementProfile : ScriptableObject
     public float CrouchSpeed => crouchSpeed;
     public float StrafeSpeedMultiplier => strafeSpeedMultiplier;
     public float GroundAcceleration => groundAcceleration;
+    public float SprintAcceleration => sprintAcceleration;
     public float GroundDeceleration => groundDeceleration;
     public float AirAcceleration => airAcceleration;
+    public float SprintTurnAcceleration => sprintTurnAcceleration;
 
     public float Gravity => gravity;
     public float JumpHeight => jumpHeight;

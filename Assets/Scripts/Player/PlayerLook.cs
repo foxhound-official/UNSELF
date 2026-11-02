@@ -6,6 +6,15 @@ public class PlayerLook : MonoBehaviour
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private float mouseSensitivity = 0.08f;
 
+    [Header("Ledge Climb Look")]
+    [SerializeField, Range(-15f, 15f)] private float ledgeClimbTargetPitch = 0f;
+
+    [SerializeField, Min(1f)] private float ledgeClimbPitchSpeed = 300f;
+
+    private TraversalMotor traversalMotor;
+
+    public float Pitch => verticalRotation;
+
     private float horizontalRotation;
     private float verticalRotation;
 
@@ -15,6 +24,7 @@ public class PlayerLook : MonoBehaviour
     private void Awake()
     {
         horizontalRotation = transform.eulerAngles.y;
+        traversalMotor = GetComponent<TraversalMotor>();
     }
 
     private void Start()
@@ -25,6 +35,18 @@ public class PlayerLook : MonoBehaviour
 
     private void Update()
     {
+        if (traversalMotor != null && traversalMotor.IsLedgeClimbing)
+        {
+            verticalRotation = Mathf.MoveTowardsAngle(
+                verticalRotation,
+                ledgeClimbTargetPitch,
+                ledgeClimbPitchSpeed * Time.deltaTime
+            );
+
+            ApplyCameraRotation();
+            return;
+        }
+        
         if (Mouse.current == null)
             return;
 

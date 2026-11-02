@@ -49,7 +49,7 @@ MonoBehaviour:
   vaultExitBoostFallTime: 0.35
   ledgeClimbMaximumUpwardSpeed: 9
   ledgeClimbWallClearance: 0.05
-  ledgeClimbHangDepth: 1.35
+  ledgeClimbHangDepth: 1.65
   ledgeClimbTopClearance: 0.12
   ledgeClimbCrestForward: 0.25
   ledgeClimbLandingForward: 0.3

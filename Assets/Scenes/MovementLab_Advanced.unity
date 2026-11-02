@@ -15225,7 +15225,7 @@ GameObject:
   - component: {fileID: 125822787}
   - component: {fileID: 125822786}
   m_Layer: 0
-  m_Name: S_3_Wall_1 (6)
+  m_Name: S_5_Wall_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33995,9 +33995,6 @@ Transform:
   - {fileID: 1746572556}
   - {fileID: 1218883084}
   - {fileID: 1151567736}
-  - {fileID: 125822785}
-  - {fileID: 440417839}
-  - {fileID: 2123285242}
   - {fileID: 934464607}
   - {fileID: 705197817}
   - {fileID: 2122831178}
@@ -34023,6 +34020,9 @@ Transform:
   - {fileID: 2011482919}
   - {fileID: 683406714}
   - {fileID: 73187490}
+  - {fileID: 125822785}
+  - {fileID: 440417839}
+  - {fileID: 2123285242}
   - {fileID: 937220113}
   - {fileID: 1622203641}
   - {fileID: 1337531085}
@@ -38436,7 +38436,7 @@ GameObject:
   m_Component:
   - component: {fileID: 440417839}
   m_Layer: 0
-  m_Name: S_3_Sign (3)
+  m_Name: S_5_Sign_Way_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -38505,7 +38505,7 @@ GameObject:
   - component: {fileID: 465732636}
   - component: {fileID: 465732635}
   m_Layer: 0
-  m_Name: S_3_Wall_1 (11)
+  m_Name: S_5_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45118,7 +45118,7 @@ GameObject:
   m_Component:
   - component: {fileID: 566151276}
   m_Layer: 0
-  m_Name: S_3_Sign (6)
+  m_Name: S_5_Sign
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -96500,7 +96500,7 @@ GameObject:
   m_Component:
   - component: {fileID: 937220113}
   m_Layer: 0
-  m_Name: S_3_Sign (4)
+  m_Name: S_5_Sign_Way_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -115937,7 +115937,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1337531085}
   m_Layer: 0
-  m_Name: S_3_Sign (5)
+  m_Name: S_5_Sign_Way_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -130976,7 +130976,7 @@ GameObject:
   - component: {fileID: 1622203643}
   - component: {fileID: 1622203642}
   m_Layer: 0
-  m_Name: S_3_Wall_1 (8)
+  m_Name: S_5_Wall_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -170893,10 +170893,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 2812006783588748189, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4690737619415367569, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.1
@@ -171674,7 +171670,7 @@ GameObject:
   - component: {fileID: 2123285244}
   - component: {fileID: 2123285243}
   m_Layer: 0
-  m_Name: S_3_Wall_1 (7)
+  m_Name: S_5_Wall_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
