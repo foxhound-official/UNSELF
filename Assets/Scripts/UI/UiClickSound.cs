@@ -10,18 +10,23 @@ public class UiClickSound : MonoBehaviour
 
     private readonly List<RaycastResult> raycastResults = new();
 
+    private InputAction clickAction;
+    private InputAction pointAction;
+
+    private void Awake()
+    {
+        clickAction = GameControls.GetUIAction("Click");
+        pointAction = GameControls.GetUIAction("Point");
+    }
+
     private void Update()
     {
-        if (Mouse.current == null ||
-            !Mouse.current.leftButton.wasPressedThisFrame ||
-            EventSystem.current == null)
-        {
+        if (!clickAction.WasPressedThisFrame() || EventSystem.current == null)
             return;
-        }
 
         PointerEventData pointerData = new(EventSystem.current)
         {
-            position = Mouse.current.position.ReadValue()
+            position = pointAction.ReadValue<Vector2>()
         };
 
         raycastResults.Clear();

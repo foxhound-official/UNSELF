@@ -21,6 +21,7 @@ public class DialogueController : MonoBehaviour
 
     private CursorLockMode previousCursorLockMode;
     private bool previousCursorVisible;
+    private InputAction cancelAction;
 
     private void Awake()
     {
@@ -31,14 +32,15 @@ public class DialogueController : MonoBehaviour
         dialogueRunner.AddFunction<string, bool>("has_capability", HasCapability);
 
         dialogueRunner.AddCommandHandler<string>("run_action", RunAction);
+        cancelAction = GameControls.GetUIAction("Cancel");
     }
 
     private void Update()
     {
-        if (!dialogueRunner.IsDialogueRunning || Keyboard.current == null)
+        if (!dialogueRunner.IsDialogueRunning)
             return;
 
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (cancelAction.WasPressedThisFrame())
             _ = dialogueRunner.Stop();
     }
 

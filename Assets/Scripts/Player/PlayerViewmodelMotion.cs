@@ -38,6 +38,7 @@ public class PlayerViewmodelMotion : MonoBehaviour
     private Vector2 currentLookSway;
     private Vector3 currentMovementOffset;
     private float currentMovementRoll;
+    private InputAction lookAction;
 
     private Vector3 currentPosePosition;
     private Vector3 currentPoseRotation;
@@ -46,6 +47,8 @@ public class PlayerViewmodelMotion : MonoBehaviour
     {
         baseLocalPosition = transform.localPosition;
         baseLocalRotation = transform.localRotation;
+
+        lookAction = GameControls.GetPlayerAction("Look");
     }
 
     private void LateUpdate()
@@ -70,13 +73,11 @@ public class PlayerViewmodelMotion : MonoBehaviour
 
     private void UpdateLookSway()
     {
-        Vector2 mouseDelta = Mouse.current != null
-            ? Mouse.current.delta.ReadValue()
-            : Vector2.zero;
+        Vector2 lookDelta = lookAction.ReadValue<Vector2>();
 
         Vector2 targetSway = new Vector2(
-            -mouseDelta.x * lookSwayAmount,
-            mouseDelta.y * lookSwayAmount
+            -lookDelta.x * lookSwayAmount,
+            lookDelta.y * lookSwayAmount
         );
 
         targetSway.x = Mathf.Clamp(targetSway.x, -maximumLookSway, maximumLookSway);

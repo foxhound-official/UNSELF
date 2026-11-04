@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -574,7 +574,7 @@ MonoBehaviour:
   button: {fileID: 136693952}
   bindingText: {fileID: 874140080}
   actionName: Crouch
-  originalBindingPath: <Keyboard>/c
+  bindingPart: 
 --- !u!114 &136693951
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1133,7 +1133,7 @@ MonoBehaviour:
   button: {fileID: 210748960}
   bindingText: {fileID: 1634251374}
   actionName: Move
-  originalBindingPath: <Keyboard>/s
+  bindingPart: down
 --- !u!114 &210748959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3247,7 +3247,7 @@ MonoBehaviour:
   button: {fileID: 1155502249}
   bindingText: {fileID: 708792012}
   actionName: Interact
-  originalBindingPath: <Keyboard>/e
+  bindingPart: 
 --- !u!114 &1155502248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3649,7 +3649,7 @@ MonoBehaviour:
   button: {fileID: 1192397512}
   bindingText: {fileID: 1888627430}
   actionName: Move
-  originalBindingPath: <Keyboard>/w
+  bindingPart: up
 --- !u!1 &1216162068
 GameObject:
   m_ObjectHideFlags: 0
@@ -5800,7 +5800,7 @@ MonoBehaviour:
   button: {fileID: 1779559475}
   bindingText: {fileID: 408708640}
   actionName: Move
-  originalBindingPath: <Keyboard>/d
+  bindingPart: right
 --- !u!114 &1779559474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6036,7 +6036,7 @@ MonoBehaviour:
   button: {fileID: 1825691720}
   bindingText: {fileID: 1293540342}
   actionName: Sprint
-  originalBindingPath: <Keyboard>/leftShift
+  bindingPart: 
 --- !u!114 &1825691719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6197,7 +6197,7 @@ MonoBehaviour:
   button: {fileID: 1826242580}
   bindingText: {fileID: 782961314}
   actionName: MemberMenu
-  originalBindingPath: <Keyboard>/tab
+  bindingPart: 
 --- !u!114 &1826242579
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6358,7 +6358,7 @@ MonoBehaviour:
   button: {fileID: 1826537538}
   bindingText: {fileID: 155923886}
   actionName: Move
-  originalBindingPath: <Keyboard>/a
+  bindingPart: left
 --- !u!114 &1826537537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7619,7 +7619,7 @@ MonoBehaviour:
   button: {fileID: 2100091617}
   bindingText: {fileID: 1162752107}
   actionName: Jump
-  originalBindingPath: <Keyboard>/space
+  bindingPart: 
 --- !u!114 &2100091616
 MonoBehaviour:
   m_ObjectHideFlags: 0

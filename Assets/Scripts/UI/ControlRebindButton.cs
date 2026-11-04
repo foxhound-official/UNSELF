@@ -1,4 +1,3 @@
-
 using System;
 using TMPro;
 using UnityEngine;
@@ -12,7 +11,7 @@ public class ControlRebindButton : MonoBehaviour
 
     [Header("Input Binding")]
     [SerializeField] private string actionName;
-    [SerializeField] private string originalBindingPath;
+    [SerializeField] private string bindingPart;
 
     private static ControlRebindButton activeRebind;
 
@@ -28,11 +27,11 @@ public class ControlRebindButton : MonoBehaviour
             button = GetComponent<Button>();
 
         action = GameControls.GetPlayerAction(actionName);
-        bindingIndex = GameControls.FindBindingIndex(action, originalBindingPath);
+        bindingIndex = GameControls.FindBindingIndex(action, bindingPart);
 
         if (bindingIndex < 0)
         {
-            Debug.LogError($"Binding not found: {actionName} / {originalBindingPath}", this);
+            Debug.LogError($"Binding not found: {actionName} / {bindingPart}", this);
             return;
         }
 
@@ -70,6 +69,7 @@ public class ControlRebindButton : MonoBehaviour
         previousOverride = action.bindings[bindingIndex].overridePath;
 
         action.Disable();
+
         bindingText.text = "PRESS KEY... ESC TO CANCEL";
 
         operation = action.PerformInteractiveRebinding(bindingIndex)
@@ -84,8 +84,10 @@ public class ControlRebindButton : MonoBehaviour
             .OnComplete(_ => FinishRebind(true))
             .OnCancel(_ => FinishRebind(false));
 
-        // Для клавиатурных назначений не принимаем кнопки мыши.
-        if (originalBindingPath.StartsWith("<Keyboard>", StringComparison.OrdinalIgnoreCase))
+        // Для клавиатурных действий исключаем случайный выбор кнопок мыши.
+        string originalPath = action.bindings[bindingIndex].path;
+
+        if (originalPath.StartsWith("<Keyboard>", StringComparison.OrdinalIgnoreCase))
             operation.WithControlsExcluding("<Mouse>/*");
 
         operation.Start();

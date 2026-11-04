@@ -27,8 +27,8 @@ public class DebugSectorTeleports : MonoBehaviour
 
     private void Update()
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (playerMotor == null || Keyboard.current == null)
+        // Отладочная телепортация доступна в Editor и Development Build.
+        if (!Debug.isDebugBuild || playerMotor == null || Keyboard.current == null)
             return;
 
         for (int i = 0; i < Hotkeys.Length; i++)
@@ -39,7 +39,6 @@ public class DebugSectorTeleports : MonoBehaviour
             TeleportToSector(i);
             return;
         }
-#endif
     }
 
     private void TeleportToSector(int index)

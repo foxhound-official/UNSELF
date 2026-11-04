@@ -7,10 +7,24 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private float interactionDistance = 2.5f;
     [SerializeField] private InteractionPromptUI interactionPrompt;
     private InputAction interactAction;
+    private string interactKeyLabel;
 
     private void Awake()
     {
         interactAction = GameControls.GetPlayerAction("Interact");
+
+        UpdateInteractKeyLabel();
+        GameControls.BindingsChanged += UpdateInteractKeyLabel;
+    }
+
+    private void OnDestroy()
+    {
+        GameControls.BindingsChanged -= UpdateInteractKeyLabel;
+    }
+
+    private void UpdateInteractKeyLabel()
+    {
+        interactKeyLabel = GameControls.GetBindingLabel("Interact");
     }
 
     private void Update()
@@ -51,10 +65,7 @@ public class PlayerInteraction : MonoBehaviour
         }
 
         if (interactionPrompt != null)
-        {
-            string key = GameControls.GetBindingLabel("Interact", "<Keyboard>/f");
-            interactionPrompt.Show($"[{key}] {interactable.InteractionPrompt}");
-        }
+            interactionPrompt.Show($"[{interactKeyLabel}] {interactable.InteractionPrompt}");
     }
 
     private void TryInteract()

@@ -50,6 +50,7 @@ public class MemberMenuController : MonoBehaviour
 
     private CursorLockMode previousCursorLockMode;
     private bool previousCursorVisible;
+    private InputAction cancelAction;
 
     private bool CanEditAssembly =>
         currentMode == MemberMenuMode.EditAssembly;
@@ -57,7 +58,9 @@ public class MemberMenuController : MonoBehaviour
     private void Awake()
     {
         memberMenuAction = GameControls.GetPlayerAction("MemberMenu");
+        cancelAction = GameControls.GetUIAction("Cancel");
     }
+
 
     private void Start()
     {
@@ -75,7 +78,7 @@ public class MemberMenuController : MonoBehaviour
             return;
         }
 
-        if (isOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (isOpen && cancelAction.WasPressedThisFrame())
             CloseMenu();
     }
 

@@ -12,6 +12,7 @@ public class PlayerLook : MonoBehaviour
     [SerializeField, Min(1f)] private float ledgeClimbPitchSpeed = 300f;
 
     private TraversalMotor traversalMotor;
+    private InputAction lookAction;
 
     public float Pitch => verticalRotation;
 
@@ -25,6 +26,7 @@ public class PlayerLook : MonoBehaviour
     {
         horizontalRotation = transform.eulerAngles.y;
         traversalMotor = GetComponent<TraversalMotor>();
+        lookAction = GameControls.GetPlayerAction("Look");
     }
 
     private void Start()
@@ -46,19 +48,12 @@ public class PlayerLook : MonoBehaviour
             ApplyCameraRotation();
             return;
         }
-        
-        if (Mouse.current == null)
-            return;
 
-        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        Vector2 lookDelta = lookAction.ReadValue<Vector2>();
         float sensitivity = mouseSensitivity * GameControls.MouseSensitivityMultiplier;
 
-        float mouseX = mouseDelta.x * sensitivity;
-        float mouseY = mouseDelta.y * sensitivity;
-
-        horizontalRotation += mouseX;
-
-        verticalRotation -= mouseY;
+        horizontalRotation += lookDelta.x * sensitivity;
+        verticalRotation -= lookDelta.y * sensitivity;
         verticalRotation = Mathf.Clamp(verticalRotation, -80f, 80f);
 
         ApplyCameraRotation();

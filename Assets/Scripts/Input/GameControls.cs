@@ -7,6 +7,7 @@ public static class GameControls
 {
     private const string BindingsKey = "UNSELF_InputBindings";
     private const string SensitivityKey = "UNSELF_MouseSensitivity";
+    private const string KeyboardMouseGroup = "Keyboard&Mouse";
 
     private static bool initialized;
 
@@ -18,6 +19,15 @@ public static class GameControls
         {
             Initialize();
             return InputSystem.actions.FindActionMap("Player", true);
+        }
+    }
+
+    public static InputActionMap UIMap
+    {
+        get
+        {
+            Initialize();
+            return InputSystem.actions.FindActionMap("UI", true);
         }
     }
 
@@ -66,6 +76,8 @@ public static class GameControls
         }
 
         actions.FindActionMap("Player", true).Enable();
+        actions.FindActionMap("UI", true).Enable();
+
         initialized = true;
     }
 
@@ -74,23 +86,54 @@ public static class GameControls
         return PlayerMap.FindAction(actionName, true);
     }
 
-    public static int FindBindingIndex(InputAction action, string originalPath)
+    public static InputAction GetUIAction(string actionName)
     {
+        return UIMap.FindAction(actionName, true);
+    }
+
+    public static int FindBindingIndex(InputAction action, string bindingPart = null)
+    {
+        // Ищем основную привязку клавиатуры или мыши, а не конкретную клавишу.
         for (int i = 0; i < action.bindings.Count; i++)
         {
-            if (string.Equals(action.bindings[i].path, originalPath, StringComparison.OrdinalIgnoreCase))
-                return i;
+            InputBinding binding = action.bindings[i];
+
+            if (binding.isComposite)
+                continue;
+
+            if (!HasBindingGroup(binding.groups, KeyboardMouseGroup))
+                continue;
+
+            if (!string.IsNullOrEmpty(bindingPart) &&
+                !string.Equals(binding.name, bindingPart, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            return i;
         }
 
         return -1;
     }
 
-    public static string GetBindingLabel(string actionName, string originalPath)
+    public static string GetBindingLabel(string actionName)
     {
         InputAction action = GetPlayerAction(actionName);
-        int index = FindBindingIndex(action, originalPath);
+        int index = FindBindingIndex(action);
 
         return index >= 0 ? action.GetBindingDisplayString(index) : "?";
+    }
+
+    private static bool HasBindingGroup(string groups, string groupName)
+    {
+        if (string.IsNullOrEmpty(groups))
+            return false;
+
+        foreach (string group in groups.Split(';'))
+        {
+            if (string.Equals(group, groupName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     public static bool HasBindingConflict(InputAction editedAction, int editedIndex)
