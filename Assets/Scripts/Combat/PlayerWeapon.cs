@@ -11,6 +11,9 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private WeaponRecoil weaponRecoil;
     [SerializeField] private MuzzleFlash muzzleFlash;
 
+    private InputAction attackAction;
+    private InputAction reloadAction;
+
     private int currentAmmo;
     private int reserveAmmo;
 
@@ -28,6 +31,9 @@ public class PlayerWeapon : MonoBehaviour
     {
         currentAmmo = weapon.MagazineSize;
         reserveAmmo = weapon.StartingReserveAmmo;
+
+        attackAction = GameControls.GetPlayerAction("Attack");
+        reloadAction = GameControls.GetPlayerAction("Reload");
     }
 
     private void Update()
@@ -43,10 +49,10 @@ public class PlayerWeapon : MonoBehaviour
         if (Cursor.lockState != CursorLockMode.Locked)
             return;
 
-        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+        if (reloadAction.WasPressedThisFrame())
             StartReload();
 
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        if (attackAction.WasPressedThisFrame())
             TryFire();
     }
 

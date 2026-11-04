@@ -6,12 +6,18 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private Camera playerCamera;
     [SerializeField] private float interactionDistance = 2.5f;
     [SerializeField] private InteractionPromptUI interactionPrompt;
+    private InputAction interactAction;
+
+    private void Awake()
+    {
+        interactAction = GameControls.GetPlayerAction("Interact");
+    }
 
     private void Update()
     {
         UpdateInteractionPrompt();
 
-        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        if (interactAction.WasPressedThisFrame())
             TryInteract();
     }
 
@@ -45,7 +51,10 @@ public class PlayerInteraction : MonoBehaviour
         }
 
         if (interactionPrompt != null)
-            interactionPrompt.Show($"[F] {interactable.InteractionPrompt}");
+        {
+            string key = GameControls.GetBindingLabel("Interact", "<Keyboard>/f");
+            interactionPrompt.Show($"[{key}] {interactable.InteractionPrompt}");
+        }
     }
 
     private void TryInteract()

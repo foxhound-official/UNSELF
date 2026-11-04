@@ -34,6 +34,8 @@ public class MemberMenuController : MonoBehaviour
     [SerializeField] private Transform assemblyList;
     [SerializeField] private AssemblySlotUI assemblySlotTemplate;
 
+    private InputAction memberMenuAction;
+
     private readonly List<AssemblySlotUI> assemblySlotViews = new();
 
     private MemberDefinition selectedMember;
@@ -52,6 +54,11 @@ public class MemberMenuController : MonoBehaviour
     private bool CanEditAssembly =>
         currentMode == MemberMenuMode.EditAssembly;
 
+    private void Awake()
+    {
+        memberMenuAction = GameControls.GetPlayerAction("MemberMenu");
+    }
+
     private void Start()
     {
         CreateAssemblySlots();
@@ -62,16 +69,13 @@ public class MemberMenuController : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current == null)
-            return;
-
-        if (Keyboard.current.tabKey.wasPressedThisFrame)
+        if (memberMenuAction.WasPressedThisFrame())
         {
             ToggleMenu();
             return;
         }
 
-        if (isOpen && Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (isOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             CloseMenu();
     }
 

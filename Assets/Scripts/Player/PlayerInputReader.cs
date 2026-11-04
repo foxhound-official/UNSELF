@@ -1,9 +1,15 @@
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [DefaultExecutionOrder(-100)]
 public class PlayerInputReader : MonoBehaviour
 {
+    private InputAction moveAction;
+    private InputAction jumpAction;
+    private InputAction sprintAction;
+    private InputAction crouchAction;
+
     public Vector2 Move { get; private set; }
 
     public bool JumpPressed { get; private set; }
@@ -14,49 +20,33 @@ public class PlayerInputReader : MonoBehaviour
     public bool CrouchPressed { get; private set; }
     public bool CrouchHeld { get; private set; }
 
-    private void Update()
+    private void Awake()
     {
-        if (Keyboard.current == null)
-        {
-            ResetInput();
-            return;
-        }
-
-        float horizontal = 0f;
-        float vertical = 0f;
-
-        if (Keyboard.current.wKey.isPressed)
-            vertical += 1f;
-
-        if (Keyboard.current.sKey.isPressed)
-            vertical -= 1f;
-
-        if (Keyboard.current.dKey.isPressed)
-            horizontal += 1f;
-
-        if (Keyboard.current.aKey.isPressed)
-            horizontal -= 1f;
-
-        Move = Vector2.ClampMagnitude(new Vector2(horizontal, vertical), 1f);
-
-        JumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame;
-        JumpHeld = Keyboard.current.spaceKey.isPressed;
-
-        SprintHeld = Keyboard.current.leftShiftKey.isPressed;
-
-        CrouchPressed = Keyboard.current.leftCtrlKey.wasPressedThisFrame;
-        CrouchHeld = Keyboard.current.leftCtrlKey.isPressed;
+        moveAction = GameControls.GetPlayerAction("Move");
+        jumpAction = GameControls.GetPlayerAction("Jump");
+        sprintAction = GameControls.GetPlayerAction("Sprint");
+        crouchAction = GameControls.GetPlayerAction("Crouch");
     }
 
-    private void ResetInput()
+    private void Update()
+    {
+        Move = Vector2.ClampMagnitude(moveAction.ReadValue<Vector2>(), 1f);
+
+        JumpPressed = jumpAction.WasPressedThisFrame();
+        JumpHeld = jumpAction.IsPressed();
+
+        SprintHeld = sprintAction.IsPressed();
+
+        CrouchPressed = crouchAction.WasPressedThisFrame();
+        CrouchHeld = crouchAction.IsPressed();
+    }
+
+    private void OnDisable()
     {
         Move = Vector2.zero;
-
         JumpPressed = false;
         JumpHeld = false;
-
         SprintHeld = false;
-
         CrouchPressed = false;
         CrouchHeld = false;
     }

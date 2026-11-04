@@ -51,9 +51,10 @@ public class PlayerLook : MonoBehaviour
             return;
 
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        float sensitivity = mouseSensitivity * GameControls.MouseSensitivityMultiplier;
 
-        float mouseX = mouseDelta.x * mouseSensitivity;
-        float mouseY = mouseDelta.y * mouseSensitivity;
+        float mouseX = mouseDelta.x * sensitivity;
+        float mouseY = mouseDelta.y * sensitivity;
 
         horizontalRotation += mouseX;
 
