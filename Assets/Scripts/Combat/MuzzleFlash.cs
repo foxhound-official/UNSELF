@@ -27,6 +27,12 @@ public class MuzzleFlash : MonoBehaviour
         flashEndTime = Time.time + flashDuration;
         SetFlashActive(true);
     }
+    
+    public void Stop()
+    {
+        flashEndTime = 0f;
+        SetFlashActive(false);
+    }
 
     private void SetFlashActive(bool active)
     {

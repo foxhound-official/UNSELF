@@ -162,6 +162,7 @@ GameObject:
   - component: {fileID: 2542528788446594114}
   - component: {fileID: 1857696973418738092}
   - component: {fileID: 1375624109738447693}
+  - component: {fileID: 3185167488834699192}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -335,7 +336,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b566fd3a84816d140a16570f11e905fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerWeapon
-  weapon: {fileID: 11400000, guid: 766ab0646226e614cba1175e88a5795d, type: 2}
   playerCamera: {fileID: 8060483051278613544}
   hitMask:
     serializedVersion: 2
@@ -536,6 +536,24 @@ MonoBehaviour:
   traversalMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &3185167488834699192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14082279e67df9d4ca628d92fd856507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerEquipment
+  equipment:
+  - id: pistol_standard
+    type: 1
+    weapon: {fileID: 11400000, guid: 766ab0646226e614cba1175e88a5795d, type: 2}
+    viewmodelObject: {fileID: 8580291385350224341}
+    available: 1
 --- !u!1 &2798576144553698930
 GameObject:
   m_ObjectHideFlags: 0
@@ -1112,14 +1130,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5585123957939840303}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.65264016, y: -0.3591793, z: -0.5989138, w: -0.29385966}
-  m_LocalPosition: {x: -0.09500004, y: 0.003999993, z: -0.02100008}
+  m_LocalRotation: {x: 0, y: -0.10912705, z: 0, w: 0.99402785}
+  m_LocalPosition: {x: 0.331, y: -0.249, z: 0.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5998694998309082017}
   m_Father: {fileID: 9099338635232804395}
-  m_LocalEulerAnglesHint: {x: -54.469, y: -100.901, z: 191.598}
+  m_LocalEulerAnglesHint: {x: 0, y: -12.53, z: 0}
 --- !u!1 &5648782821917129517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1473,7 +1491,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 6db00712d73fa554fa80ac79aedeb7af, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
