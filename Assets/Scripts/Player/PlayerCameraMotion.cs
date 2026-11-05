@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 public class PlayerCameraMotion : MonoBehaviour
@@ -64,6 +65,10 @@ public class PlayerCameraMotion : MonoBehaviour
     [SerializeField] private float sprintFovIncrease = 3f;
     [SerializeField] private float fovResponseSpeed = 5f;
 
+    [Header("Focus Mode")] 
+    [SerializeField, Min(1f)] private float focusFovReduction = 20f;
+    [SerializeField, Min(0.1f)] private float focusFovResponseSpeed = 9f;
+
     [Header("Landing")]
     [SerializeField] private float landingImpactThreshold = 2.5f;
     [SerializeField] private float landingImpulseScale = 0.09f;
@@ -80,6 +85,7 @@ public class PlayerCameraMotion : MonoBehaviour
     private Vector3 currentBobOffset;
     private Vector3 currentInertiaOffset;
     private Vector3 previousLocalVelocity;
+    private InputAction focusAction;
 
     private float baseFieldOfView;
     private float bobPhase;
@@ -109,6 +115,8 @@ public class PlayerCameraMotion : MonoBehaviour
 
         if (playerCamera != null)
             baseFieldOfView = playerCamera.fieldOfView;
+
+        focusAction = GameControls.GetPlayerAction("Focus");
     }
 
     private void OnEnable()
@@ -452,12 +460,51 @@ public class PlayerCameraMotion : MonoBehaviour
         if (playerCamera == null)
             return;
 
-        float sprintAmount = playerMovement.IsGrounded && playerMovement.IsSprinting ? playerMovement.SprintRatio : 0f;
-        float targetFieldOfView = baseFieldOfView + sprintFovIncrease * sprintAmount;
-        float blend = 1f - Mathf.Exp(-fovResponseSpeed * Time.deltaTime);
+        bool canFocus =
+            focusAction != null &&
+            focusAction.IsPressed() &&
+            Cursor.lockState == CursorLockMode.Locked &&
+            playerMovement != null &&
+            playerMovement.enabled &&
+            !playerMovement.IsSprinting &&
+            !playerMovement.IsSliding &&
+            (traversalMotor == null || !traversalMotor.IsTraversing);
 
-        playerCamera.fieldOfView =
-            Mathf.Lerp(playerCamera.fieldOfView, targetFieldOfView, blend);
+        float sprintAmount =
+            playerMovement != null &&
+            playerMovement.IsGrounded &&
+            playerMovement.IsSprinting
+                ? playerMovement.SprintRatio
+                : 0f;
+
+        float targetFieldOfView;
+
+        if (canFocus)
+        {
+            targetFieldOfView = Mathf.Max(
+                20f,
+                baseFieldOfView - focusFovReduction
+            );
+        }
+        else
+        {
+            targetFieldOfView =
+                baseFieldOfView +
+                sprintFovIncrease * sprintAmount;
+        }
+
+        float responseSpeed = canFocus
+            ? focusFovResponseSpeed
+            : fovResponseSpeed;
+
+        float blend =
+            1f - Mathf.Exp(-responseSpeed * Time.deltaTime);
+
+        playerCamera.fieldOfView = Mathf.Lerp(
+            playerCamera.fieldOfView,
+            targetFieldOfView,
+            blend
+        );
     }
 
     private void UpdateLanding()

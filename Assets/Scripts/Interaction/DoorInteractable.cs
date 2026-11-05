@@ -5,11 +5,15 @@ using UnityEngine;
 public class DoorInteractable : MonoBehaviour, IInteractable, IConditionalInteractable
 {
     [Header("Door Rotation")]
-    [SerializeField, Range(-180f, 180f)] private float openAngle = 95f;
-    [SerializeField, Min(1f)] private float rotationSpeed = 140f;
+    [SerializeField, Range(-180f, 180f)]
+    private float openAngle = 95f;
+
+    [SerializeField, Min(1f)]
+    private float rotationSpeed = 140f;
 
     [Header("Initial State")]
     [SerializeField] private bool startOpened;
+    [SerializeField] private bool startLocked;
 
     private Rigidbody doorRigidbody;
 
@@ -18,12 +22,18 @@ public class DoorInteractable : MonoBehaviour, IInteractable, IConditionalIntera
 
     private bool isOpen;
     private bool isMoving;
+    private bool isLocked;
 
     public bool IsOpen => isOpen;
+    public bool IsLocked => isLocked;
     public bool CanInteract => !isMoving;
 
     public string InteractionPrompt =>
-        isOpen ? "ЗАКРЫТЬ ДВЕРЬ" : "ОТКРЫТЬ ДВЕРЬ";
+        isLocked
+            ? "ДВЕРЬ ЗАПЕРТА"
+            : isOpen
+                ? "ЗАКРЫТЬ ДВЕРЬ"
+                : "ОТКРЫТЬ ДВЕРЬ";
 
     private void Awake()
     {
@@ -33,9 +43,10 @@ public class DoorInteractable : MonoBehaviour, IInteractable, IConditionalIntera
         openedLocalRotation = closedLocalRotation *
             Quaternion.Euler(0f, openAngle, 0f);
 
-        isOpen = startOpened;
+        isLocked = startLocked;
+        isOpen = startOpened && !isLocked;
 
-        if (startOpened)
+        if (isOpen)
         {
             transform.localRotation = openedLocalRotation;
             doorRigidbody.rotation = transform.rotation;
@@ -73,10 +84,23 @@ public class DoorInteractable : MonoBehaviour, IInteractable, IConditionalIntera
 
     public void Interact()
     {
-        if (!CanInteract)
+        if (!CanInteract || isLocked)
             return;
 
         isOpen = !isOpen;
         isMoving = true;
+    }
+
+    public void Lock()
+    {
+        if (isOpen || isMoving)
+            return;
+
+        isLocked = true;
+    }
+
+    public void Unlock()
+    {
+        isLocked = false;
     }
 }

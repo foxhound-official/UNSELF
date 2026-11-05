@@ -44,19 +44,19 @@ public class BootSequence : MonoBehaviour
 
         yield return companyBootSequence.Play();
 
-        yield return TypeSimpleLine("> INITIALIZING MEMBER SYSTEM...");
-        yield return TypeStatusLine("> HOST:", "[DETECTED]", "terminal_confirm");
-        yield return TypeStatusLine("> BIOLOGICAL STATUS:", "[ACCEPTABLE]", "terminal_confirm");
-        yield return TypeStatusLine("> MEMORY STRUCTURE:", "[ERROR]", "terminal_error");
-        yield return TypeStatusLine("> PERSONALITY CORE:", "[NOT FOUND]", "terminal_error");
-        yield return TypeStatusLine("> Y.O.U. MODULE:", "[ACTIVE]", "terminal_confirm");
-        yield return TypeSimpleLine("> ATTEMPTING RECOVERY...");
-        yield return TypeStatusLine("> SYSTEM STATUS:", "[READY]", "terminal_confirm");
+        yield return TypeSimpleLine("> ЗАПУСК ПРОТОКОЛА MEMBER...");
+        yield return TypeStatusLine("> НОСИТЕЛЬ:", "[ПОДКЛЮЧЕН]", "terminal_confirm");
+        yield return TypeStatusLine("> БИОМЕТРИЯ:", "[В ПРЕДЕЛАХ НОРМЫ]", "terminal_confirm");
+        yield return TypeStatusLine("> МАТРИЦА ПАМЯТИ:", "[ПОВРЕЖДЕНА]", "terminal_error");
+        yield return TypeStatusLine("> ЛИЧНОСТНОЕ ЯДРО:", "[НЕ НАЙДЕНО]", "terminal_error");
+        yield return TypeStatusLine("> МОДУЛЬ Y.O.U.:", "[АКТИВЕН]", "terminal_confirm");
+        yield return TypeSimpleLine("> ИНИЦИИРУЕТСЯ ВОССТАНОВЛЕНИЕ...");
+        yield return TypeStatusLine("> СТАТУС СИСТЕМЫ:", "[ГОТОВА]", "terminal_confirm");
 
         yield return new WaitForSeconds(finalDelay);
 
         completedText += "\n";
-        yield return TypeSimpleLine("> WAKE", wakeDelay);
+        yield return TypeSimpleLine("> ПРОСНИСЬ", wakeDelay);
 
         wakeUpSequence.Begin();
         yield return monitorBootTransition.Play();
