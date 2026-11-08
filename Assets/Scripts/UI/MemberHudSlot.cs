@@ -69,7 +69,7 @@ public class MemberHudSlot : MonoBehaviour
 
     public void SetMember(MemberDefinition member)
     {
-        memberColor = GetClassColor(member.Class);
+        memberColor = MemberClassColors.Get(member.Class);
 
         headerText.text =
             $"{member.Code} // {member.MemberName}";
