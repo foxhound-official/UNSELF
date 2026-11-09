@@ -114,12 +114,22 @@ public static class GameControls
         return -1;
     }
 
+
     public static string GetBindingLabel(string actionName)
     {
         InputAction action = GetPlayerAction(actionName);
         int index = FindBindingIndex(action);
 
-        return index >= 0 ? action.GetBindingDisplayString(index) : "?";
+        return GetBindingLabel(action, index);
+    }
+
+    public static string GetBindingLabel(InputAction action, int bindingIndex)
+    {
+        if (action == null || bindingIndex < 0 || bindingIndex >= action.bindings.Count)
+            return "?";
+
+        // Получаем название физической клавиши без учёта раскладки Windows.
+        return action.bindings[bindingIndex].ToDisplayString();
     }
 
     private static bool HasBindingGroup(string groups, string groupName)

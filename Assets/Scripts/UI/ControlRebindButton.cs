@@ -57,7 +57,7 @@ public class ControlRebindButton : MonoBehaviour
         if (action == null || bindingIndex < 0 || bindingText == null)
             return;
 
-        bindingText.text = action.GetBindingDisplayString(bindingIndex);
+        bindingText.text = GameControls.GetBindingLabel(action, bindingIndex);
     }
 
     private void StartRebind()
