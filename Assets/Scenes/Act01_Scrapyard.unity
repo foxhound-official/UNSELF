@@ -191510,17 +191510,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 733251168}
     m_Modifications:
-    - target: {fileID: 1663315588707905105, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
-      propertyPath: unlockedSlotCount
-      value: 5
-      objectReference: {fileID: 0}
     - target: {fileID: 2045478783104088046, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 2502117316157530115, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
-      propertyPath: skipSequence
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4690737619415367569, guid: 38c825ba7b0862842b9cc1ca88375d9e, type: 3}
       propertyPath: m_LocalPosition.x
