@@ -1,14 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 [RequireComponent(typeof(AudioSource))]
 public class AudioService : MonoBehaviour
 {
     public static AudioService Instance { get; private set; }
 
-    [SerializeField]
-    private SoundLibrary soundLibrary;
+    [SerializeField] private SoundLibrary soundLibrary;
 
     private AudioSource audioSource;
+    private readonly Dictionary<AudioMixerGroup, AudioSource> sources = new();
 
     private AudioSource[] footstepSources;
     private int nextFootstepSource;
@@ -22,12 +24,13 @@ public class AudioService : MonoBehaviour
         }
 
         Instance = this;
-
         DontDestroyOnLoad(gameObject);
 
         audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
 
-        // Отдельные каналы позволяют менять тон шагов независимо от остальных звуков.
+        // Для шагов сохраняем отдельные источники с независимой настройкой Pitch.
         footstepSources = new AudioSource[2];
 
         for (int i = 0; i < footstepSources.Length; i++)
@@ -36,8 +39,15 @@ public class AudioService : MonoBehaviour
             source.playOnAwake = false;
             source.spatialBlend = 0f;
             source.outputAudioMixerGroup = audioSource.outputAudioMixerGroup;
+
             footstepSources[i] = source;
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     public static void Play(string soundId, float volumeMultiplier = 1f)
@@ -51,9 +61,14 @@ public class AudioService : MonoBehaviour
         Instance.PlayInternal(soundId, volumeMultiplier);
     }
 
+    public static void PlayUI(string soundId)
+    {
+        Play(soundId);
+    }
+
     private void PlayInternal(string soundId, float volumeMultiplier)
     {
-        if (!soundLibrary.TryGetSound(soundId, out AudioClip clip, out float volume))
+        if (soundLibrary == null || !soundLibrary.TryGetSound(soundId, out AudioClip clip, out float volume, out AudioMixerGroup output))
         {
             Debug.LogWarning($"Sound '{soundId}' was not found in SoundLibrary.");
             return;
@@ -65,7 +80,26 @@ public class AudioService : MonoBehaviour
             return;
         }
 
-        audioSource.PlayOneShot(clip, volume * Mathf.Clamp01(volumeMultiplier));
+        AudioSource source = GetSource(output);
+        source.PlayOneShot(clip, volume * Mathf.Clamp01(volumeMultiplier));
+    }
+
+    private AudioSource GetSource(AudioMixerGroup output)
+    {
+        // Используем основной источник для звуков без группы и общих SFX.
+        if (output == null || output == audioSource.outputAudioMixerGroup)
+            return audioSource;
+
+        if (sources.TryGetValue(output, out AudioSource source))
+            return source;
+
+        source = gameObject.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.spatialBlend = 0f;
+        source.outputAudioMixerGroup = output;
+
+        sources.Add(output, source);
+        return source;
     }
 
     public static void PlayFootstep(string soundId, float volumeMultiplier, float pitch)
@@ -78,7 +112,7 @@ public class AudioService : MonoBehaviour
 
     private void PlayFootstepInternal(string soundId, float volumeMultiplier, float pitch)
     {
-        if (soundLibrary == null || !soundLibrary.TryGetSound(soundId, out AudioClip clip, out float volume))
+        if (soundLibrary == null || !soundLibrary.TryGetSound(soundId, out AudioClip clip, out float volume, out AudioMixerGroup output))
             return;
 
         if (clip == null)
@@ -87,6 +121,7 @@ public class AudioService : MonoBehaviour
         AudioSource source = footstepSources[nextFootstepSource];
         nextFootstepSource = (nextFootstepSource + 1) % footstepSources.Length;
 
+        source.outputAudioMixerGroup = output != null ? output : audioSource.outputAudioMixerGroup;
         source.pitch = Mathf.Clamp(pitch, 0.5f, 2f);
         source.PlayOneShot(clip, volume * Mathf.Clamp01(volumeMultiplier));
     }

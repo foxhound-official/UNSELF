@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 [CreateAssetMenu(
     fileName = "SoundLibrary",
@@ -16,32 +17,37 @@ public class SoundLibrary : ScriptableObject
 
         [Range(0f, 1f)]
         public float volume = 1f;
+
+        public AudioMixerGroup output;
     }
 
     [SerializeField]
     private List<SoundEntry> sounds = new();
 
-    public bool TryGetSound(string id, out AudioClip clip, out float volume)
+    public bool TryGetSound(string id, out AudioClip clip, out float volume, out AudioMixerGroup output)
     {
         foreach (SoundEntry sound in sounds)
         {
             if (sound.id != id)
                 continue;
 
-            if (sound.clips == null || sound.clips.Count == 0)
-            {
-                clip = null;
-                volume = sound.volume;
-                return true;
-            }
+            clip = sound.clips != null && sound.clips.Count > 0
+                ? sound.clips[UnityEngine.Random.Range(0, sound.clips.Count)]
+                : null;
 
-            clip = sound.clips[UnityEngine.Random.Range(0, sound.clips.Count)];
             volume = sound.volume;
+            output = sound.output;
             return true;
         }
 
         clip = null;
         volume = 1f;
+        output = null;
         return false;
+    }
+
+    public bool TryGetSound(string id, out AudioClip clip, out float volume)
+    {
+        return TryGetSound(id, out clip, out volume, out _);
     }
 }

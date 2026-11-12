@@ -10,60 +10,74 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79c181dc57a99de4d9970b7a814909c3, type: 3}
-  m_Name: MainSoundLibrary
+  m_Name: SoundLibrary
   m_EditorClassIdentifier: Assembly-CSharp::SoundLibrary
   sounds:
-  - id: test
-    clips:
-    - {fileID: 0}
-    volume: 1
   - id: terminal_key
     clips:
     - {fileID: 8300000, guid: 25e2707ed79f00b44b7ee93782610c5a, type: 3}
     - {fileID: 8300000, guid: d511d1a6af1e693458d71c532cd06126, type: 3}
     - {fileID: 8300000, guid: 3a01dcd65504f264dab77b17ff6fc81d, type: 3}
     volume: 1
+    output: {fileID: -527514351327704101, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: terminal_confirm
     clips:
     - {fileID: 8300000, guid: 0f6fe42800553cd49bad5055c81cb4c5, type: 3}
     volume: 1
+    output: {fileID: -527514351327704101, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: terminal_error
     clips:
     - {fileID: 8300000, guid: fcafd526254e5ec4aa2b7a7df5acae17, type: 3}
     volume: 1
+    output: {fileID: -527514351327704101, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: screen_flicker
     clips:
     - {fileID: 8300000, guid: b5119f35d71402b4db93f74eb1426d6b, type: 3}
     volume: 0.2
+    output: {fileID: -527514351327704101, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: screen_open
     clips:
     - {fileID: 8300000, guid: 779d64ca2b9d0d04babc949e586dc347, type: 3}
     volume: 0.25
+    output: {fileID: -527514351327704101, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: interface_start
     clips:
     - {fileID: 8300000, guid: 322df168a9278ce4d896cd72df30b70d, type: 3}
     volume: 0.2
+    output: {fileID: -527514351327704101, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: member_log
     clips:
     - {fileID: 8300000, guid: ed8fa619f6428fd4193bfc775a37e283, type: 3}
     volume: 0.2
+    output: {fileID: 3746225533848373353, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: ui_click
     clips:
     - {fileID: 8300000, guid: a0b6b5b8cc993ef46a115d516e38a188, type: 3}
     volume: 0.3
+    output: {fileID: 5179000969637190660, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: weapon_fire
     clips:
     - {fileID: 8300000, guid: 9fef960307ba9444e97da3779f87812a, type: 3}
     - {fileID: 8300000, guid: 8d6990f6a44ade840ba176914b71b04d, type: 3}
     volume: 0.3
+    output: {fileID: -2023119919906641994, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: weapon_empty
     clips:
     - {fileID: 8300000, guid: 477266c2a6618a649816f25180557258, type: 3}
     volume: 0.3
+    output: {fileID: -2023119919906641994, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: footstep_concrete
     clips:
-    - {fileID: 0}
+    - {fileID: 8300000, guid: 840c81334798c04469f460bc11775f38, type: 3}
+    - {fileID: 8300000, guid: a82aeb44132c40248b6ec80d4db6b111, type: 3}
+    - {fileID: 8300000, guid: fbd61bf422820af4b84e4871563b209a, type: 3}
+    - {fileID: 8300000, guid: fbe59e02ec04f1849a2b0073431089ac, type: 3}
+    - {fileID: 8300000, guid: b2e752d221c34a1469d994959564f629, type: 3}
+    - {fileID: 8300000, guid: dc1bb776a1cc1b84bb31b85eaf89fc54, type: 3}
+    - {fileID: 8300000, guid: 780f791ff11c0774d9d4fd14d9890c79, type: 3}
+    - {fileID: 8300000, guid: e784b6a1efce71146b8f6b7848a1f605, type: 3}
     volume: 0.3
+    output: {fileID: -9128165462116418059, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: footstep_metal
     clips:
     - {fileID: 8300000, guid: 71662f5067ba9ef43bc5729baf4be005, type: 3}
@@ -75,10 +89,14 @@ MonoBehaviour:
     - {fileID: 8300000, guid: e62fef2598ca89e48af9cb80c7df575e, type: 3}
     - {fileID: 8300000, guid: 7df351cddb21a3c4ba5436a209f78232, type: 3}
     volume: 1
+    output: {fileID: -9128165462116418059, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: footstep_dirt
     clips:
-    - {fileID: 0}
+    - {fileID: 8300000, guid: 436ff3f54cd850243aea7f1523e0bcec, type: 3}
+    - {fileID: 8300000, guid: d89c22a3020c57046a1bdc91344ce7dc, type: 3}
+    - {fileID: 8300000, guid: f26c30f9d6db4cc43a1955cf5744b405, type: 3}
     volume: 0.3
+    output: {fileID: -9128165462116418059, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: footstep_gravel
     clips:
     - {fileID: 8300000, guid: 085abf80eb2f82a48b95992c67951211, type: 3}
@@ -91,7 +109,18 @@ MonoBehaviour:
     - {fileID: 8300000, guid: d51c70afb3a72f84a8ac4923c5636703, type: 3}
     - {fileID: 8300000, guid: ab3dbee029f994844aaa12b23f57f47e, type: 3}
     volume: 0.3
+    output: {fileID: -9128165462116418059, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}
   - id: footstep_asphalt
     clips:
-    - {fileID: 0}
+    - {fileID: 8300000, guid: b90d2c9f74923544b92f46b84331c0c3, type: 3}
+    - {fileID: 8300000, guid: 181a1769bd2ea7b4fa018d8106db3d0c, type: 3}
+    - {fileID: 8300000, guid: ab961f405e8199d468019a078d3e29fe, type: 3}
+    - {fileID: 8300000, guid: 4e811a11bdf50c94295bbbb54712e24f, type: 3}
+    - {fileID: 8300000, guid: 4dfcb4c073685d94c9d4883abc917a53, type: 3}
+    - {fileID: 8300000, guid: 7f28e134d834be24e9b560b2b08ba15b, type: 3}
+    - {fileID: 8300000, guid: 7ae98b659ce44b54ba8afe273ca00f33, type: 3}
+    - {fileID: 8300000, guid: dc896bcbed8110c4790a93e1b754581f, type: 3}
+    - {fileID: 8300000, guid: e525eaad8c386454187f496f711f56b7, type: 3}
+    - {fileID: 8300000, guid: 3b716d5de45599d4183c4a70ff3f44f5, type: 3}
     volume: 0.3
+    output: {fileID: -9128165462116418059, guid: 05c04ab26e0ec11469a83b29caaa092d, type: 2}

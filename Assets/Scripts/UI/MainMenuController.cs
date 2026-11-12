@@ -1,4 +1,3 @@
-
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,6 +7,9 @@ public class MainMenuController : MonoBehaviour
 {
     [SerializeField] private GameObject mainPage;
     [SerializeField] private GameObject settingsPage;
+
+    [Header("Music")]
+    [SerializeField] private string menuMusicId = "main_menu";
 
     [Header("Mouse Settings")]
     [SerializeField] private Slider sensitivitySlider;
@@ -28,11 +30,17 @@ public class MainMenuController : MonoBehaviour
         sensitivitySlider.SetValueWithoutNotify(GameControls.MouseSensitivityMultiplier);
 
         UpdateSensitivityLabel();
+
+        if (MusicService.Instance != null)
+            MusicService.Instance.Play(menuMusicId);
     }
 
     public void StartGame()
     {
-        SceneManager.LoadScene("Act01_Scrapyard");
+        if (MusicService.Instance != null)
+            MusicService.Instance.Stop();
+
+        SceneManager.LoadSceneAsync("Act01_Scrapyard");
     }
 
     public void OpenSettings()

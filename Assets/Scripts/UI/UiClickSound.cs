@@ -39,7 +39,7 @@ public class UiClickSound : MonoBehaviour
             if (button == null || !button.interactable)
                 continue;
 
-            AudioService.Play(soundId);
+            AudioService.PlayUI(soundId);
             return;
         }
     }
