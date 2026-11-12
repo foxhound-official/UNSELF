@@ -165,6 +165,7 @@ GameObject:
   - component: {fileID: 1857696973418738092}
   - component: {fileID: 1375624109738447693}
   - component: {fileID: 3185167488834699192}
+  - component: {fileID: 6632534899126494048}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -559,6 +560,29 @@ MonoBehaviour:
     weapon: {fileID: 11400000, guid: 766ab0646226e614cba1175e88a5795d, type: 2}
     viewmodelObject: {fileID: 8580291385350224341}
     available: 1
+--- !u!114 &6632534899126494048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045478783104088046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dfa69d61b099e344b0f5814c21f3f68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFootsteps
+  walkStepDistance: 1.5
+  sprintStepDistance: 1.8
+  crouchStepDistance: 1.25
+  walkVolume: 0.5
+  sprintVolume: 0.8
+  crouchVolume: 0.25
+  minimumSpeed: 0.25
+  maximumFrameDistance: 2
+  minimumStepInterval: 0.35
+  minimumMovementPerFrame: 0.002
+  pitchVariation: 0.06
 --- !u!1 &2798576144553698930
 GameObject:
   m_ObjectHideFlags: 0

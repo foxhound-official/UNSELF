@@ -60,3 +60,38 @@ MonoBehaviour:
     clips:
     - {fileID: 8300000, guid: 477266c2a6618a649816f25180557258, type: 3}
     volume: 0.3
+  - id: footstep_concrete
+    clips:
+    - {fileID: 0}
+    volume: 0.3
+  - id: footstep_metal
+    clips:
+    - {fileID: 8300000, guid: 71662f5067ba9ef43bc5729baf4be005, type: 3}
+    - {fileID: 8300000, guid: 8b277c7935ffa9b44befc7c49c7feec7, type: 3}
+    - {fileID: 8300000, guid: 06a68e62d7b85664d90d15634e8cb602, type: 3}
+    - {fileID: 8300000, guid: 0746a7011fa883b4b969a5b75c78f107, type: 3}
+    - {fileID: 8300000, guid: 2f43275fedf8c38489da63d846987d9d, type: 3}
+    - {fileID: 8300000, guid: bc0a639ad0cf3ad4189fdcb566ac6a37, type: 3}
+    - {fileID: 8300000, guid: e62fef2598ca89e48af9cb80c7df575e, type: 3}
+    - {fileID: 8300000, guid: 7df351cddb21a3c4ba5436a209f78232, type: 3}
+    volume: 1
+  - id: footstep_dirt
+    clips:
+    - {fileID: 0}
+    volume: 0.3
+  - id: footstep_gravel
+    clips:
+    - {fileID: 8300000, guid: 085abf80eb2f82a48b95992c67951211, type: 3}
+    - {fileID: 8300000, guid: 0c54c2fa7460e3f4294c4fe71d752c1b, type: 3}
+    - {fileID: 8300000, guid: 04b2dce41235cc34ebc72801259e9444, type: 3}
+    - {fileID: 8300000, guid: 8e0afb44cd7e19f40a85ef2bd0817c01, type: 3}
+    - {fileID: 8300000, guid: eb4b6088371aa39408358201002a6a93, type: 3}
+    - {fileID: 8300000, guid: 3c7309d815c388a45a740fc04eca52a5, type: 3}
+    - {fileID: 8300000, guid: 972c43b2ad20aa34e958b1eb466657b2, type: 3}
+    - {fileID: 8300000, guid: d51c70afb3a72f84a8ac4923c5636703, type: 3}
+    - {fileID: 8300000, guid: ab3dbee029f994844aaa12b23f57f47e, type: 3}
+    volume: 0.3
+  - id: footstep_asphalt
+    clips:
+    - {fileID: 0}
+    volume: 0.3
