@@ -3,7 +3,17 @@ guid: 3e3581a7da098254b9269eb839068f9c
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: modular_airduct_rectangular_01_parts01
+    second: {fileID: 2100000, guid: 69416f8fc14727c47924b5206b492c47, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: modular_airduct_rectangular_01_parts02
+    second: {fileID: 2100000, guid: b8c54f51592a8f548818356be1d661a3, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

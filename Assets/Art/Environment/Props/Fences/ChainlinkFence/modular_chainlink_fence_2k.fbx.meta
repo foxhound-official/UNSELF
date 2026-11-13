@@ -1,9 +1,19 @@
 fileFormatVersion: 2
-guid: 7503831580976694daba108dfe86fcc9
+guid: f8f324b2533b1304da28ac2d3d13db6e
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: modular_chainlink_fence_posts
+    second: {fileID: 2100000, guid: 23b592fb47f86a344991eabe424383c6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: modular_chainlink_fence_wire
+    second: {fileID: 2100000, guid: 55278901ceb846f4f87ef21916b05f29, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
